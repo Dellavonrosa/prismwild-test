@@ -1,4 +1,4 @@
-PRISMWILD PROTOTYPE v0.15.24
+PRISMWILD PROTOTYPE v0.15.26
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
@@ -787,7 +787,7 @@ v0.15.23 public-test prep:
 - IMPORTANT: Player/Admin separation in this standalone HTML build is only for prototype testing. It is not secure authentication. Real public deployment requires server-side accounts/authorization.
 
 
-v0.15.24 live-content publishing:
+v0.15.26 live-content publishing:
 - Adds content/prismwild-content.js as the public live-content layer.
 - The initial public content pack contains the current Admin export supplied for this build.
 - Custom species can be marked Published or Draft in Admin > Monster Workshop. New species default to Draft.

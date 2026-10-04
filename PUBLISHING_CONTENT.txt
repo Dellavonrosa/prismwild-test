@@ -1,8 +1,8 @@
 PRISMWILD LIVE CONTENT PUBLISHING
 =================================
 
-FIRST TIME ONLY (moving from v0.15.23 to v0.15.24)
-1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.24 build.
+FIRST TIME ONLY (moving from v0.15.23 to v0.15.26)
+1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.26 build.
 2. Make sure the new folder content/ exists and contains prismwild-content.js.
 3. In GitHub Desktop, Commit to main, then Push origin.
 4. Refresh the public Prismwild site. The current published custom species should load automatically.
@@ -32,3 +32,17 @@ BACKUPS
 
 IMPORTANT STATIC-HOSTING NOTE
 The Admin panel cannot directly modify GitHub Pages. Publishing still requires replacing prismwild-content.js in the repository and pushing it through GitHub Desktop. This avoids putting GitHub credentials inside the public game code.
+
+
+IMPORTANT HOTFIX NOTE
+---------------------
+v0.15.26 fixes the Live Content loader. v0.15.26 could export content correctly but did not load content/prismwild-content.js at startup.
+
+
+CUSTOM ATTACKS
+--------------
+Custom attacks have their own Published checkbox in Admin > Attacks. A published custom monster that uses a custom Signature Attack cannot be exported until that attack is also Published. This prevents a live monster from referencing a move that players do not have.
+
+LIVE CONTENT LOADING
+--------------------
+Prismwild v0.15.26 revalidates content/prismwild-content.js at startup so GitHub Pages updates are picked up promptly. Admin shows the loaded Live Content revision so you can verify that the public site received the newest pack.

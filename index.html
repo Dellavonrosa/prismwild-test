@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.24</title>
+<title>Prismwild Prototype v0.15.26</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.24</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.26</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -388,7 +388,8 @@
           <button id="exportData" class="ghost">Export Admin Data</button>
           <button id="exportLiveContent" class="primary">Export Live Content</button>
           <label class="ghost file-label">Import Admin Data<input id="importData" type="file" accept=".json,application/json"></label>
-          <span class="form-note">Publish flow: save monsters → mark them for Live Content → export → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
+          <span class="form-note"><strong>Published</strong> means “include in the next Live Content export.” To make it live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
+          <span id="liveContentStatus" class="form-note">Live Content: checking…</span>
         </div>
 
         <div class="admin-layout">
@@ -523,6 +524,7 @@
               </div>
               <label class="check-row"><input id="scrollEnabled" type="checkbox"><span>Sell this attack as an Attack Scroll</span></label>
               <label id="scrollPriceWrap" class="single-field hidden">Scroll price<input id="scrollPrice" type="number" min="0" step="10" value="5000"></label>
+              <label class="check-row"><input id="publishAttack" type="checkbox"><span>Include this custom attack in Live Content export</span></label>
             </div>
             <div id="attackLivePreview" class="attack-live-preview"></div>
             <div class="admin-actions">
@@ -1627,6 +1629,7 @@ function normalizeState(){
   for(const [id,attack] of Object.entries(BUILTIN_ATTACKS)){
     state.attacks[id]={...attack,...(state.attacks[id]||{}),builtin:true};
   }
+  for(const attack of Object.values(state.attacks)){if(!attack.builtin)attack.published=!!attack.published;}
   state.trials=state.trials||{};
   for(const [id,trial] of Object.entries(BUILTIN_TRIALS))state.trials[id]={...trial,...(state.trials[id]||{}),builtin:true};
   for(const [id,trial] of Object.entries(state.trials)){
@@ -3376,6 +3379,7 @@ function renderSignaturePreview(){
   const a=attackOf(document.getElementById('signatureAttack').value);document.getElementById('signatureAttackPreview').innerHTML=a?`<strong>${a.name}</strong><span>${attackSummary(a)}</span><p>${a.description||''}</p>`:'No signature attack selected.';
 }
 function renderRegistry(){
+  const liveStatus=document.getElementById('liveContentStatus');if(liveStatus)liveStatus.textContent=state.liveContentRevision?`Live Content loaded: ${state.liveContentRevision}`:'Live Content: no published content pack loaded.';
   const q=document.getElementById('adminSearch').value.trim().toLowerCase(),box=document.getElementById('registryList');box.innerHTML='';
   Object.entries(state.species).filter(([,sp])=>sp.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?'':` • ${sp.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
 }
@@ -3527,13 +3531,13 @@ async function resetCurrentSprite(){
 
 function renderAttackRegistry(){
   const q=document.getElementById('attackAdminSearch').value.trim().toLowerCase(),box=document.getElementById('attackRegistryList');box.innerHTML='';
-  Object.entries(state.attacks).filter(([,a])=>a.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,a])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${a.name}</strong><span>${a.element} • ${a.style} • PWR ${a.power}</span>`;b.onclick=()=>loadAttackIntoForm(id);box.appendChild(b);});
+  Object.entries(state.attacks).filter(([,a])=>a.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,a])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${a.name}</strong><span>${a.element} • ${a.style} • PWR ${a.power}${a.builtin?'':` • ${a.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadAttackIntoForm(id);box.appendChild(b);});
 }
 function newAttackForm(){
-  document.getElementById('attackForm').reset();document.getElementById('editAttackId').value='';document.getElementById('attackElement').value='Aether';document.getElementById('attackStyle').value='Standard';document.getElementById('attackPower').value=50;document.getElementById('attackAccuracy').value=95;document.getElementById('attackStatus').value='None';document.getElementById('attackStatusChance').value=0;document.getElementById('attackStatusDuration').value=0;document.getElementById('attackLifeSteal').value=0;document.getElementById('attackEvadeNext').value=0;document.getElementById('scrollPrice').value=5000;document.getElementById('deleteAttack').classList.add('hidden');document.getElementById('attackAdminMessage').textContent='';updateAttackConditional();updateAttackPreview();
+  document.getElementById('attackForm').reset();document.getElementById('editAttackId').value='';document.getElementById('attackElement').value='Aether';document.getElementById('attackStyle').value='Standard';document.getElementById('attackPower').value=50;document.getElementById('attackAccuracy').value=95;document.getElementById('attackStatus').value='None';document.getElementById('attackStatusChance').value=0;document.getElementById('attackStatusDuration').value=0;document.getElementById('attackLifeSteal').value=0;document.getElementById('attackEvadeNext').value=0;document.getElementById('scrollPrice').value=5000;document.getElementById('publishAttack').checked=false;document.getElementById('publishAttack').disabled=false;document.getElementById('deleteAttack').classList.add('hidden');document.getElementById('attackAdminMessage').textContent='';updateAttackConditional();updateAttackPreview();
 }
 function loadAttackIntoForm(id){
-  const a=state.attacks[id];if(!a)return;document.getElementById('editAttackId').value=id;document.getElementById('attackName').value=a.name;document.getElementById('attackElement').value=a.element;document.getElementById('attackStyle').value=a.style;document.getElementById('attackPower').value=a.power;document.getElementById('attackAccuracy').value=a.accuracy;document.getElementById('attackStatus').value=a.status;document.getElementById('attackStatusChance').value=a.statusChance;document.getElementById('attackStatusDuration').value=a.statusDuration;document.getElementById('attackLifeSteal').value=Number(a.lifeSteal||0);document.getElementById('attackEvadeNext').value=Number(a.evadeNext||0);document.getElementById('attackDescription').value=a.description||'';document.getElementById('scrollEnabled').checked=!!a.scrollEnabled;document.getElementById('scrollPrice').value=a.scrollPrice||5000;document.getElementById('deleteAttack').classList.toggle('hidden',!!a.builtin);document.getElementById('attackAdminMessage').textContent='Editing '+a.name;updateAttackConditional();updateAttackPreview();
+  const a=state.attacks[id];if(!a)return;document.getElementById('editAttackId').value=id;document.getElementById('attackName').value=a.name;document.getElementById('attackElement').value=a.element;document.getElementById('attackStyle').value=a.style;document.getElementById('attackPower').value=a.power;document.getElementById('attackAccuracy').value=a.accuracy;document.getElementById('attackStatus').value=a.status;document.getElementById('attackStatusChance').value=a.statusChance;document.getElementById('attackStatusDuration').value=a.statusDuration;document.getElementById('attackLifeSteal').value=Number(a.lifeSteal||0);document.getElementById('attackEvadeNext').value=Number(a.evadeNext||0);document.getElementById('attackDescription').value=a.description||'';document.getElementById('scrollEnabled').checked=!!a.scrollEnabled;document.getElementById('scrollPrice').value=a.scrollPrice||5000;document.getElementById('publishAttack').checked=!a.builtin&&!!a.published;document.getElementById('publishAttack').disabled=!!a.builtin;document.getElementById('deleteAttack').classList.toggle('hidden',!!a.builtin);document.getElementById('attackAdminMessage').textContent='Editing '+a.name;updateAttackConditional();updateAttackPreview();
 }
 function updateAttackConditional(){document.getElementById('scrollPriceWrap').classList.toggle('hidden',!document.getElementById('scrollEnabled').checked);}
 function updateAttackPreview(){
@@ -3542,8 +3546,8 @@ function updateAttackPreview(){
 function saveAttackForm(e){
   e.preventDefault();const oldId=document.getElementById('editAttackId').value,name=document.getElementById('attackName').value.trim();if(!name)return;let id=oldId||slugify(name);if(!oldId&&state.attacks[id])id=`${id}-${Date.now().toString().slice(-5)}`;const prev=state.attacks[id]||{};
   if(!confirm(oldId?`Save changes to attack "${name}"?`:`Create new attack "${name}"?`))return;
-  state.attacks[id]={...prev,name,element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,power:Number(document.getElementById('attackPower').value),accuracy:Number(document.getElementById('attackAccuracy').value),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value),statusDuration:Number(document.getElementById('attackStatusDuration').value),lifeSteal:Math.max(0,Math.min(100,Number(document.getElementById('attackLifeSteal').value||0))),evadeNext:Math.max(0,Math.min(100,Number(document.getElementById('attackEvadeNext').value||0))),description:document.getElementById('attackDescription').value.trim(),scrollEnabled:document.getElementById('scrollEnabled').checked,scrollPrice:Number(document.getElementById('scrollPrice').value||5000),builtin:!!prev.builtin};
-  save();document.getElementById('editAttackId').value=id;document.getElementById('attackAdminMessage').textContent=`Saved ${name}.`;renderAll();loadAttackIntoForm(id);
+  state.attacks[id]={...prev,name,element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,power:Number(document.getElementById('attackPower').value),accuracy:Number(document.getElementById('attackAccuracy').value),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value),statusDuration:Number(document.getElementById('attackStatusDuration').value),lifeSteal:Math.max(0,Math.min(100,Number(document.getElementById('attackLifeSteal').value||0))),evadeNext:Math.max(0,Math.min(100,Number(document.getElementById('attackEvadeNext').value||0))),description:document.getElementById('attackDescription').value.trim(),scrollEnabled:document.getElementById('scrollEnabled').checked,scrollPrice:Number(document.getElementById('scrollPrice').value||5000),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishAttack').checked};
+  save();document.getElementById('editAttackId').value=id;document.getElementById('attackAdminMessage').textContent=`Saved ${name}.${state.attacks[id].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadAttackIntoForm(id);
 }
 function deleteCurrentAttack(){
   const id=document.getElementById('editAttackId').value,a=state.attacks[id];if(!id||!a||a.builtin)return;
@@ -3561,19 +3565,47 @@ async function buildContentPack({publishedOnly=false}={}){
     customSpecies[slug]={species:{...sp,builtin:false},base:null,prismatic:null,egg:null};
     for(const kind of ['base','prismatic','egg']){const b=await getAssetBlob(`${slug}:${kind}`);if(b)customSpecies[slug][kind]=await blobToDataURL(b);}
   }
-  const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin));
+  const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin&&(!publishedOnly||a.published)));
   const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const b=await getAssetBlob(`sprite:${key}`);if(b)customSprites[key]=await blobToDataURL(b);}
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const b=await getAssetBlob(`trial:${id}:${kind}`);if(b)trialAssets[id][kind]=await blobToDataURL(b);}}
   return {version:6,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
+  const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
+  const missingAttackIds=[...new Set(publishedSpecies.map(([,sp])=>sp.signatureAttackId).filter(id=>id&&state.attacks[id]&&!state.attacks[id].builtin&&!state.attacks[id].published))];
+  if(missingAttackIds.length){
+    const names=missingAttackIds.map(id=>state.attacks[id]?.name||id).join(', ');
+    document.getElementById('adminMessage').textContent=`Cannot export yet: a published monster uses a Draft custom attack (${names}). Publish that attack first.`;
+    return;
+  }
   const pack=await buildContentPack({publishedOnly:true});
-  const publishedCount=Object.keys(pack.customSpecies).length;
-  if(!publishedCount&&!confirm('No custom species are marked for Live Content. Export the shared posts/sprites/trials anyway?'))return;
+  const publishedSpeciesCount=Object.keys(pack.customSpecies).length,publishedAttackCount=Object.keys(pack.customAttacks).length;
+  if(!publishedSpeciesCount&&!publishedAttackCount&&!confirm('No custom species or attacks are marked for Live Content. Export the shared posts/sprites/trials anyway?'))return;
   const payload={kind:'prismwild-live-content',schemaVersion:6,contentRevision:new Date().toISOString(),...pack};
   const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
   const blob=new Blob([text],{type:'application/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-content.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  document.getElementById('adminMessage').textContent=`Exported Live Content with ${publishedCount} published custom species. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
+  document.getElementById('adminMessage').textContent=`Exported Live Content with ${publishedSpeciesCount} published custom species and ${publishedAttackCount} published custom attacks. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
+}
+async function loadLiveContentScript(){
+  // Revalidate the live pack on every hosted launch so GitHub Pages updates are
+  // noticed promptly without forcing a full 20+ MB re-download when unchanged.
+  try{
+    const response=await fetch('content/prismwild-content.js',{cache:'no-cache'});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    const source=await response.text();
+    (0,eval)(source);
+    return true;
+  }catch(fetchError){
+    // file:// testing can block fetch(), so fall back to a normal script tag.
+    return await new Promise(resolve=>{
+      const script=document.createElement('script');
+      script.src='content/prismwild-content.js';
+      script.async=true;
+      script.onload=()=>resolve(true);
+      script.onerror=()=>{console.warn('Live Content file could not be loaded.',fetchError);resolve(false);};
+      document.head.appendChild(script);
+    });
+  }
 }
 async function applyLiveContent(data){
   if(!data||data.kind!=='prismwild-live-content')return false;
@@ -3583,7 +3615,7 @@ async function applyLiveContent(data){
     state.species[slug]={...(state.species[slug]||{}),...(entry.species||{}),builtin:false,published:true};
     for(const kind of ['base','prismatic','egg'])if(entry?.[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));
   }
-  for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...(state.attacks[id]||{}),...a,builtin:false};
+  for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...(state.attacks[id]||{}),...a,builtin:false,published:true};
   for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
   if(data.silverwindDialogue)state.silverwindDialogue=data.silverwindDialogue;
   if(data.landingFeed)state.landingFeed=data.landingFeed;
@@ -3594,13 +3626,13 @@ async function applyLiveContent(data){
 }
 async function exportAdmin(){
   const pack=await buildContentPack({publishedOnly:false});
-  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01524.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01526.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
     const data=JSON.parse(await file.text());
     for(const [slug,entry] of Object.entries(data.customSpecies||{})){const wasPublished=!!state.species[slug]?.published;state.species[slug]={...entry.species,builtin:false,published:entry.species?.published===undefined?wasPublished:!!entry.species.published};for(const kind of ['base','prismatic','egg'])if(entry[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));}
-    for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...a,builtin:false};
+    for(const [id,a] of Object.entries(data.customAttacks||{})){const wasPublished=!!state.attacks[id]?.published;state.attacks[id]={...a,builtin:false,published:a?.published===undefined?wasPublished:!!a.published};}
     for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
@@ -5180,7 +5212,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.24 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.26 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
@@ -5258,7 +5290,7 @@ function tickLiveTimers(){
 }
 setInterval(tickLiveTimers,500);
 
-(async()=>{await openAssetDB();try{await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
+(async()=>{await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 </body>
 </html>
