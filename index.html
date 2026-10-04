@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.23</title>
+<title>Prismwild Prototype v0.15.24</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.23</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.24</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -386,7 +386,9 @@
         <div class="admin-toolbar">
           <button id="newSpecies" class="primary">New Monster</button>
           <button id="exportData" class="ghost">Export Admin Data</button>
+          <button id="exportLiveContent" class="primary">Export Live Content</button>
           <label class="ghost file-label">Import Admin Data<input id="importData" type="file" accept=".json,application/json"></label>
+          <span class="form-note">Publish flow: save monsters → mark them for Live Content → export → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
         </div>
 
         <div class="admin-layout">
@@ -455,6 +457,9 @@
                 <p>Wild zones are determined by the monster's Element. No weekday setup is needed.</p>
                 <div id="autoZonePreview" class="auto-zone-preview"></div>
               </div>
+
+              <label class="check-row"><input id="publishSpecies" type="checkbox"><span>Include this custom species in Live Content export</span></label>
+              <p class="form-note">Leave this off while a monster is still a draft. Published species are included when you export the single live-content file for GitHub.</p>
 
               <label class="check-row"><input id="isCrossbreed" type="checkbox"><span>This species is a crossbreed</span></label>
               <div id="crossbreedFields" class="crossbreed-fields hidden">
@@ -1475,6 +1480,7 @@ function defaultState(){
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
     expeditions:{slots:{},lastMessage:''},
+    liveContentRevision:'',
     landingFeed:cloneLandingFeed(),
     silverwindDialogue:cloneSilverwindDialogue(),
     eventWallets:{},eventStates:{},eventOverrides:{},discoveredSpecies:[],
@@ -1607,6 +1613,7 @@ function normalizeState(){
     if(sp.isCrossbreed && sp.secondaryElement===sp.element)sp.secondaryElement='';
     if(sp.isCrossbreed)sp.obtain='Breeding Only';
     sp.nativeFacing=sp.nativeFacing==='left'?'left':'right';
+    if(!sp.builtin)sp.published=!!sp.published;
   }
   state.migrations=state.migrations||{};
   // v0.15.18: the old Halloween shop listed Mournwick at 75 Fangs in a hard-coded
@@ -3370,19 +3377,19 @@ function renderSignaturePreview(){
 }
 function renderRegistry(){
   const q=document.getElementById('adminSearch').value.trim().toLowerCase(),box=document.getElementById('registryList');box.innerHTML='';
-  Object.entries(state.species).filter(([,sp])=>sp.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
+  Object.entries(state.species).filter(([,sp])=>sp.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?'':` • ${sp.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
 }
 function populateParentDropdowns(excludeSlug=''){
   const opts=Object.entries(state.species).filter(([slug])=>slug!==excludeSlug).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
   document.getElementById('parentA').innerHTML=opts;document.getElementById('parentB').innerHTML=opts;
 }
 function newSpeciesForm(){
-  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('crossbreedChance').value=15;document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
+  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
   speciesSignatureDraft='';
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
   for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();
@@ -3449,10 +3456,10 @@ async function saveSpeciesForm(e){
   const selectedSignature=(visibleSignature&&state.attacks[visibleSignature])?visibleSignature:((speciesSignatureDraft&&state.attacks[speciesSignatureDraft])?speciesSignatureDraft:'');
   if(!confirm(oldSlug?`Save changes to monster "${name}"?`:`Create new monster "${name}"?`))return;
   const {encounterDays:_legacyEncounterDays,signatureAttack:_legacySignatureAttack,...cleanPrev}=prev;
-  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
+  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
-  save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name}. No rebuild needed.`;renderAll();loadSpeciesIntoForm(slug);
+  save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadSpeciesIntoForm(slug);
 }
 function grantTestCopy(){
   const slug=document.getElementById('editSlug').value,sp=state.species[slug];if(!slug||!sp){document.getElementById('adminMessage').textContent='Save the species first.';return;}
@@ -3547,17 +3554,52 @@ function deleteCurrentAttack(){
 
 async function blobToDataURL(blob){return await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(blob);});}
 async function dataURLToBlob(data){return await (await fetch(data)).blob();}
-async function exportAdmin(){
-  const customSpecies={};for(const [slug,sp] of Object.entries(state.species))if(!sp.builtin){customSpecies[slug]={species:sp,base:null,prismatic:null,egg:null};for(const kind of ['base','prismatic','egg']){const b=await getAssetBlob(`${slug}:${kind}`);if(b)customSpecies[slug][kind]=await blobToDataURL(b);}}
+async function buildContentPack({publishedOnly=false}={}){
+  const customSpecies={};
+  for(const [slug,sp] of Object.entries(state.species)){
+    if(sp.builtin||(publishedOnly&&!sp.published))continue;
+    customSpecies[slug]={species:{...sp,builtin:false},base:null,prismatic:null,egg:null};
+    for(const kind of ['base','prismatic','egg']){const b=await getAssetBlob(`${slug}:${kind}`);if(b)customSpecies[slug][kind]=await blobToDataURL(b);}
+  }
   const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin));
   const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const b=await getAssetBlob(`sprite:${key}`);if(b)customSprites[key]=await blobToDataURL(b);}
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const b=await getAssetBlob(`trial:${id}:${kind}`);if(b)trialAssets[id][kind]=await blobToDataURL(b);}}
-  const blob=new Blob([JSON.stringify({version:6,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01523.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  return {version:6,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets};
+}
+async function exportLiveContent(){
+  const pack=await buildContentPack({publishedOnly:true});
+  const publishedCount=Object.keys(pack.customSpecies).length;
+  if(!publishedCount&&!confirm('No custom species are marked for Live Content. Export the shared posts/sprites/trials anyway?'))return;
+  const payload={kind:'prismwild-live-content',schemaVersion:6,contentRevision:new Date().toISOString(),...pack};
+  const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
+  const blob=new Blob([text],{type:'application/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-content.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  document.getElementById('adminMessage').textContent=`Exported Live Content with ${publishedCount} published custom species. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
+}
+async function applyLiveContent(data){
+  if(!data||data.kind!=='prismwild-live-content')return false;
+  const revision=String(data.contentRevision||'');
+  if(revision&&state.liveContentRevision===revision)return false;
+  for(const [slug,entry] of Object.entries(data.customSpecies||{})){
+    state.species[slug]={...(state.species[slug]||{}),...(entry.species||{}),builtin:false,published:true};
+    for(const kind of ['base','prismatic','egg'])if(entry?.[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));
+  }
+  for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...(state.attacks[id]||{}),...a,builtin:false};
+  for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
+  if(data.silverwindDialogue)state.silverwindDialogue=data.silverwindDialogue;
+  if(data.landingFeed)state.landingFeed=data.landingFeed;
+  if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
+  for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
+  state.liveContentRevision=revision||`legacy-${Date.now()}`;
+  return true;
+}
+async function exportAdmin(){
+  const pack=await buildContentPack({publishedOnly:false});
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01524.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
     const data=JSON.parse(await file.text());
-    for(const [slug,entry] of Object.entries(data.customSpecies||{})){state.species[slug]={...entry.species,builtin:false};for(const kind of ['base','prismatic','egg'])if(entry[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));}
+    for(const [slug,entry] of Object.entries(data.customSpecies||{})){const wasPublished=!!state.species[slug]?.published;state.species[slug]={...entry.species,builtin:false,published:entry.species?.published===undefined?wasPublished:!!entry.species.published};for(const kind of ['base','prismatic','egg'])if(entry[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));}
     for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...a,builtin:false};
     for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
@@ -5089,7 +5131,7 @@ document.getElementById('showTrialAdmin').addEventListener('click',()=>showAdmin
 
 document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
 document.getElementById('baseArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('basePreview')));document.getElementById('prismaticArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('prismaticPreview')));document.getElementById('eggArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('eggPreview')));
-document.getElementById('exportData').addEventListener('click',exportAdmin);document.getElementById('importData').addEventListener('change',e=>{if(e.target.files?.[0])importAdminFile(e.target.files[0]);});
+document.getElementById('exportData').addEventListener('click',exportAdmin);document.getElementById('exportLiveContent').addEventListener('click',exportLiveContent);document.getElementById('importData').addEventListener('change',e=>{if(e.target.files?.[0])importAdminFile(e.target.files[0]);});
 
 document.getElementById('newAttack').addEventListener('click',newAttackForm);document.getElementById('attackForm').addEventListener('submit',saveAttackForm);document.getElementById('deleteAttack').addEventListener('click',deleteCurrentAttack);document.getElementById('attackAdminSearch').addEventListener('input',renderAttackRegistry);
 document.getElementById('spriteAdminSearch').addEventListener('input',renderSpriteRegistry);document.getElementById('spriteForm').addEventListener('submit',saveSpriteForm);document.getElementById('resetSprite').addEventListener('click',resetCurrentSprite);document.getElementById('spriteArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('spriteUploadPreview')));
@@ -5138,7 +5180,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.23 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.24 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
@@ -5216,7 +5258,7 @@ function tickLiveTimers(){
 }
 setInterval(tickLiveTimers,500);
 
-(async()=>{await openAssetDB();populateStatic();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);normalizeState();save();await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
+(async()=>{await openAssetDB();try{await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-PRISMWILD PROTOTYPE v0.15.23
+PRISMWILD PROTOTYPE v0.15.24
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
@@ -785,3 +785,13 @@ v0.15.23 public-test prep:
 - Profile includes local Keeper name, local account ID, role display, reset controls, and prototype Admin access.
 - Existing pre-v0.15.23 saves preserve progress, migrate as Player, and skip duplicate newcomer rewards. Admin access is unlocked locally from Profile with the project-owner test code.
 - IMPORTANT: Player/Admin separation in this standalone HTML build is only for prototype testing. It is not secure authentication. Real public deployment requires server-side accounts/authorization.
+
+
+v0.15.24 live-content publishing:
+- Adds content/prismwild-content.js as the public live-content layer.
+- The initial public content pack contains the current Admin export supplied for this build.
+- Custom species can be marked Published or Draft in Admin > Monster Workshop. New species default to Draft.
+- Admin > Export Live Content downloads one prismwild-content.js file containing published custom species/art plus custom attacks, shared sprites, landing posts, Silvy dialogue, and Trial data.
+- To publish content without a game rebuild, replace content/prismwild-content.js in the GitHub repository, then Commit and Push Origin.
+- Public clients import a new content revision once into their local species/attack registries and IndexedDB artwork cache. Player collections/progress are preserved.
+- Full Admin Export/Import remains available separately for workshop backups.
