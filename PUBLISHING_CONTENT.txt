@@ -1,48 +1,72 @@
-PRISMWILD LIVE CONTENT PUBLISHING
-=================================
+PRISMWILD LIVE CONTENT PUBLISHING • v0.15.27
+============================================
 
-FIRST TIME ONLY (moving from v0.15.23 to v0.15.26)
-1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.26 build.
-2. Make sure the new folder content/ exists and contains prismwild-content.js.
+WHAT LIVE CONTENT DOES
+Prismwild now separates GAME BUILDS from CONTENT UPDATES.
+
+A full game build is needed for code/system/UI changes.
+A Live Content push is enough for Admin-authored content that the current build already knows how to use.
+
+LIVE CONTENT INCLUDES
+- Published custom Monsters
+- Their uploaded Base / Prismatic / Egg art
+- Published custom Attacks
+- ALL Sprite Workshop replacements automatically
+  • item icons
+  • shop icons
+  • Halloween/event icons
+  • field-find art
+  • facility art
+  • Silverwind poses
+- ALL current Silvy Dialogue
+- ALL current Landing Page News and Announcements
+- ALL current Trial definitions
+- Trial Captain and Badge artwork
+
+NOT PUBLISHED
+- Player saves / collections / currency / inventory
+- Account names or account roles
+- Admin unlock state
+- Event Tester force-active/inactive overrides
+- Expedition Tester fast-forward state
+- Other local testing state
+
+FIRST DEPLOYMENT OF v0.15.27
+1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.27 build.
+2. Make sure content/prismwild-content.js exists.
 3. In GitHub Desktop, Commit to main, then Push origin.
-4. Refresh the public Prismwild site. The current published custom species should load automatically.
+4. Refresh the public Prismwild site.
 
-FUTURE MONSTER / CONTENT UPDATES (NO GAME REBUILD NEEDED)
-1. Open the Admin panel in Prismwild.
-2. Create or edit your monster normally.
-3. Check "Include this custom species in Live Content export" only when it is ready for the public game.
-4. Click "Export Live Content" in Admin.
-5. Your browser downloads prismwild-content.js.
-6. In your local GitHub repository, open the content folder.
-7. Replace content/prismwild-content.js with the newly downloaded file.
-8. Open GitHub Desktop.
-9. Commit the change with a short message such as "Add NewMonsterName".
-10. Click Push origin.
-11. Refresh the public site. Players will receive the new content revision without resetting their saves.
+FUTURE CONTENT UPDATES • NO NEW BUILD NEEDED
+1. Open your local/admin Prismwild copy.
+2. Make your content changes in Admin.
+3. For a custom Monster, check its Published box when it is ready.
+4. For a custom Attack, check its Published box when it is ready.
+5. Sprite Workshop, Silvy Dialogue, Landing Page, and Trial changes need no extra Published checkbox. Their current saved versions are included automatically.
+6. Click Export Live Content.
+7. Your browser downloads prismwild-content.js.
+8. Replace content/prismwild-content.js in your local GitHub repository with that downloaded file.
+9. Open GitHub Desktop.
+10. Commit the change with a short message such as "Update Halloween icons" or "Add NewMonsterName".
+11. Click Push origin.
+12. Refresh the public site. Existing player saves remain separate from the shared content update.
 
-DRAFTS
-- New custom monsters default to Draft.
-- Draft monsters stay in your local Admin browser and are NOT included in Live Content exports.
-- Existing built-in monsters are always part of the game and do not use the Draft/Published switch.
+DRAFT SAFETY
+- New custom Monsters default to Draft.
+- New custom Attacks default to Draft.
+- Draft Monsters and Attacks are not included in Live Content.
+- Export Live Content refuses to publish a Monster if its custom Signature Attack is still Draft.
+- Sprite/Dialogue/News/Trial editors currently publish their SAVED state as a whole, so use your local Admin copy as the workshop and export only when those edits are ready.
 
 BACKUPS
-- "Export Admin Data" is still the full workshop backup.
-- "Export Live Content" is the public publishing file.
-- Keep occasional Admin Data backups somewhere safe. Live Content is for publishing, not your only backup.
+- Export Admin Data = full local workshop backup.
+- Export Live Content = public publishing package.
+- Keep occasional Admin Data backups somewhere safe. Live Content should not be your only backup.
 
-IMPORTANT STATIC-HOSTING NOTE
-The Admin panel cannot directly modify GitHub Pages. Publishing still requires replacing prismwild-content.js in the repository and pushing it through GitHub Desktop. This avoids putting GitHub credentials inside the public game code.
+STATIC-HOSTING NOTE
+The public site cannot safely write directly to GitHub. Do not put a GitHub password or token inside Prismwild.
+Publishing remains:
+  Export Live Content -> replace content/prismwild-content.js -> Commit -> Push origin
 
-
-IMPORTANT HOTFIX NOTE
----------------------
-v0.15.26 fixes the Live Content loader. v0.15.26 could export content correctly but did not load content/prismwild-content.js at startup.
-
-
-CUSTOM ATTACKS
---------------
-Custom attacks have their own Published checkbox in Admin > Attacks. A published custom monster that uses a custom Signature Attack cannot be exported until that attack is also Published. This prevents a live monster from referencing a move that players do not have.
-
-LIVE CONTENT LOADING
---------------------
-Prismwild v0.15.26 revalidates content/prismwild-content.js at startup so GitHub Pages updates are picked up promptly. Admin shows the loaded Live Content revision so you can verify that the public site received the newest pack.
+LIVE CONTENT DIAGNOSTICS
+Admin shows the currently loaded Live Content revision plus counts for Monsters, Attacks, Sprite overrides, Silvy lines, News, Announcements, and Trials. If a public update seems missing, compare that revision after refreshing the live site.

@@ -1,4 +1,4 @@
-PRISMWILD PROTOTYPE v0.15.26
+PRISMWILD PROTOTYPE v0.15.27
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
@@ -787,7 +787,7 @@ v0.15.23 public-test prep:
 - IMPORTANT: Player/Admin separation in this standalone HTML build is only for prototype testing. It is not secure authentication. Real public deployment requires server-side accounts/authorization.
 
 
-v0.15.26 live-content publishing:
+v0.15.27 live-content publishing:
 - Adds content/prismwild-content.js as the public live-content layer.
 - The initial public content pack contains the current Admin export supplied for this build.
 - Custom species can be marked Published or Draft in Admin > Monster Workshop. New species default to Draft.
@@ -795,3 +795,11 @@ v0.15.26 live-content publishing:
 - To publish content without a game rebuild, replace content/prismwild-content.js in the GitHub repository, then Commit and Push Origin.
 - Public clients import a new content revision once into their local species/attack registries and IndexedDB artwork cache. Player collections/progress are preserved.
 - Full Admin Export/Import remains available separately for workshop backups.
+
+v0.15.27 live-content publishing:
+- Live Content is now explicitly the complete Admin-authored CONTENT layer, not just monsters.
+- Sprite Workshop replacements are automatically exported, including Halloween/event/shop icons.
+- Silvy Dialogue, Landing News/Announcements, Trials, Trial Captain art, and Trial Badge art are automatically exported.
+- Published custom Monsters and custom Attacks retain Draft/Published gates.
+- Export status and the loaded-content status now show a content manifest with category counts.
+- Local test controls and player/account save state are intentionally excluded from publishing.

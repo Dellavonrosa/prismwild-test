@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.26</title>
+<title>Prismwild Prototype v0.15.27</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.26</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.27</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -388,9 +388,10 @@
           <button id="exportData" class="ghost">Export Admin Data</button>
           <button id="exportLiveContent" class="primary">Export Live Content</button>
           <label class="ghost file-label">Import Admin Data<input id="importData" type="file" accept=".json,application/json"></label>
-          <span class="form-note"><strong>Published</strong> means “include in the next Live Content export.” To make it live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
+          <span class="form-note"><strong>Published</strong> on Monsters/Attacks means “include in the next Live Content export.” Sprite replacements, Silvy dialogue, Landing News/Announcements, and Trials are included automatically. To make changes live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
           <span id="liveContentStatus" class="form-note">Live Content: checking…</span>
         </div>
+        <div class="note-card"><strong>Live Content publishes the Admin content layer</strong><p>Included automatically: Sprite Workshop overrides (including Halloween/event/shop icons), Silvy Dialogue, News &amp; Announcements, and Trial definitions plus Captain/Badge art. Published custom Monsters and Published custom Attacks are included too. Local test controls, account data, player saves, Event Tester overrides, and Expedition Tester fast-forwards are never published.</p></div>
 
         <div class="admin-layout">
           <aside class="registry-panel">
@@ -540,7 +541,7 @@
         <div class="admin-layout">
           <aside class="registry-panel">
             <h3>Sprite Registry</h3>
-            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used.</p>
+            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used. <strong>All uploaded Sprite Workshop replacements are automatically included in Export Live Content</strong>, including Halloween/event/shop icons.</p>
             <input id="spriteAdminSearch" placeholder="Search sprites...">
             <div id="spriteRegistryList" class="registry-list"></div>
           </aside>
@@ -1482,7 +1483,7 @@ function defaultState(){
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
     expeditions:{slots:{},lastMessage:''},
-    liveContentRevision:'',
+    liveContentRevision:'',liveContentManifest:{},
     landingFeed:cloneLandingFeed(),
     silverwindDialogue:cloneSilverwindDialogue(),
     eventWallets:{},eventStates:{},eventOverrides:{},discoveredSpecies:[],
@@ -1597,6 +1598,7 @@ function normalizeState(){
   state.species=state.species||{};
   state.attacks=state.attacks||{};
   state.inventory=state.inventory||{};
+  state.liveContentManifest=state.liveContentManifest&&typeof state.liveContentManifest==='object'?state.liveContentManifest:{};
   normalizeLandingFeed();
 
   // Official built-ins are merged into older v0.6 saves without deleting
@@ -3379,7 +3381,7 @@ function renderSignaturePreview(){
   const a=attackOf(document.getElementById('signatureAttack').value);document.getElementById('signatureAttackPreview').innerHTML=a?`<strong>${a.name}</strong><span>${attackSummary(a)}</span><p>${a.description||''}</p>`:'No signature attack selected.';
 }
 function renderRegistry(){
-  const liveStatus=document.getElementById('liveContentStatus');if(liveStatus)liveStatus.textContent=state.liveContentRevision?`Live Content loaded: ${state.liveContentRevision}`:'Live Content: no published content pack loaded.';
+  const liveStatus=document.getElementById('liveContentStatus');if(liveStatus)liveStatus.textContent=state.liveContentRevision?`Live Content loaded: ${state.liveContentRevision} • ${liveContentManifestLabel(state.liveContentManifest)}`:'Live Content: no published content pack loaded.';
   const q=document.getElementById('adminSearch').value.trim().toLowerCase(),box=document.getElementById('registryList');box.innerHTML='';
   Object.entries(state.species).filter(([,sp])=>sp.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?'':` • ${sp.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
 }
@@ -3558,6 +3560,25 @@ function deleteCurrentAttack(){
 
 async function blobToDataURL(blob){return await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(blob);});}
 async function dataURLToBlob(data){return await (await fetch(data)).blob();}
+function liveContentManifestFromPack(pack){
+  const dialogue=pack?.silverwindDialogue||{};
+  const dialogueLines=(dialogue.general||[]).length+Object.values(dialogue.monsters||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0)+Object.values(dialogue.events||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0);
+  const trialAssetCount=Object.values(pack?.trialAssets||{}).reduce((n,a)=>n+['captain','badge'].filter(k=>a?.[k]).length,0);
+  return {
+    species:Object.keys(pack?.customSpecies||{}).length,
+    attacks:Object.keys(pack?.customAttacks||{}).length,
+    sprites:Object.keys(pack?.customSprites||{}).length,
+    silvyDialogueLines:dialogueLines,
+    news:(pack?.landingFeed?.news||[]).length,
+    announcements:(pack?.landingFeed?.announcements||[]).length,
+    trials:Object.keys(pack?.trialDefinitions||{}).length,
+    trialAssets:trialAssetCount
+  };
+}
+function liveContentManifestLabel(manifest){
+  const m=manifest||{};
+  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.trials||0)} trials`;
+}
 async function buildContentPack({publishedOnly=false}={}){
   const customSpecies={};
   for(const [slug,sp] of Object.entries(state.species)){
@@ -3566,9 +3587,12 @@ async function buildContentPack({publishedOnly=false}={}){
     for(const kind of ['base','prismatic','egg']){const b=await getAssetBlob(`${slug}:${kind}`);if(b)customSpecies[slug][kind]=await blobToDataURL(b);}
   }
   const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin&&(!publishedOnly||a.published)));
+  // Sprite Workshop is an authoritative content editor: every uploaded replacement
+  // is shared automatically. This includes event/shop/find icons and Silvy poses.
   const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const b=await getAssetBlob(`sprite:${key}`);if(b)customSprites[key]=await blobToDataURL(b);}
+  // Dialogue, landing posts, and Trials are content-layer data, not player save data.
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const b=await getAssetBlob(`trial:${id}:${kind}`);if(b)trialAssets[id][kind]=await blobToDataURL(b);}}
-  return {version:6,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets};
+  return {version:7,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
   const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
@@ -3579,13 +3603,13 @@ async function exportLiveContent(){
     return;
   }
   const pack=await buildContentPack({publishedOnly:true});
-  const publishedSpeciesCount=Object.keys(pack.customSpecies).length,publishedAttackCount=Object.keys(pack.customAttacks).length;
-  if(!publishedSpeciesCount&&!publishedAttackCount&&!confirm('No custom species or attacks are marked for Live Content. Export the shared posts/sprites/trials anyway?'))return;
-  const payload={kind:'prismwild-live-content',schemaVersion:6,contentRevision:new Date().toISOString(),...pack};
+  const manifest=liveContentManifestFromPack(pack);
+  const payload={kind:'prismwild-live-content',schemaVersion:7,contentRevision:new Date().toISOString(),manifest,...pack};
   const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
   const blob=new Blob([text],{type:'application/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-content.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  document.getElementById('adminMessage').textContent=`Exported Live Content with ${publishedSpeciesCount} published custom species and ${publishedAttackCount} published custom attacks. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
+  document.getElementById('adminMessage').textContent=`Exported Live Content: ${liveContentManifestLabel(manifest)}. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
 }
+
 async function loadLiveContentScript(){
   // Revalidate the live pack on every hosted launch so GitHub Pages updates are
   // noticed promptly without forcing a full 20+ MB re-download when unchanged.
@@ -3622,11 +3646,12 @@ async function applyLiveContent(data){
   if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
   for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
   state.liveContentRevision=revision||`legacy-${Date.now()}`;
+  state.liveContentManifest=data.manifest||liveContentManifestFromPack(data);
   return true;
 }
 async function exportAdmin(){
   const pack=await buildContentPack({publishedOnly:false});
-  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01526.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01527.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
@@ -5212,7 +5237,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.26 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.27 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
