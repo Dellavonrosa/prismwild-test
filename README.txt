@@ -1,4 +1,4 @@
-PRISMWILD PROTOTYPE v0.15.29
+PRISMWILD PROTOTYPE v0.15.34
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
@@ -825,3 +825,57 @@ v0.15.29 — Navigation Dropdown Hover Hotfix
 - Added an invisible hover bridge above each dropdown so My Hideout, Explore, and Silverwind remain open while moving the cursor into their menu options.
 - Existing click/focus behavior remains intact.
 - No gameplay, save, breeding, loot, content, or balance logic changed in this hotfix.
+
+
+
+=== v0.15.32 Candidate Notes ===
+- Winter Gift Calendar shortened from 31 days to 25 days.
+- Existing v0.15.30 calendar data is normalized to the 25-day cap; stale Day 26-31 prize entries are pruned automatically.
+- Event Workshop Calendar Day and Calendar Test Day controls respect the configured 25-day Winter calendar length.
+
+=== v0.15.30 Candidate Notes ===
+
+MODULAR WINTER EVENT FOUNDATION
+- Winter Event is now registered as an upcoming Dec 1, 2026 through Jan 2, 2027 seasonal event using Snowflakes as its event currency.
+- Added a publishable Daily Event Calendar system. Admin > Event Workshop can configure each calendar day as Money, Item, Egg, or direct Monster reward.
+- Calendar configurations are now included in Live Content exports/imports (schema v8); test date overrides remain local-only.
+- Calendar supports catch-up claiming for previously unlocked days by default.
+- Added Calendar Test Day so future event calendars can be tested without changing the computer clock.
+- Forced-active Event Tester selections now take priority over naturally active events, making Winter testable while Halloween is still live.
+- Added Winter Memory, a persistent 4x4 / 8-pair monster matching mini-game.
+- Each matched pair currently awards 2 Snowflakes. Matched pairs stay revealed and rewards cannot be re-earned on refresh.
+- Three failed matches end the run and trigger a 20-minute cooldown; after cooldown a new randomized board is generated.
+- Completing all eight pairs grants a Winter Mystery Egg and triggers a one-hour cooldown before a fresh set.
+- The Mystery Egg currently uses Frostmaw/Shardback as a temporary test content pool; its final Winter pool/art can be swapped in when the Winter Mystery Egg is designed.
+- Admin Event Workshop includes Reset Memory Board and Clear Memory Cooldown controls for local testing.
+- Existing monsterGame_v06 saves remain compatible.
+
+
+=== v0.15.32 Candidate Notes ===
+- Added built-in Winter species Bouldrift, Yulemaw, and seasonal Crossbreed Briarhart with base/prismatic art and signature attacks.
+- Bouldrift is registry-driven Winter Event Shop stock at 120 Snowflakes.
+- Yulemaw is the built-in Winter Mystery Egg species. Additional custom species can join that pool with Obtain Method = Winter Mystery Egg.
+- Winter Memory now includes a Snowflake Event Shop beneath the board.
+- Monster Workshop adds Winter Event Shop Egg / Winter Mystery Egg obtain methods and a Seasonal Recipe selector for Crossbreeds.
+- Seasonal Crossbreed recipe gating was repaired and generalized by event family. Recipes are active only while that seasonal event is active (including Admin Force Active); owned monsters remain usable afterward.
+- Briarhart = Bouldrift × Thornjack, 15% Winter-only Crossbreed chance, authored 55m breeding / 70m hatch timers.
+
+
+=== v0.15.33 Candidate Notes ===
+- Winter Memory failed-match cooldown reduced from 20 minutes to 3 minutes. Completion cooldown remains 1 hour.
+- Added Shop Black Market: three persistent daily standard-species requests, excluding Mythics and Crossbreeds.
+- Black Market prefers eligible species already owned when possible. Normal requests only accept normal monsters.
+- Very rare Prismatic request chance: 0.5% per slot, only when a matching Prismatic is owned; Prismatic payouts use a 12x premium.
+- Black Market payouts scale with species P1 BST, individual Level, and Potential. Active/breeding/expedition/battle monsters cannot be sold.
+- Monster Archive split into Base Monsters and Crossbreeds tabs.
+- Existing prismwild-content.js preserved unchanged from the v0.15.32 CONTENT_PRESERVED package.
+
+
+=== v0.15.34 ===
+- Winter Daily Calendar can award event currency; Day 1 defaults/migrates to 50 Snowflakes.
+- Refresh Juice: 1-hour item cooldown; +5 Halloween Maze Steps or clears Winter failed-match cooldown only.
+- Capture Pod: 20 minutes, +20 percentage points to normal capturable defeat recruitment chance.
+- Nature Disc: rerolls Trait once per local day per individual monster.
+- DNA Splicers: Vitality / Attack / Armor / Speed; +15 permanently; exactly one DNA Splicer total per monster.
+- Shop prices: Refresh Juice 1,000; Capture Pod 2,500; Nature Disc 5,000; each DNA Splicer 50,000.
+- Player live-content file remains preserved from v0.15.33.

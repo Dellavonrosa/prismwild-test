@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.29</title>
+<title>Prismwild Prototype v0.15.34</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.29</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.34</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -300,6 +300,14 @@
         <div><h3>Items</h3><div id="shopGrid" class="shop-grid"></div></div>
         <div><h3>Facility Upgrades</h3><div id="facilityShop" class="shop-grid"></div></div>
       </div>
+      <section class="black-market-panel">
+        <div class="black-market-heading">
+          <div><div class="eyebrow">BLACK MARKET</div><h3>Shady Buyer</h3><p>A stranger behind the supply counter wants three specific monsters each day. No Mythics. No Crossbreeds. No questions.</p></div>
+          <div class="black-market-date"><span>Today’s list</span><strong id="blackMarketDate"></strong></div>
+        </div>
+        <div id="blackMarketGrid" class="black-market-grid"></div>
+        <p id="blackMarketMessage" class="black-market-message"></p>
+      </section>
     </section>
 
     <section id="event" class="page">
@@ -374,6 +382,10 @@
           <h3>Monster Archive</h3>
           <p>Species details are revealed after you obtain that monster for the first time.</p>
         </div>
+        <div class="admin-switch archive-switch">
+          <button id="showArchiveBase" class="subtab active" type="button">Base Monsters</button>
+          <button id="showArchiveCrossbreeds" class="subtab" type="button">Crossbreeds</button>
+        </div>
         <div id="archiveGrid" class="archive-grid"></div>
       </div>
 
@@ -415,10 +427,10 @@
           <button id="exportData" class="ghost">Export Admin Data</button>
           <button id="exportLiveContent" class="primary">Export Live Content</button>
           <label class="ghost file-label">Import Admin Data<input id="importData" type="file" accept=".json,application/json"></label>
-          <span class="form-note"><strong>Published</strong> on Monsters/Attacks means “include in the next Live Content export.” Sprite replacements, Silvy dialogue, Landing News/Announcements, and Trials are included automatically. To make changes live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
+          <span class="form-note"><strong>Published</strong> on Monsters/Attacks means “include in the next Live Content export.” Sprite replacements, Silvy dialogue, Landing News/Announcements, Event Calendars, and Trials are included automatically. To make changes live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
           <span id="liveContentStatus" class="form-note">Live Content: checking…</span>
         </div>
-        <div class="note-card"><strong>Live Content publishes the Admin content layer</strong><p>Included automatically: Sprite Workshop overrides (including Halloween/event/shop icons), Silvy Dialogue, News &amp; Announcements, and Trial definitions plus Captain/Badge art. Published custom Monsters and Published custom Attacks are included too. Local test controls, account data, player saves, Event Tester overrides, and Expedition Tester fast-forwards are never published.</p></div>
+        <div class="note-card"><strong>Live Content publishes the Admin content layer</strong><p>Included automatically: Sprite Workshop overrides (including Halloween/event/shop icons), Silvy Dialogue, News &amp; Announcements, Event Calendar prize configurations, and Trial definitions plus Captain/Badge art. Published custom Monsters and Published custom Attacks are included too. Local test controls, account data, player saves, Event Tester overrides/day simulation, and Expedition Tester fast-forwards are never published.</p></div>
 
         <div class="admin-layout">
           <aside class="registry-panel">
@@ -454,7 +466,7 @@
                   <span>Special Egg Art</span>
                   <input id="eggArt" type="file" accept="image/png,image/webp,image/jpeg">
                   <img id="eggPreview" alt="Egg art preview">
-                  <small id="eggArtHelp">Shown for Shop Egg and Halloween Event Shop Egg species.</small>
+                  <small id="eggArtHelp">Shown for Shop Egg, Halloween Event Shop Egg, and Winter Event Shop Egg species.</small>
                 </label>
               </div>
             </div>
@@ -497,6 +509,7 @@
                   <label>Parent species A<select id="parentA"></select></label>
                   <label>Parent species B<select id="parentB"></select></label>
                   <label>Crossbreed chance %<input id="crossbreedChance" type="number" min="1" max="20" step="1" value="15"></label>
+                  <label>Seasonal recipe<select id="crossbreedSeason"><option value="">Always available</option><option value="spooky_halloween">Spooky Halloween only</option><option value="winter_event">Winter Event only</option></select><small>Seasonal recipes go dormant outside that event. Already-owned monsters remain usable.</small></label>
                 </div>
                 <p class="form-note">Crossbreeds are breeding-only dual-Element species. Parent order does not matter. Standard Crossbreeds usually use 10–20%; Mythic recipes may use rarer odds.</p>
               </div>
@@ -634,7 +647,7 @@
             <label>Post date<input id="landingPostDate" type="date"></label>
             <label>Headline<input id="landingPostTitle" maxlength="80" placeholder="What changed?"></label>
           </div>
-          <label class="single-field">Post text<textarea id="landingPostBody" rows="4" maxlength="600" placeholder="Short update for players..."></textarea></label>
+          <label class="single-field">Post text<textarea id="landingPostBody" rows="8" maxlength="5000" placeholder="Write a short notice or a full update for players..."></textarea><span class="form-note">Up to 5,000 characters. Long posts stay compact on Home until a player opens the full post.</span></label>
           <div class="admin-actions">
             <button id="saveLandingPost" class="primary" type="button">Add Post</button>
             <button id="cancelLandingPostEdit" class="ghost hidden" type="button">Cancel Edit</button>
@@ -647,18 +660,39 @@
 
       <div id="eventAdminPane" class="hidden">
         <div class="event-admin-panel">
-          <div class="section-title"><span>🎃</span><div><h3>Event Framework Tester</h3><p>Preview event timing and test persistent event state without changing your computer clock.</p></div></div>
-          <div class="form-grid two">
+          <div class="section-title"><span>❄️</span><div><h3>Event Workshop &amp; Tester</h3><p>Build reusable daily reward calendars, including event-currency gifts, preview event timing, and test persistent event state without changing your computer clock.</p></div></div>
+          <div class="form-grid three">
             <label>Event<select id="eventAdminSelect"></select></label>
             <label>Availability override<select id="eventAdminOverride"><option value="auto">Automatic date rules</option><option value="active">Force Active</option><option value="inactive">Force Inactive</option></select></label>
+            <label>Calendar test day<input id="eventAdminTestDay" type="number" min="0" max="62" step="1" value="0"><small>0 = real date. Test-only and never published.</small></label>
           </div>
           <div class="admin-actions event-admin-actions">
-            <button id="applyEventOverride" class="primary" type="button">Apply Override</button>
-            <button id="eventGrantFangs" class="ghost" type="button">Grant 25 Fangs</button>
+            <button id="applyEventOverride" class="primary" type="button">Apply Test Settings</button>
+            <button id="eventGrantFangs" class="ghost" type="button">Grant 25 Event Currency</button>
             <button id="eventGrantSteps" class="ghost" type="button">Grant 5 Maze Steps</button>
             <button id="eventResetMaze" class="danger" type="button">Reset Haunted Maze</button>
+            <button id="eventResetMemory" class="danger hidden" type="button">Reset Memory Board</button>
+            <button id="eventClearMemoryCooldown" class="ghost hidden" type="button">Clear Memory Cooldown</button>
           </div>
-          <div class="note-card event-backend-note"><strong>Reusable backend</strong><p>Events are defined in the <code>EVENT_DEFS</code> registry. Shop stock, currency, dates, activity settings, and future Event monster pools live in the event definition so later events can reuse the same engine.</p></div>
+
+          <div id="eventCalendarBuilder" class="event-calendar-builder hidden">
+            <div class="dialogue-library-heading"><div><div class="eyebrow">PUBLISHABLE EVENT CONTENT</div><h3>Daily Event Calendar</h3></div><small>These prizes are included in Export Live Content.</small></div>
+            <div class="form-grid three">
+              <label>Calendar day<input id="eventCalendarDay" type="number" min="1" max="25" step="1" value="1"></label>
+              <label>Reward type<select id="eventCalendarRewardType"><option value="money">Money</option><option value="eventCurrency">Event Currency</option><option value="item">Item</option><option value="egg">Egg</option><option value="monster">Monster</option></select></label>
+              <label id="eventCalendarAmountWrap">Amount / quantity<input id="eventCalendarAmount" type="number" min="1" step="1" value="100"></label>
+              <label id="eventCalendarItemWrap" class="hidden">Item<select id="eventCalendarItem"></select></label>
+              <label id="eventCalendarSpeciesWrap" class="hidden">Species<select id="eventCalendarSpecies"></select></label>
+            </div>
+            <label class="check-row"><input id="eventCalendarCatchUp" type="checkbox" checked><span>Allow earlier unlocked days to be claimed later during the event</span></label>
+            <div class="admin-actions">
+              <button id="saveEventCalendarDay" class="primary" type="button">Save Day Prize</button>
+              <button id="clearEventCalendarDay" class="ghost" type="button">Clear Day Prize</button>
+            </div>
+            <div id="eventCalendarAdminList" class="event-calendar-admin-list"></div>
+          </div>
+
+          <div class="note-card event-backend-note"><strong>Reusable backend</strong><p>Events still live in <code>EVENT_DEFS</code>, while day-by-day Calendar prizes live in a publishable content layer. Winter uses the reusable 4×4 monster-memory activity: eight pairs, three failed matches before a 3-minute lockout, and a one-hour lockout after a completed board. Monster Workshop species marked <strong>Winter Event Shop Egg</strong> automatically join the Snowflake Shop, species marked <strong>Winter Mystery Egg</strong> automatically join the Mystery Egg pool, and Crossbreeds can be marked <strong>Winter Event only</strong>.</p></div>
           <p id="eventAdminMessage" class="admin-message"></p>
         </div>
       </div>
@@ -973,6 +1007,12 @@
         <div class="element-stat"><span>Element</span><strong id="statElement"></strong></div>
       </div></div>
 
+      <div class="monster-item-tools">
+        <div class="move-heading"><h3>Monster Items</h3><span id="monsterItemToolStatus" class="move-note"></span></div>
+        <p class="move-note">Nature Discs reroll this individual’s Trait once per day. A monster may receive exactly one DNA Splicer in its lifetime.</p>
+        <div id="monsterItemTools" class="monster-item-tool-grid"></div>
+      </div>
+
       <div class="move-section">
         <div class="move-heading"><h3>Attacks</h3><button id="swapAttacks" class="ghost small">Swap Slots</button></div>
         <p class="move-note">Attack Slot 1 is the move this monster passes through breeding.</p>
@@ -997,8 +1037,8 @@
 </dialog>
 
 <script>
-const BUILTIN_SPECIES = {"razebite":{"name":"Razebite","role":"Fast slasher","battleType":"Speed","element":"Aether","p1bst":290,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"rift_claw","builtin":true,"nativeFacing":"right"},"moltcrag":{"name":"Moltcrag","role":"Volcanic brute","battleType":"Brute","element":"Fire","p1bst":314,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"magma_ram","builtin":true,"nativeFacing":"right"},"sludgewart":{"name":"Sludgewart","role":"Toxic swamp tank","battleType":"Defender","element":"Toxic","p1bst":282,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"caustic_belch","builtin":true,"nativeFacing":"right"},"voltalon":{"name":"Voltalon","role":"Lightning speed attacker","battleType":"Speed","element":"Lightning","p1bst":284,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"thunder_dive","builtin":true,"nativeFacing":"right"},"velvetrend":{"name":"Velvetrend","role":"Feline slasher","battleType":"Speed","element":"Shadow","p1bst":295,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"velvet_rend","builtin":true,"nativeFacing":"right"},"bloomreign":{"name":"Bloomreign","role":"Floral assassin","battleType":"Speed","element":"Nature","p1bst":288,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"petal_guillotine","builtin":true,"nativeFacing":"right"},"umbracoil":{"name":"Umbracoil","role":"Abyssal serpent","battleType":"Brute","element":"Void","p1bst":299,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"abyss_coil","builtin":true,"nativeFacing":"right"},"thornjack":{"name":"Thornjack","role":"Forest ambusher","battleType":"Brute","element":"Nature","p1bst":294,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"briar_impale","builtin":true,"nativeFacing":"right"},"frostmaw":{"name":"Frostmaw","role":"Arctic tank","battleType":"Defender","element":"Ice","p1bst":311,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"polar_bite","builtin":true,"nativeFacing":"left"},"bellgrave":{"name":"Bellgrave","role":"Haunted resonance beast","battleType":"Brute","element":"Spirit","p1bst":280,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"toll_of_dread","builtin":true,"nativeFacing":"right"},"gravemire":{"name":"Gravemire","role":"Crypt-shell fortress","battleType":"Defender","element":"Earth","p1bst":306,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"crypt_crusher","builtin":true,"nativeFacing":"left"},"ripsilk":{"name":"Ripsilk","role":"Razor-thread predator","battleType":"Speed","element":"Shadow","p1bst":291,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"razor_thread","builtin":true,"nativeFacing":"right"},"aurevane":{"name":"Aurevane","role":"Radiant aerial predator","battleType":"Speed","element":"Light","p1bst":292,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"crescent_flash","builtin":true,"nativeFacing":"right"},"cindervane":{"name":"Cindervane","role":"Molten siege beast","battleType":"Brute","element":"Metal","p1bst":308,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"crucible_horn","builtin":true,"nativeFacing":"right"},"morrowisp":{"name":"Morrowisp","role":"Spectral lantern guardian","battleType":"Defender","element":"Spirit","p1bst":287,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"soul_lantern","builtin":true,"nativeFacing":"right"},"clatterjaw":{"name":"Clatterjaw","role":"Armored scavenger brute","battleType":"Brute","element":"Metal","p1bst":301,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1500,"hatchSeconds":2400,"signatureAttackId":"shear_maw","builtin":true,"nativeFacing":"right"},"guttergore":{"name":"Guttergore","role":"Subterranean toxic tunnel ambusher","battleType":"Brute","element":"Toxic","p1bst":303,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"gutter_clamp","builtin":true,"nativeFacing":"left"},"halowing":{"name":"Halowing","role":"Elusive manta-like aerial predator","battleType":"Speed","element":"Air","p1bst":296,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"gale_shear","builtin":true,"nativeFacing":"right"},"rimeforge":{"name":"Rimeforge","role":"Thermal-shock siege beast","battleType":"Brute","element":"Fire","secondaryElement":"Ice","p1bst":345,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["moltcrag","frostmaw"],"crossbreedChance":12,"breedSeconds":3000,"hatchSeconds":4200,"signatureAttackId":"rimebreak_charge","builtin":true,"nativeFacing":"right"},"wraithwood":{"name":"Wraithwood","role":"Hollow wooden spirit reaper","battleType":"Speed","element":"Nature","secondaryElement":"Spirit","p1bst":334,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["bloomreign","morrowisp"],"crossbreedChance":16,"breedSeconds":2400,"hatchSeconds":3600,"signatureAttackId":"hollow_reap","builtin":true,"nativeFacing":"right"},"railclast":{"name":"Railclast","role":"Electromagnetic pursuit predator","battleType":"Defender","element":"Metal","secondaryElement":"Lightning","p1bst":336,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["clatterjaw","voltalon"],"crossbreedChance":15,"breedSeconds":2700,"hatchSeconds":3900,"signatureAttackId":"rail_surge","builtin":true,"nativeFacing":"right"},"tideveil":{"name":"Tideveil","role":"Hypnotic lionfish siren predator","battleType":"Speed","element":"Water","secondaryElement":"","p1bst":294,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"undertow_aria","builtin":true,"nativeFacing":"right"},"shardback":{"name":"Shardback","role":"Armored glacier burrower","battleType":"Defender","element":"Ice","secondaryElement":"","p1bst":300,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"glacier_break","builtin":true,"nativeFacing":"right"},"hexolith":{"name":"Hexolith","role":"Shattered monument fortress","battleType":"Defender","element":"Earth","secondaryElement":"","p1bst":309,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"ruin_hammer","builtin":true,"statWeights":{"hp":0.27184466019417475,"attack":0.22653721682847897,"armor":0.3786407766990291,"speed":0.12297734627831715},"nativeFacing":"right"},"dirgewake":{"name":"Dirgewake","role":"Funeral-armored maze hunter","battleType":"Brute","element":"Shadow","secondaryElement":"","p1bst":305,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2100,"hatchSeconds":2700,"signatureAttackId":"funeral_rush","builtin":true,"statWeights":{"hp":0.26229508196721313,"attack":0.3344262295081967,"armor":0.2360655737704918,"speed":0.16721311475409836},"nativeFacing":"right"},"mournwick":{"name":"Mournwick","role":"Corpse-lantern funeral guardian","battleType":"Defender","element":"Spirit","secondaryElement":"","p1bst":309,"obtain":"Halloween Event Shop Egg","shopPrice":75,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2700,"hatchSeconds":3600,"signatureAttackId":"lantern_dirge","builtin":true,"statWeights":{"hp":0.284789644012945,"attack":0.20064724919093851,"armor":0.3592233009708738,"speed":0.1553398058252427},"nativeFacing":"left"},"dreadrein":{"name":"Dreadrein","role":"Fused spectral grave-rider","battleType":"Speed","element":"Aether","secondaryElement":"","p1bst":308,"obtain":"Haunted Event Egg","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"pale_gallop","builtin":true,"statWeights":{"hp":0.23376623376623376,"attack":0.2727272727272727,"armor":0.19480519480519481,"speed":0.2987012987012987},"nativeFacing":"right"},"vesperfang":{"name":"Vesperfang","role":"Aristocratic nocturnal blood hunter","battleType":"Speed","element":"Shadow","secondaryElement":"","p1bst":306,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"crimson_siphon","builtin":true,"statWeights":{"hp":0.22875816993464052,"attack":0.30392156862745096,"armor":0.17973856209150327,"speed":0.2875816993464052},"nativeFacing":"right"},"veilwyrm":{"name":"Veilwyrm","role":"Regal skeletal grave-empress dragon","battleType":"Speed","element":"Spirit","secondaryElement":"","p1bst":312,"obtain":"Haunted Event Egg","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2700,"hatchSeconds":3600,"signatureAttackId":"veil_of_bones","builtin":true,"statWeights":{"hp":0.23717948717948717,"attack":0.27564102564102566,"armor":0.1987179487179487,"speed":0.28846153846153844},"nativeFacing":"right"},"harrowjack":{"name":"Harrowjack","role":"Bound harvest warden","battleType":"Defender","element":"Nature","secondaryElement":"","p1bst":310,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"reaping_shackle","builtin":true,"nativeFacing":"right","eventEncounterRarity":"rare","statWeights":{"hp":0.27741935483870966,"attack":0.21935483870967742,"armor":0.3548387096774194,"speed":0.14838709677419354}},"marrowstride":{"name":"Marrowstride","role":"Spectral bone-cat dragon prowler","battleType":"Speed","element":"Shadow","secondaryElement":"Spirit","p1bst":346,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["velvetrend","veilwyrm"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"phantom_stride","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.2254335260115607,"attack":0.2774566473988439,"armor":0.1907514450867052,"speed":0.3063583815028902}},"grimreign":{"name":"Grimreign","role":"Bipedal funeral pursuit war-ghoul","battleType":"Brute","element":"Shadow","secondaryElement":"Aether","p1bst":344,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["dirgewake","dreadrein"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"gallows_charge","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.23837209302325582,"attack":0.313953488372093,"armor":0.20930232558139536,"speed":0.23837209302325582}},"wickmare":{"name":"Wickmare","role":"Bestial grave-lantern nightmare steed","battleType":"Defender","element":"Spirit","secondaryElement":"Aether","p1bst":345,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["mournwick","dreadrein"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"wickmare_howl","builtin":true,"nativeFacing":"left","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.2608695652173913,"attack":0.23768115942028986,"armor":0.2898550724637681,"speed":0.21159420289855072}},"cerbereign":{"name":"Cerbereign","role":"Mythic three-headed Horseman culmination","battleType":"Brute","element":"Void","secondaryElement":"Aether","p1bst":545,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["grimreign","wickmare"],"crossbreedChance":5,"breedSeconds":7200,"hatchSeconds":10800,"signatureAttackId":"doom_procession","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","rarity":"Mythic","isMythic":true,"statWeights":{"hp":0.25321100917431194,"attack":0.29357798165137616,"armor":0.24220183486238533,"speed":0.21100917431192662}}};
-const BUILTIN_ATTACKS = {"rift_claw":{"name":"Rift Claw","element":"Aether","style":"Standard","power":55,"accuracy":95,"status":"None","statusChance":0,"statusDuration":0,"description":"Razebite tears through the target with an aether-charged claw swipe.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"magma_ram":{"name":"Magma Ram","element":"Fire","style":"Heavy","power":72,"accuracy":88,"status":"Burn","statusChance":8,"statusDuration":3,"description":"Moltcrag lowers its armored head and drives molten force through the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"caustic_belch":{"name":"Caustic Belch","element":"Toxic","style":"Standard","power":48,"accuracy":94,"status":"Poison","statusChance":18,"statusDuration":4,"description":"Sludgewart spits a pressurized glob of corrosive swamp toxin.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"thunder_dive":{"name":"Thunder Dive","element":"Lightning","style":"Heavy","power":68,"accuracy":90,"status":"Shock","statusChance":10,"statusDuration":2,"description":"Voltalon folds its wings and dives in a crackling lightning strike.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"velvet_rend":{"name":"Velvet Rend","element":"Shadow","style":"Standard","power":58,"accuracy":97,"status":"Bleed","statusChance":10,"statusDuration":3,"description":"Velvetrend lunges from an odd angle and tears with both oversized paws.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"petal_guillotine":{"name":"Petal Guillotine","element":"Nature","style":"Heavy","power":70,"accuracy":89,"status":"Bleed","statusChance":8,"statusDuration":3,"description":"Bloomreign snaps its floral scythes together in a brutal cross-cut.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"abyss_coil":{"name":"Abyss Coil","element":"Void","style":"Standard","power":54,"accuracy":96,"status":"Slow","statusChance":12,"statusDuration":3,"description":"Umbracoil wraps the target in void pressure that drags at its movement.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"briar_impale":{"name":"Briar Impale","element":"Nature","style":"Heavy","power":66,"accuracy":91,"status":"Bleed","statusChance":12,"statusDuration":3,"description":"Thornjack drives hooked antlers and thorn growths straight through its prey.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"polar_bite":{"name":"Polar Bite","element":"Ice","style":"Heavy","power":74,"accuracy":90,"status":"Freeze","statusChance":5,"statusDuration":4,"description":"Frostmaw clamps down with crushing frozen force.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"toll_of_dread":{"name":"Toll of Dread","element":"Spirit","style":"Standard","power":50,"accuracy":96,"status":"Slow","statusChance":15,"statusDuration":2,"description":"Bellgrave releases a resonant toll that rattles body and spirit.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crypt_crusher":{"name":"Crypt Crusher","element":"Earth","style":"Heavy","power":76,"accuracy":86,"status":"Guard Break","statusChance":10,"statusDuration":3,"description":"Gravemire brings its enormous crypt-like crusher claw down with ruinous force.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"razor_thread":{"name":"Razor Thread","element":"Shadow","style":"Light","power":44,"accuracy":99,"status":"Bleed","statusChance":16,"statusDuration":3,"description":"Ripsilk snaps a near-invisible cutting filament across the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"meteor_crash":{"name":"Meteor Crash","element":"Fire","style":"Heavy","power":82,"accuracy":82,"status":"Burn","statusChance":12,"statusDuration":3,"description":"A costly scroll technique that slams the target with explosive force.","scrollEnabled":true,"scrollPrice":9000,"builtin":true},"quickstep_cut":{"name":"Quickstep Cut","element":"Air","style":"Light","power":40,"accuracy":100,"status":"None","statusChance":0,"statusDuration":0,"description":"A scroll technique built around a sudden dash and clean strike.","scrollEnabled":true,"scrollPrice":6500,"builtin":true},"iron_shell":{"name":"Iron Shell","element":"Metal","style":"Standard","power":46,"accuracy":98,"status":"Guard Break","statusChance":6,"statusDuration":2,"description":"A scroll technique that turns a body-check into a plated impact.","scrollEnabled":true,"scrollPrice":7000,"builtin":true},"crescent_flash":{"name":"Crescent Flash","element":"Light","style":"Standard","power":57,"accuracy":97,"status":"Shock","statusChance":8,"statusDuration":2,"description":"Aurevane folds its wings into a radiant crescent and tears past the target in a blinding arc.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crucible_horn":{"name":"Crucible Horn","element":"Metal","style":"Heavy","power":68,"accuracy":90,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Cindervane lowers its blazing spiral horn and drives forward like a living battering ram, cracking armor and leaving the target exposed.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"soul_lantern":{"name":"Soul Lantern","element":"Spirit","style":"Standard","power":49,"accuracy":96,"status":"Sleep","statusChance":12,"statusDuration":2,"description":"Morrowisp opens the cage around its spectral core and floods the target with hypnotic ghost-light.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"shear_maw":{"name":"Shear Maw","element":"Metal","style":"Heavy","power":65,"accuracy":92,"status":"Bleed","statusChance":16,"statusDuration":3,"description":"Clatterjaw snaps its sideways jaws shut around the target in a violent shearing bite, leaving deep wounds that continue to bleed.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gutter_clamp":{"name":"Gutter Clamp","element":"Toxic","style":"Heavy","power":71,"accuracy":89,"status":"Poison","statusChance":18,"statusDuration":4,"description":"Guttergore lunges from below and locks its enormous jaws around the target, crushing down while contaminated sludge seeps into the wound.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gale_shear":{"name":"Gale Shear","element":"Air","style":"Light","power":46,"accuracy":99,"status":"Slow","statusChance":18,"statusDuration":3,"description":"Halowing twists its floating vanes into alignment and dives through the surrounding air, releasing a razor-thin pressure current that leaves turbulent winds dragging against the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"rimebreak_charge":{"name":"Rimebreak Charge","element":"Ice","style":"Heavy","power":75,"accuracy":88,"status":"Guard Break","statusChance":18,"statusDuration":3,"description":"Rimeforge flash-freezes its enormous horn before superheating the armor beneath it, then barrels into the target in a steam-shrouded charge that cracks armor through violent thermal shock.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"hollow_reap":{"name":"Hollow Reap","element":"Spirit","style":"Standard","power":62,"accuracy":96,"status":"Sleep","statusChance":12,"statusDuration":2,"description":"Wraithwood passes silently through the target with both wooden scythes extended, allowing its spirit flame to briefly overlap their body and pull awareness toward unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"rail_surge":{"name":"Rail Surge","element":"Lightning","style":"Heavy","power":69,"accuracy":91,"status":"Shock","statusChance":18,"statusDuration":3,"description":"Railclast charges its paired jaw-rails until electricity arcs violently between them, then launches itself forward in a magnetically accelerated rush.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"undertow_aria":{"name":"Undertow Aria","element":"Water","style":"Standard","power":54,"accuracy":97,"status":"Sleep","statusChance":14,"statusDuration":2,"description":"Tideveil spreads its resonance fins and releases a low hypnotic call through the surrounding water, bending the song into a crushing undertow that can lull the target into unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"glacier_break":{"name":"Glacier Break","element":"Ice","style":"Heavy","power":64,"accuracy":94,"status":"Slow","statusChance":22,"statusDuration":3,"description":"Shardback drives its armored body forward and slams the target with its frozen shoulder plates, scattering razor-edged ice fragments. The sudden frost buildup can leave the target sluggish.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"ruin_hammer":{"name":"Ruin Hammer","element":"Earth","style":"Heavy","power":68,"accuracy":92,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Hexolith pulls its floating slabs into alignment and launches one enormous stone fist forward, striking with the force of a collapsing monument. The impact can fracture the target\u2019s defenses.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"funeral_rush":{"name":"Funeral Rush","element":"Shadow","style":"Heavy","power":68,"accuracy":92,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Dirgewake lowers its armored body while its floating skull surges ahead, then crashes through the target in a wave of funeral flame.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"lantern_dirge":{"name":"Lantern Dirge","element":"Spirit","style":"Standard","power":55,"accuracy":97,"status":"Sleep","statusChance":18,"statusDuration":2,"description":"Mournwick opens its broken head-cage and releases a wavering pulse of corpse-light that can drag the target toward unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"pale_gallop":{"name":"Pale Gallop","element":"Aether","style":"Heavy","power":65,"accuracy":94,"status":"Slow","statusChance":20,"statusDuration":3,"description":"Dreadrein becomes a pale spectral charge, passing through the target before its armored body violently catches up with its own ghost.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crimson_siphon":{"name":"Crimson Siphon","element":"Shadow","style":"Standard","power":60,"accuracy":96,"status":"None","statusChance":0,"statusDuration":0,"lifeSteal":50,"description":"Vesperfang tears into the target and draws vitality from the wound, restoring half of the damage actually dealt.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"veil_of_bones":{"name":"Veil of Bones","element":"Spirit","style":"Standard","power":61,"accuracy":97,"status":"Sleep","statusChance":18,"statusDuration":2,"description":"Veilwyrm sweeps forward in a spiral of spectral ribs and grave-light, wrapping the target in a drifting funeral haze that can pull them into unnatural slumber.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"reaping_shackle":{"name":"Reaping Shackle","element":"Nature","style":"Heavy","power":64,"accuracy":94,"status":"Slow","statusChance":25,"statusDuration":3,"description":"Harrowjack lashes a dragging chain around the target and yanks them through thorny straw and splintered roots. The binding can leave the victim struggling to move.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"phantom_stride":{"name":"Phantom Stride","element":"Shadow","style":"Standard","power":58,"accuracy":98,"status":"None","statusChance":0,"statusDuration":0,"evadeNext":10,"description":"Marrowstride slips through a spectral feint. After the strike lands, Stride Veil grants a flat 10% chance to evade the next incoming attack.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gallows_charge":{"name":"Gallows Charge","element":"Shadow","style":"Heavy","power":67,"accuracy":94,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Grimreign surges forward with its floating skull pulling the armored body after it, chains snapping through funeral flame as the impact tears open defenses.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"wickmare_howl":{"name":"Wickmare Howl","element":"Spirit","style":"Heavy","power":62,"accuracy":95,"status":"Sleep","statusChance":20,"statusDuration":2,"description":"Wickmare throws back its caged spectral skull and releases a grave-born howl that rolls through the target in lantern-fire and can drag it into cursed sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"doom_procession":{"name":"Doom Procession","element":"Void","style":"Heavy","power":74,"accuracy":93,"status":"Guard Break","statusChance":25,"statusDuration":3,"lifeSteal":10,"description":"Cerbereign advances like an oncoming funeral apocalypse. Three spectral maws tear through the target as the charge fractures defenses and siphons a trace of the damage dealt.","scrollEnabled":false,"scrollPrice":0,"builtin":true}};
+const BUILTIN_SPECIES = {"razebite":{"name":"Razebite","role":"Fast slasher","battleType":"Speed","element":"Aether","p1bst":290,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"rift_claw","builtin":true,"nativeFacing":"right"},"moltcrag":{"name":"Moltcrag","role":"Volcanic brute","battleType":"Brute","element":"Fire","p1bst":314,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"magma_ram","builtin":true,"nativeFacing":"right"},"sludgewart":{"name":"Sludgewart","role":"Toxic swamp tank","battleType":"Defender","element":"Toxic","p1bst":282,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"caustic_belch","builtin":true,"nativeFacing":"right"},"voltalon":{"name":"Voltalon","role":"Lightning speed attacker","battleType":"Speed","element":"Lightning","p1bst":284,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"thunder_dive","builtin":true,"nativeFacing":"right"},"velvetrend":{"name":"Velvetrend","role":"Feline slasher","battleType":"Speed","element":"Shadow","p1bst":295,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"velvet_rend","builtin":true,"nativeFacing":"right"},"bloomreign":{"name":"Bloomreign","role":"Floral assassin","battleType":"Speed","element":"Nature","p1bst":288,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"petal_guillotine","builtin":true,"nativeFacing":"right"},"umbracoil":{"name":"Umbracoil","role":"Abyssal serpent","battleType":"Brute","element":"Void","p1bst":299,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"abyss_coil","builtin":true,"nativeFacing":"right"},"thornjack":{"name":"Thornjack","role":"Forest ambusher","battleType":"Brute","element":"Nature","p1bst":294,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"briar_impale","builtin":true,"nativeFacing":"right"},"frostmaw":{"name":"Frostmaw","role":"Arctic tank","battleType":"Defender","element":"Ice","p1bst":311,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"polar_bite","builtin":true,"nativeFacing":"left"},"bellgrave":{"name":"Bellgrave","role":"Haunted resonance beast","battleType":"Brute","element":"Spirit","p1bst":280,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"toll_of_dread","builtin":true,"nativeFacing":"right"},"gravemire":{"name":"Gravemire","role":"Crypt-shell fortress","battleType":"Defender","element":"Earth","p1bst":306,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"crypt_crusher","builtin":true,"nativeFacing":"left"},"ripsilk":{"name":"Ripsilk","role":"Razor-thread predator","battleType":"Speed","element":"Shadow","p1bst":291,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":60,"hatchSeconds":60,"signatureAttackId":"razor_thread","builtin":true,"nativeFacing":"right"},"aurevane":{"name":"Aurevane","role":"Radiant aerial predator","battleType":"Speed","element":"Light","p1bst":292,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"crescent_flash","builtin":true,"nativeFacing":"right"},"cindervane":{"name":"Cindervane","role":"Molten siege beast","battleType":"Brute","element":"Metal","p1bst":308,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"crucible_horn","builtin":true,"nativeFacing":"right"},"morrowisp":{"name":"Morrowisp","role":"Spectral lantern guardian","battleType":"Defender","element":"Spirit","p1bst":287,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"soul_lantern","builtin":true,"nativeFacing":"right"},"clatterjaw":{"name":"Clatterjaw","role":"Armored scavenger brute","battleType":"Brute","element":"Metal","p1bst":301,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1500,"hatchSeconds":2400,"signatureAttackId":"shear_maw","builtin":true,"nativeFacing":"right"},"guttergore":{"name":"Guttergore","role":"Subterranean toxic tunnel ambusher","battleType":"Brute","element":"Toxic","p1bst":303,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"gutter_clamp","builtin":true,"nativeFacing":"left"},"halowing":{"name":"Halowing","role":"Elusive manta-like aerial predator","battleType":"Speed","element":"Air","p1bst":296,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":25,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"gale_shear","builtin":true,"nativeFacing":"right"},"rimeforge":{"name":"Rimeforge","role":"Thermal-shock siege beast","battleType":"Brute","element":"Fire","secondaryElement":"Ice","p1bst":345,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["moltcrag","frostmaw"],"crossbreedChance":12,"breedSeconds":3000,"hatchSeconds":4200,"signatureAttackId":"rimebreak_charge","builtin":true,"nativeFacing":"right"},"wraithwood":{"name":"Wraithwood","role":"Hollow wooden spirit reaper","battleType":"Speed","element":"Nature","secondaryElement":"Spirit","p1bst":334,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["bloomreign","morrowisp"],"crossbreedChance":16,"breedSeconds":2400,"hatchSeconds":3600,"signatureAttackId":"hollow_reap","builtin":true,"nativeFacing":"right"},"railclast":{"name":"Railclast","role":"Electromagnetic pursuit predator","battleType":"Defender","element":"Metal","secondaryElement":"Lightning","p1bst":336,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["clatterjaw","voltalon"],"crossbreedChance":15,"breedSeconds":2700,"hatchSeconds":3900,"signatureAttackId":"rail_surge","builtin":true,"nativeFacing":"right"},"tideveil":{"name":"Tideveil","role":"Hypnotic lionfish siren predator","battleType":"Speed","element":"Water","secondaryElement":"","p1bst":294,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"undertow_aria","builtin":true,"nativeFacing":"right"},"shardback":{"name":"Shardback","role":"Armored glacier burrower","battleType":"Defender","element":"Ice","secondaryElement":"","p1bst":300,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2100,"hatchSeconds":3000,"signatureAttackId":"glacier_break","builtin":true,"nativeFacing":"right"},"hexolith":{"name":"Hexolith","role":"Shattered monument fortress","battleType":"Defender","element":"Earth","secondaryElement":"","p1bst":309,"obtain":"Random Battle Reward","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"ruin_hammer","builtin":true,"statWeights":{"hp":0.27184466019417475,"attack":0.22653721682847897,"armor":0.3786407766990291,"speed":0.12297734627831715},"nativeFacing":"right"},"dirgewake":{"name":"Dirgewake","role":"Funeral-armored maze hunter","battleType":"Brute","element":"Shadow","secondaryElement":"","p1bst":305,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2100,"hatchSeconds":2700,"signatureAttackId":"funeral_rush","builtin":true,"statWeights":{"hp":0.26229508196721313,"attack":0.3344262295081967,"armor":0.2360655737704918,"speed":0.16721311475409836},"nativeFacing":"right"},"mournwick":{"name":"Mournwick","role":"Corpse-lantern funeral guardian","battleType":"Defender","element":"Spirit","secondaryElement":"","p1bst":309,"obtain":"Halloween Event Shop Egg","shopPrice":75,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2700,"hatchSeconds":3600,"signatureAttackId":"lantern_dirge","builtin":true,"statWeights":{"hp":0.284789644012945,"attack":0.20064724919093851,"armor":0.3592233009708738,"speed":0.1553398058252427},"nativeFacing":"left"},"dreadrein":{"name":"Dreadrein","role":"Fused spectral grave-rider","battleType":"Speed","element":"Aether","secondaryElement":"","p1bst":308,"obtain":"Haunted Event Egg","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"pale_gallop","builtin":true,"statWeights":{"hp":0.23376623376623376,"attack":0.2727272727272727,"armor":0.19480519480519481,"speed":0.2987012987012987},"nativeFacing":"right"},"vesperfang":{"name":"Vesperfang","role":"Aristocratic nocturnal blood hunter","battleType":"Speed","element":"Shadow","secondaryElement":"","p1bst":306,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":1800,"hatchSeconds":2700,"signatureAttackId":"crimson_siphon","builtin":true,"statWeights":{"hp":0.22875816993464052,"attack":0.30392156862745096,"armor":0.17973856209150327,"speed":0.2875816993464052},"nativeFacing":"right"},"veilwyrm":{"name":"Veilwyrm","role":"Regal skeletal grave-empress dragon","battleType":"Speed","element":"Spirit","secondaryElement":"","p1bst":312,"obtain":"Haunted Event Egg","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2700,"hatchSeconds":3600,"signatureAttackId":"veil_of_bones","builtin":true,"statWeights":{"hp":0.23717948717948717,"attack":0.27564102564102566,"armor":0.1987179487179487,"speed":0.28846153846153844},"nativeFacing":"right"},"harrowjack":{"name":"Harrowjack","role":"Bound harvest warden","battleType":"Defender","element":"Nature","secondaryElement":"","p1bst":310,"obtain":"Halloween Maze Encounter","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2400,"hatchSeconds":3300,"signatureAttackId":"reaping_shackle","builtin":true,"nativeFacing":"right","eventEncounterRarity":"rare","statWeights":{"hp":0.27741935483870966,"attack":0.21935483870967742,"armor":0.3548387096774194,"speed":0.14838709677419354}},"marrowstride":{"name":"Marrowstride","role":"Spectral bone-cat dragon prowler","battleType":"Speed","element":"Shadow","secondaryElement":"Spirit","p1bst":346,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["velvetrend","veilwyrm"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"phantom_stride","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.2254335260115607,"attack":0.2774566473988439,"armor":0.1907514450867052,"speed":0.3063583815028902}},"grimreign":{"name":"Grimreign","role":"Bipedal funeral pursuit war-ghoul","battleType":"Brute","element":"Shadow","secondaryElement":"Aether","p1bst":344,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["dirgewake","dreadrein"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"gallows_charge","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.23837209302325582,"attack":0.313953488372093,"armor":0.20930232558139536,"speed":0.23837209302325582}},"wickmare":{"name":"Wickmare","role":"Bestial grave-lantern nightmare steed","battleType":"Defender","element":"Spirit","secondaryElement":"Aether","p1bst":345,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["mournwick","dreadrein"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"wickmare_howl","builtin":true,"nativeFacing":"left","seasonalEventFamily":"spooky_halloween","statWeights":{"hp":0.2608695652173913,"attack":0.23768115942028986,"armor":0.2898550724637681,"speed":0.21159420289855072}},"cerbereign":{"name":"Cerbereign","role":"Mythic three-headed Horseman culmination","battleType":"Brute","element":"Void","secondaryElement":"Aether","p1bst":545,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["grimreign","wickmare"],"crossbreedChance":5,"breedSeconds":7200,"hatchSeconds":10800,"signatureAttackId":"doom_procession","builtin":true,"nativeFacing":"right","seasonalEventFamily":"spooky_halloween","rarity":"Mythic","isMythic":true,"statWeights":{"hp":0.25321100917431194,"attack":0.29357798165137616,"armor":0.24220183486238533,"speed":0.21100917431192662}},"bouldrift":{"name":"Bouldrift","role":"Packed-snow winter bulwark","battleType":"Defender","element":"Ice","secondaryElement":"","p1bst":320,"obtain":"Winter Event Shop Egg","shopPrice":120,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":2700,"hatchSeconds":3600,"signatureAttackId":"snow_boulder","builtin":true,"nativeFacing":"right","statWeights":{"hp":0.31875,"attack":0.20625,"armor":0.325,"speed":0.15}},"yulemaw":{"name":"Yulemaw","role":"Predatory decorated evergreen","battleType":"Brute","element":"Nature","secondaryElement":"","p1bst":340,"obtain":"Winter Mystery Egg","shopPrice":1000,"isCrossbreed":false,"parents":[],"crossbreedChance":0,"breedSeconds":3000,"hatchSeconds":3900,"signatureAttackId":"ornament_bomb","builtin":true,"nativeFacing":"right","statWeights":{"hp":0.2647058823529412,"attack":0.32941176470588235,"armor":0.2411764705882353,"speed":0.16470588235294117}},"briarhart":{"name":"Briarhart","role":"Frozen thicket anomaly","battleType":"Speed","element":"Ice","secondaryElement":"Nature","p1bst":365,"obtain":"Breeding Only","shopPrice":1000,"isCrossbreed":true,"parents":["bouldrift","thornjack"],"crossbreedChance":15,"breedSeconds":3300,"hatchSeconds":4200,"signatureAttackId":"deadwinter_charge","builtin":true,"nativeFacing":"right","seasonalEventFamily":"winter_event","statWeights":{"hp":0.22465753424657534,"attack":0.2821917808219178,"armor":0.1917808219178082,"speed":0.3013698630136986}}};
+const BUILTIN_ATTACKS = {"rift_claw":{"name":"Rift Claw","element":"Aether","style":"Standard","power":55,"accuracy":95,"status":"None","statusChance":0,"statusDuration":0,"description":"Razebite tears through the target with an aether-charged claw swipe.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"magma_ram":{"name":"Magma Ram","element":"Fire","style":"Heavy","power":72,"accuracy":88,"status":"Burn","statusChance":8,"statusDuration":3,"description":"Moltcrag lowers its armored head and drives molten force through the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"caustic_belch":{"name":"Caustic Belch","element":"Toxic","style":"Standard","power":48,"accuracy":94,"status":"Poison","statusChance":18,"statusDuration":4,"description":"Sludgewart spits a pressurized glob of corrosive swamp toxin.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"thunder_dive":{"name":"Thunder Dive","element":"Lightning","style":"Heavy","power":68,"accuracy":90,"status":"Shock","statusChance":10,"statusDuration":2,"description":"Voltalon folds its wings and dives in a crackling lightning strike.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"velvet_rend":{"name":"Velvet Rend","element":"Shadow","style":"Standard","power":58,"accuracy":97,"status":"Bleed","statusChance":10,"statusDuration":3,"description":"Velvetrend lunges from an odd angle and tears with both oversized paws.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"petal_guillotine":{"name":"Petal Guillotine","element":"Nature","style":"Heavy","power":70,"accuracy":89,"status":"Bleed","statusChance":8,"statusDuration":3,"description":"Bloomreign snaps its floral scythes together in a brutal cross-cut.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"abyss_coil":{"name":"Abyss Coil","element":"Void","style":"Standard","power":54,"accuracy":96,"status":"Slow","statusChance":12,"statusDuration":3,"description":"Umbracoil wraps the target in void pressure that drags at its movement.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"briar_impale":{"name":"Briar Impale","element":"Nature","style":"Heavy","power":66,"accuracy":91,"status":"Bleed","statusChance":12,"statusDuration":3,"description":"Thornjack drives hooked antlers and thorn growths straight through its prey.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"polar_bite":{"name":"Polar Bite","element":"Ice","style":"Heavy","power":74,"accuracy":90,"status":"Freeze","statusChance":5,"statusDuration":4,"description":"Frostmaw clamps down with crushing frozen force.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"toll_of_dread":{"name":"Toll of Dread","element":"Spirit","style":"Standard","power":50,"accuracy":96,"status":"Slow","statusChance":15,"statusDuration":2,"description":"Bellgrave releases a resonant toll that rattles body and spirit.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crypt_crusher":{"name":"Crypt Crusher","element":"Earth","style":"Heavy","power":76,"accuracy":86,"status":"Guard Break","statusChance":10,"statusDuration":3,"description":"Gravemire brings its enormous crypt-like crusher claw down with ruinous force.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"razor_thread":{"name":"Razor Thread","element":"Shadow","style":"Light","power":44,"accuracy":99,"status":"Bleed","statusChance":16,"statusDuration":3,"description":"Ripsilk snaps a near-invisible cutting filament across the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"meteor_crash":{"name":"Meteor Crash","element":"Fire","style":"Heavy","power":82,"accuracy":82,"status":"Burn","statusChance":12,"statusDuration":3,"description":"A costly scroll technique that slams the target with explosive force.","scrollEnabled":true,"scrollPrice":9000,"builtin":true},"quickstep_cut":{"name":"Quickstep Cut","element":"Air","style":"Light","power":40,"accuracy":100,"status":"None","statusChance":0,"statusDuration":0,"description":"A scroll technique built around a sudden dash and clean strike.","scrollEnabled":true,"scrollPrice":6500,"builtin":true},"iron_shell":{"name":"Iron Shell","element":"Metal","style":"Standard","power":46,"accuracy":98,"status":"Guard Break","statusChance":6,"statusDuration":2,"description":"A scroll technique that turns a body-check into a plated impact.","scrollEnabled":true,"scrollPrice":7000,"builtin":true},"crescent_flash":{"name":"Crescent Flash","element":"Light","style":"Standard","power":57,"accuracy":97,"status":"Shock","statusChance":8,"statusDuration":2,"description":"Aurevane folds its wings into a radiant crescent and tears past the target in a blinding arc.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crucible_horn":{"name":"Crucible Horn","element":"Metal","style":"Heavy","power":68,"accuracy":90,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Cindervane lowers its blazing spiral horn and drives forward like a living battering ram, cracking armor and leaving the target exposed.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"soul_lantern":{"name":"Soul Lantern","element":"Spirit","style":"Standard","power":49,"accuracy":96,"status":"Sleep","statusChance":12,"statusDuration":2,"description":"Morrowisp opens the cage around its spectral core and floods the target with hypnotic ghost-light.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"shear_maw":{"name":"Shear Maw","element":"Metal","style":"Heavy","power":65,"accuracy":92,"status":"Bleed","statusChance":16,"statusDuration":3,"description":"Clatterjaw snaps its sideways jaws shut around the target in a violent shearing bite, leaving deep wounds that continue to bleed.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gutter_clamp":{"name":"Gutter Clamp","element":"Toxic","style":"Heavy","power":71,"accuracy":89,"status":"Poison","statusChance":18,"statusDuration":4,"description":"Guttergore lunges from below and locks its enormous jaws around the target, crushing down while contaminated sludge seeps into the wound.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gale_shear":{"name":"Gale Shear","element":"Air","style":"Light","power":46,"accuracy":99,"status":"Slow","statusChance":18,"statusDuration":3,"description":"Halowing twists its floating vanes into alignment and dives through the surrounding air, releasing a razor-thin pressure current that leaves turbulent winds dragging against the target.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"rimebreak_charge":{"name":"Rimebreak Charge","element":"Ice","style":"Heavy","power":75,"accuracy":88,"status":"Guard Break","statusChance":18,"statusDuration":3,"description":"Rimeforge flash-freezes its enormous horn before superheating the armor beneath it, then barrels into the target in a steam-shrouded charge that cracks armor through violent thermal shock.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"hollow_reap":{"name":"Hollow Reap","element":"Spirit","style":"Standard","power":62,"accuracy":96,"status":"Sleep","statusChance":12,"statusDuration":2,"description":"Wraithwood passes silently through the target with both wooden scythes extended, allowing its spirit flame to briefly overlap their body and pull awareness toward unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"rail_surge":{"name":"Rail Surge","element":"Lightning","style":"Heavy","power":69,"accuracy":91,"status":"Shock","statusChance":18,"statusDuration":3,"description":"Railclast charges its paired jaw-rails until electricity arcs violently between them, then launches itself forward in a magnetically accelerated rush.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"undertow_aria":{"name":"Undertow Aria","element":"Water","style":"Standard","power":54,"accuracy":97,"status":"Sleep","statusChance":14,"statusDuration":2,"description":"Tideveil spreads its resonance fins and releases a low hypnotic call through the surrounding water, bending the song into a crushing undertow that can lull the target into unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"glacier_break":{"name":"Glacier Break","element":"Ice","style":"Heavy","power":64,"accuracy":94,"status":"Slow","statusChance":22,"statusDuration":3,"description":"Shardback drives its armored body forward and slams the target with its frozen shoulder plates, scattering razor-edged ice fragments. The sudden frost buildup can leave the target sluggish.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"ruin_hammer":{"name":"Ruin Hammer","element":"Earth","style":"Heavy","power":68,"accuracy":92,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Hexolith pulls its floating slabs into alignment and launches one enormous stone fist forward, striking with the force of a collapsing monument. The impact can fracture the target’s defenses.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"funeral_rush":{"name":"Funeral Rush","element":"Shadow","style":"Heavy","power":68,"accuracy":92,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Dirgewake lowers its armored body while its floating skull surges ahead, then crashes through the target in a wave of funeral flame.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"lantern_dirge":{"name":"Lantern Dirge","element":"Spirit","style":"Standard","power":55,"accuracy":97,"status":"Sleep","statusChance":18,"statusDuration":2,"description":"Mournwick opens its broken head-cage and releases a wavering pulse of corpse-light that can drag the target toward unnatural sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"pale_gallop":{"name":"Pale Gallop","element":"Aether","style":"Heavy","power":65,"accuracy":94,"status":"Slow","statusChance":20,"statusDuration":3,"description":"Dreadrein becomes a pale spectral charge, passing through the target before its armored body violently catches up with its own ghost.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"crimson_siphon":{"name":"Crimson Siphon","element":"Shadow","style":"Standard","power":60,"accuracy":96,"status":"None","statusChance":0,"statusDuration":0,"lifeSteal":50,"description":"Vesperfang tears into the target and draws vitality from the wound, restoring half of the damage actually dealt.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"veil_of_bones":{"name":"Veil of Bones","element":"Spirit","style":"Standard","power":61,"accuracy":97,"status":"Sleep","statusChance":18,"statusDuration":2,"description":"Veilwyrm sweeps forward in a spiral of spectral ribs and grave-light, wrapping the target in a drifting funeral haze that can pull them into unnatural slumber.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"reaping_shackle":{"name":"Reaping Shackle","element":"Nature","style":"Heavy","power":64,"accuracy":94,"status":"Slow","statusChance":25,"statusDuration":3,"description":"Harrowjack lashes a dragging chain around the target and yanks them through thorny straw and splintered roots. The binding can leave the victim struggling to move.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"phantom_stride":{"name":"Phantom Stride","element":"Shadow","style":"Standard","power":58,"accuracy":98,"status":"None","statusChance":0,"statusDuration":0,"evadeNext":10,"description":"Marrowstride slips through a spectral feint. After the strike lands, Stride Veil grants a flat 10% chance to evade the next incoming attack.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"gallows_charge":{"name":"Gallows Charge","element":"Shadow","style":"Heavy","power":67,"accuracy":94,"status":"Guard Break","statusChance":20,"statusDuration":3,"description":"Grimreign surges forward with its floating skull pulling the armored body after it, chains snapping through funeral flame as the impact tears open defenses.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"wickmare_howl":{"name":"Wickmare Howl","element":"Spirit","style":"Heavy","power":62,"accuracy":95,"status":"Sleep","statusChance":20,"statusDuration":2,"description":"Wickmare throws back its caged spectral skull and releases a grave-born howl that rolls through the target in lantern-fire and can drag it into cursed sleep.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"doom_procession":{"name":"Doom Procession","element":"Void","style":"Heavy","power":74,"accuracy":93,"status":"Guard Break","statusChance":25,"statusDuration":3,"lifeSteal":10,"description":"Cerbereign advances like an oncoming funeral apocalypse. Three spectral maws tear through the target as the charge fractures defenses and siphons a trace of the damage dealt.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"snow_boulder":{"name":"Snow Boulder","element":"Ice","style":"Heavy","power":65,"accuracy":92,"status":"Freeze","statusChance":10,"statusDuration":4,"description":"Bouldrift packs snow and ice into a massive frozen boulder and hurls it with crushing force.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"ornament_bomb":{"name":"Ornament Bomb","element":"Nature","style":"Heavy","power":72,"accuracy":90,"status":"Guard Break","statusChance":15,"statusDuration":3,"description":"Yulemaw hurls an overstuffed ornament that bursts into a violent spray of festive shards, cracking the target’s defenses.","scrollEnabled":false,"scrollPrice":0,"builtin":true},"deadwinter_charge":{"name":"Deadwinter Charge","element":"Ice","style":"Standard","power":62,"accuracy":96,"status":"Freeze","statusChance":10,"statusDuration":4,"description":"Briarhart’s red nose flares through the snowfall before it lunges from the thicket in a sudden antler-and-crystal charge.","scrollEnabled":false,"scrollPrice":0,"builtin":true}};
 const SEED_MONSTERS = [{"id": "m001", "slug": "razebite", "level": 14, "gender": "Male", "potential": 5, "trait": "Quickclaw", "nickname": "", "attacks": ["rift_claw"]}, {"id": "m002", "slug": "moltcrag", "level": 9, "gender": "Female", "potential": 4, "trait": "Stoneblood", "nickname": "", "attacks": ["magma_ram"]}, {"id": "m003", "slug": "sludgewart", "level": 11, "gender": "Male", "potential": 3, "trait": "Caustic Hide", "nickname": "", "attacks": ["caustic_belch"]}, {"id": "m004", "slug": "voltalon", "level": 13, "gender": "Female", "potential": 6, "trait": "Static Rush", "nickname": "", "attacks": ["thunder_dive"]}, {"id": "m005", "slug": "velvetrend", "level": 16, "gender": "Female", "potential": 7, "trait": "Softstep", "nickname": "", "attacks": ["velvet_rend"]}, {"id": "m006", "slug": "bloomreign", "level": 12, "gender": "Male", "potential": 5, "trait": "Petal Edge", "nickname": "", "attacks": ["petal_guillotine"]}, {"id": "m007", "slug": "umbracoil", "level": 10, "gender": "Male", "potential": 4, "trait": "Deep Lure", "nickname": "", "attacks": ["abyss_coil"]}, {"id": "m008", "slug": "thornjack", "level": 8, "gender": "Female", "potential": 2, "trait": "Briarstep", "nickname": "", "attacks": ["briar_impale"]}, {"id": "m009", "slug": "frostmaw", "level": 15, "gender": "Male", "potential": 8, "trait": "Coldfront", "nickname": "", "attacks": ["polar_bite"]}, {"id": "m010", "slug": "bellgrave", "level": 7, "gender": "Intersex", "potential": 3, "trait": "Resonance", "nickname": "", "attacks": ["toll_of_dread"]}, {"id": "m011", "slug": "gravemire", "level": 6, "gender": "Female", "potential": 5, "trait": "Gravewall", "nickname": "", "attacks": ["crypt_crusher"]}, {"id": "m012", "slug": "ripsilk", "level": 12, "gender": "Male", "potential": 6, "trait": "Razorweave", "nickname": "", "attacks": ["razor_thread"]}];
 // Trial-exclusive attacks can live in the normal Attack registry while remaining unavailable in the Shop.
 BUILTIN_ATTACKS.nature_beam={name:"Nature Beam",element:"Nature",style:"Heavy",power:90,accuracy:95,status:"Stun",statusChance:15,statusDuration:1,description:"A concentrated beam of verdant energy. Its impact can briefly stun the target.",scrollEnabled:false,scrollPrice:0,builtin:true,trialExclusive:true};
@@ -1041,7 +1081,7 @@ const TYPE_STRONG_MULTIPLIER=1.5;
 const TYPE_RESIST_MULTIPLIER=2/3;
 const TYPE_MIN_MULTIPLIER=.5;
 const TYPE_MAX_MULTIPLIER=2;
-const OBTAIN_METHODS = ["Random Battle Reward", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Event / Promo", "Admin / Test"];
+const OBTAIN_METHODS = ["Random Battle Reward", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Admin / Test"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
 const INTERSEX_HATCH_CHANCE = 0.05;
@@ -1179,6 +1219,7 @@ const SPRITE_DEFS={
   spider_silk_bundle:{name:'Spider Silk Bundle',category:'Halloween Event',kind:'image',fallback:'assets/icons/basic_sprites/spider_silk_bundle.png'},
   cracked_monster_tooth:{name:'Cracked Monster Tooth',category:'Halloween Event',kind:'image',fallback:'assets/icons/basic_sprites/cracked_monster_tooth.png'},
   winter_event:{name:'Winter Event',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/winter_event.png'},
+  winter_snowflake:{name:'Snowflakes',category:'Winter Event',kind:'glyph',fallback:'❄️'},
   spring_event:{name:'Spring Event',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/spring_event.png'},
   event_currency_generic:{name:'Generic Event Currency',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/event_currency_generic.png'},
   incubator:{name:'Incubator',category:'Facilities',kind:'image',fallback:'assets/icons/basic_sprites/incubator.png'},
@@ -1239,6 +1280,10 @@ function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
 
 const FAINT_DURATION_MS=3*60*1000;
 const WILD_MONSTER_REWARD_CHANCE=.15;
+const CAPTURE_POD_BONUS=.20;
+const CAPTURE_POD_DURATION_MS=20*60*1000;
+const REFRESH_JUICE_COOLDOWN_MS=60*60*1000;
+const DNA_SPLICE_BONUS=15;
 const EXPLORE_RATES={battle:.60,field:.19,currency:.08,item:.08,egg:.05};
 
 // ---------- Daily Expeditions ----------
@@ -1282,9 +1327,24 @@ const EVENT_DEFS={
       {id:'halloween_crimson_siphon_scroll',name:'Crimson Siphon Scroll',category:'Halloween Attack Scroll',cost:150,limit:null,description:'Teach any monster the Shadow technique Crimson Siphon. It restores 50% of the damage actually dealt as Vitality.',reward:{type:'scroll',id:'crimson_siphon',qty:1}}
     ]
   },
-  winter_event_2026:{id:'winter_event_2026',family:'winter_event',name:'Winter Event',icon:'❄️',spriteKey:'winter_event',available:false,start:'2026-12-01T00:00:00',end:'2027-01-03T00:00:00',description:'Planning slot for the next seasonal event.',currency:{name:'Event Currency',icon:'◆',spriteKey:'event_currency_generic'},activity:null,shop:[]},
+  winter_event_2026:{id:'winter_event_2026',family:'winter_event',name:'Winter Event',icon:'❄️',spriteKey:'winter_event',available:true,start:'2026-12-01T00:00:00',end:'2027-01-03T00:00:00',description:'Winter has settled over Prismwild. Open daily gifts, match frosty monster pairs, gather Snowflakes, and trade them for seasonal rewards.',currency:{name:'Snowflakes',icon:'❄️',spriteKey:'winter_snowflake'},calendar:{days:25,start:'2026-12-01'},activity:{type:'memory',name:'Winter Memory',size:4,pairReward:2,maxFails:3,failCooldownMs:180000,clearCooldownMs:3600000,memorySpecies:['frostmaw','shardback','morrowisp','bellgrave','aurevane','tideveil','hexolith','voltalon'],mysteryEggPool:['yulemaw'],mysteryEggLabel:'Winter Mystery Egg'},shop:[]},
   spring_event_2027:{id:'spring_event_2027',family:'spring_event',name:'Spring Event',icon:'🌱',spriteKey:'spring_event',available:false,start:'2027-04-01T00:00:00',end:'2027-05-01T00:00:00',description:'Planning slot for a future event.',currency:{name:'Event Currency',icon:'◆',spriteKey:'event_currency_generic'},activity:null,shop:[]}
 };
+
+const DEFAULT_EVENT_CALENDARS={
+  winter_event_2026:{start:'2026-12-01',days:25,catchUp:true,entries:{1:{type:'eventCurrency',amount:50}}}
+};
+function cloneEventCalendars(){return JSON.parse(JSON.stringify(DEFAULT_EVENT_CALENDARS));}
+function normalizeEventCalendars(){
+  const defaults=cloneEventCalendars(),saved=state.eventCalendars&&typeof state.eventCalendars==='object'?state.eventCalendars:{};
+  state.eventCalendars={...defaults,...saved};
+  for(const [eventId,base] of Object.entries(defaults)){
+    const cur=state.eventCalendars[eventId]&&typeof state.eventCalendars[eventId]==='object'?state.eventCalendars[eventId]:{};
+    cur.start=String(cur.start||base.start);const maxDays=Math.max(1,Number(base.days||31));cur.days=Math.max(1,Math.min(maxDays,Number(cur.days||base.days||maxDays)));cur.catchUp=cur.catchUp!==false;cur.entries=cur.entries&&typeof cur.entries==='object'?cur.entries:{};
+    for(const key of Object.keys(cur.entries)){const day=Number(key);if(!Number.isFinite(day)||day<1||day>cur.days)delete cur.entries[key];}
+    state.eventCalendars[eventId]=cur;
+  }
+}
 
 const DEFAULT_LANDING_FEED={
   news:[
@@ -1300,7 +1360,7 @@ function cloneLandingFeed(){return JSON.parse(JSON.stringify(DEFAULT_LANDING_FEE
 function normalizeLandingFeed(){
   const base=cloneLandingFeed(),src=state.landingFeed&&typeof state.landingFeed==='object'?state.landingFeed:{};
   state.landingFeed={news:Array.isArray(src.news)?src.news:base.news,announcements:Array.isArray(src.announcements)?src.announcements:base.announcements};
-  for(const key of ['news','announcements'])state.landingFeed[key]=state.landingFeed[key].map((entry,i)=>({id:String(entry?.id||`${key}-${Date.now()}-${i}`),date:String(entry?.date||''),title:String(entry?.title||'Untitled').slice(0,80),body:String(entry?.body||'').slice(0,600)}));
+  for(const key of ['news','announcements'])state.landingFeed[key]=state.landingFeed[key].map((entry,i)=>({id:String(entry?.id||`${key}-${Date.now()}-${i}`),date:String(entry?.date||''),title:String(entry?.title||'Untitled').slice(0,80),body:String(entry?.body||'').slice(0,5000)}));
 }
 
 const SILVERWIND_EVENT_CURRENCY_GIFT=5;
@@ -1334,7 +1394,7 @@ const BUILTIN_SILVERWIND_DIALOGUE={
     ],
     winter_event_2026:[
       {text:`The winter air has that strange Prismwild sparkle to it. I'm keeping a warm drink near the archive before the frost starts filing paperwork too.`,eventGift:false},
-      {text:`Winter event day! Take five event tokens from me. I refuse to let you face seasonal shopping with empty pockets.`,eventGift:true}
+      {text:`Winter event day! Take five Snowflakes from me. I refuse to let you face seasonal shopping with empty pockets.`,eventGift:true}
     ],
     spring_event_2027:[
       {text:`Something new is sprouting all over the wilds. Some of it is probably harmless. The word probably is doing important work there.`,eventGift:false},
@@ -1387,6 +1447,13 @@ const ITEM_SHOP = [
   {id:'revive_gem',name:'Revive Gem',category:'Recovery',price:500,icon:'prismatic_shard',desc:'Immediately revives a fainted monster and clears its recovery timer.'},
   {id:'incu_catalyst',name:'Incubation Catalyst',category:'Consumable',price:300,icon:'incubation_catalyst',desc:'Use once on an incubating egg to reduce its remaining hatch time by 30 minutes.'},
   {id:'hormone_catalyst',name:'Hormone Catalyst',category:'Breeding Consumable',price:750,spriteKey:'hormone_catalyst',iconImage:'assets/icons/basic_sprites/hormone_catalyst.png',desc:'Use once on an active breeding pen to reduce its remaining breeding time by 30 minutes.'},
+  {id:'refresh_juice',name:'Refresh Juice',category:'Event Consumable',price:1000,icon:'recovery_gel',desc:'Usable once per hour. Halloween: instantly restores 5 Haunted Maze Steps. Winter: immediately clears a failed-match Memory lockout. It cannot clear the one-hour completion cooldown.'},
+  {id:'capture_pod',name:'Capture Pod',category:'Exploration Consumable',price:2500,icon:'mystery_capsule',desc:'Activates a 20-minute field signal that adds 20 percentage points to the recruit chance of defeated capturable monsters.'},
+  {id:'nature_disc',name:'Nature Disc',category:'Monster Tuning',price:5000,icon:'trait_charm',desc:'Rerolls one monster’s Trait. Each individual monster may use one Nature Disc per local calendar day.'},
+  {id:'dna_splicer_hp',name:'DNA Splicer • Vitality',category:'DNA Splicer',price:50000,icon:'greater_potential_injector',dnaStat:'hp',desc:'Permanently adds +15 Vitality to one monster. A monster can receive only ONE DNA Splicer total.'},
+  {id:'dna_splicer_attack',name:'DNA Splicer • Attack',category:'DNA Splicer',price:50000,icon:'greater_potential_injector',dnaStat:'attack',desc:'Permanently adds +15 Attack to one monster. A monster can receive only ONE DNA Splicer total.'},
+  {id:'dna_splicer_armor',name:'DNA Splicer • Armor',category:'DNA Splicer',price:50000,icon:'greater_potential_injector',dnaStat:'armor',desc:'Permanently adds +15 Armor to one monster. A monster can receive only ONE DNA Splicer total.'},
+  {id:'dna_splicer_speed',name:'DNA Splicer • Speed',category:'DNA Splicer',price:50000,icon:'greater_potential_injector',dnaStat:'speed',desc:'Permanently adds +15 Speed to one monster. A monster can receive only ONE DNA Splicer total.'},
   ...[2,3,4,5,6,7,8,9,10,11,12].map((p,i)=>({
     id:`injector_p${p}`,name:`Potential Injector P${p}`,category:'Potential Injector',
     price:[500,900,1500,2500,4000,6500,10000,16000,25000,40000,75000][i],
@@ -1510,11 +1577,13 @@ function defaultState(){
     accountLevel:1,accountXp:0,
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
+    blackMarket:null,
+    itemCooldowns:{refreshJuiceUntil:0},buffs:{capturePodUntil:0},
     expeditions:{slots:{},lastMessage:''},
     liveContentRevision:'',liveContentManifest:{},
     landingFeed:cloneLandingFeed(),
     silverwindDialogue:cloneSilverwindDialogue(),
-    eventWallets:{},eventStates:{},eventOverrides:{},discoveredSpecies:[],
+    eventWallets:{},eventStates:{},eventOverrides:{},eventTestDays:{},eventCalendars:cloneEventCalendars(),discoveredSpecies:[],
     chaosWeekKey:null,chaosElements:[],
     unlockedIncubators:1,incubators:Array.from({length:5},(_,i)=>({slot:i,eggId:null,finishAt:null})),
     nextMonsterNum:1,nextEggNum:1
@@ -1641,7 +1710,8 @@ function normalizeState(){
     if(sp.obtain==='Halloween Shop Egg'||sp.obtain==='Halloween Shop')sp.obtain='Halloween Event Shop Egg';
     if(!OBTAIN_METHODS.includes(sp.obtain))sp.obtain=sp.isCrossbreed?'Breeding Only':'Random Battle Reward';
     if(!Number.isFinite(Number(sp.shopPrice)))sp.shopPrice=1000;
-    if(!sp.isCrossbreed)sp.secondaryElement='';
+    if(!sp.isCrossbreed){sp.secondaryElement='';delete sp.seasonalEventFamily;}
+    if(sp.seasonalEventFamily&&!['spooky_halloween','winter_event'].includes(sp.seasonalEventFamily))sp.seasonalEventFamily='';
     if(sp.isCrossbreed && sp.secondaryElement===sp.element)sp.secondaryElement='';
     if(sp.isCrossbreed)sp.obtain='Breeding Only';
     sp.nativeFacing=sp.nativeFacing==='left'?'left':'right';
@@ -1655,6 +1725,12 @@ function normalizeState(){
     const mournwick=state.species.mournwick;
     if(mournwick?.obtain==='Halloween Event Shop Egg'&&Number(mournwick.shopPrice||0)===1000)mournwick.shopPrice=75;
     state.migrations.halloweenSpeciesShopV01517=true;
+  }
+  if(!state.migrations.winterSpeciesV01532){
+    if(state.species.briarhart)state.species.briarhart.seasonalEventFamily='winter_event';
+    if(state.species.bouldrift){state.species.bouldrift.obtain='Winter Event Shop Egg';state.species.bouldrift.shopPrice=120;}
+    if(state.species.yulemaw)state.species.yulemaw.obtain='Winter Mystery Egg';
+    state.migrations.winterSpeciesV01532=true;
   }
   for(const [id,attack] of Object.entries(BUILTIN_ATTACKS)){
     state.attacks[id]={...attack,...(state.attacks[id]||{}),builtin:true};
@@ -1721,10 +1797,21 @@ function normalizeState(){
   state.accountLevel=Math.max(1,Number(state.accountLevel||1));
   state.accountXp=Math.max(0,Number(state.accountXp||0));
   state.accountStats={requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0,...(state.accountStats||{})};
+  state.itemCooldowns={refreshJuiceUntil:0,...(state.itemCooldowns||{})};
+  state.itemCooldowns.refreshJuiceUntil=Math.max(0,Number(state.itemCooldowns.refreshJuiceUntil||0));
+  state.buffs={capturePodUntil:0,...(state.buffs||{})};
+  state.buffs.capturePodUntil=Math.max(0,Number(state.buffs.capturePodUntil||0));
+  for(const mon of state.monsters){
+    mon.natureDiscDate=String(mon.natureDiscDate||'');
+    if(mon.dnaSplice&&typeof mon.dnaSplice==='object'){const stat=['hp','attack','armor','speed'].includes(mon.dnaSplice.stat)?mon.dnaSplice.stat:'';mon.dnaSplice=stat?{stat,amount:DNA_SPLICE_BONUS,usedAt:Number(mon.dnaSplice.usedAt||0)}:null;}
+    else mon.dnaSplice=null;
+  }
   normalizeSilverwindDialogue();
   state.eventWallets=state.eventWallets||{};
   state.eventStates=state.eventStates||{};
   state.eventOverrides=state.eventOverrides||{};
+  state.eventTestDays=state.eventTestDays||{};
+  normalizeEventCalendars();
   state.discoveredSpecies=Array.isArray(state.discoveredSpecies)?state.discoveredSpecies:[];
   for(const mon of state.monsters){if(mon?.slug&&!state.discoveredSpecies.includes(mon.slug))state.discoveredSpecies.push(mon.slug);}
   for(const def of Object.values(EVENT_DEFS))ensureEventState(def);
@@ -1734,6 +1821,14 @@ function normalizeState(){
   ensureDailyExpeditions();
   if(!state.activeMonsterId || !state.monsters.some(m=>m.id===state.activeMonsterId)){
     state.activeMonsterId=state.monsters[0]?.id||null;
+  }
+}
+function applyBuildMigrations(){
+  state.migrations=state.migrations||{};
+  if(!state.migrations.winterCalendarSnowflakesV01534){
+    normalizeEventCalendars();
+    const winterCal=state.eventCalendars?.winter_event_2026;if(winterCal)winterCal.entries[1]={type:'eventCurrency',amount:50};
+    state.migrations.winterCalendarSnowflakesV01534=true;
   }
 }
 let state=load();
@@ -1857,9 +1952,9 @@ function speciesDiscovered(slug){return (state.discoveredSpecies||[]).includes(s
 function eventStateFor(def){
   if(!def)return null;
   if(!state.eventWallets[def.family])state.eventWallets[def.family]={currency:0};
-  if(!state.eventStates[def.id])state.eventStates[def.id]={purchases:{},finds:{},maze:null,steps:def.activity?.startSteps||0,stepUpdatedAt:Date.now(),escapes:0,lastMessage:''};
+  if(!state.eventStates[def.id])state.eventStates[def.id]={purchases:{},finds:{},maze:null,memory:null,calendarClaims:{},steps:def.activity?.startSteps||0,stepUpdatedAt:Date.now(),escapes:0,lastMessage:''};
   const es=state.eventStates[def.id];
-  es.purchases=es.purchases||{};es.finds=es.finds||{};
+  es.purchases=es.purchases||{};es.finds=es.finds||{};es.calendarClaims=es.calendarClaims||{};
   es.steps=Math.max(0,Number(es.steps??def.activity?.startSteps??0));
   es.stepUpdatedAt=Number(es.stepUpdatedAt||Date.now());
   es.escapes=Math.max(0,Number(es.escapes||0));
@@ -1883,7 +1978,7 @@ function eventIsActive(def,now=new Date()){
   if(override==='inactive')return false;
   return eventDateStatus(def,now)==='active';
 }
-function activeEvent(){return Object.values(EVENT_DEFS).find(def=>eventIsActive(def))||null;}
+function activeEvent(){const defs=Object.values(EVENT_DEFS);return defs.find(def=>def.available&&eventOverride(def)==='active')||defs.find(def=>eventIsActive(def))||null;}
 function eventStatusLabel(def){
   const override=eventOverride(def);
   if(override==='active')return 'ACTIVE • ADMIN OVERRIDE';
@@ -1963,6 +2058,125 @@ function eventRewardSpriteMarkup(item,className='event-shop-icon-sprite'){
   }
   return iconMarkup('mystery_capsule',`sheet-icon ${className}`);
 }
+function eventDailyCalendar(def){return state.eventCalendars?.[def?.id]||null;}
+function eventCalendarDay(def){
+  const cfg=eventDailyCalendar(def);if(!cfg)return 0;
+  const test=Math.max(0,Number(state.eventTestDays?.[def.id]||0));if(test)return Math.min(cfg.days,test);
+  const start=new Date(`${cfg.start}T00:00:00`),now=new Date();
+  const day=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()-new Date(start.getFullYear(),start.getMonth(),start.getDate()).getTime())/86400000)+1;
+  if(eventOverride(def)==='active'&&day<1)return 1;
+  return Math.max(0,Math.min(cfg.days,day));
+}
+function calendarRewardLabel(reward,def=null){
+  if(!reward)return 'Prize not configured';
+  if(reward.type==='money')return `${money(Number(reward.amount||0))} currency`;
+  if(reward.type==='eventCurrency')return `${Math.max(0,Number(reward.amount||0))} ${def?.currency?.name||'Event Currency'}`;
+  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return `${item?.name||reward.id} ×${Math.max(1,Number(reward.qty||1))}`;}
+  if(reward.type==='egg')return `${state.species[reward.slug]?.name||reward.slug} Egg`;
+  if(reward.type==='monster')return `${state.species[reward.slug]?.name||reward.slug} monster`;
+  return 'Event prize';
+}
+function calendarRewardIcon(reward,def=null){
+  if(!reward)return '◇';
+  if(reward.type==='money')return iconMarkup('currency','sheet-icon event-calendar-reward-icon');
+  if(reward.type==='eventCurrency')return eventCurrencySpriteMarkup(def||activeEvent()||EVENT_DEFS.winter_event_2026,'event-calendar-reward-icon');
+  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return item?.spriteKey?glyphSpriteMarkup(item.spriteKey,'◆','event-calendar-reward-icon'):iconMarkup(item?.icon||'mystery_capsule','sheet-icon event-calendar-reward-icon');}
+  if(reward.type==='egg')return iconMarkup('egg_generic','sheet-icon event-calendar-reward-icon');
+  if(reward.type==='monster')return '◆';
+  return '◇';
+}
+function grantEventCalendarReward(def,reward){
+  if(!reward)return {ok:false,label:'No prize configured'};
+  if(reward.type==='money'){const amount=Math.max(0,Number(reward.amount||0));state.currency+=amount;return {ok:true,label:`${money(amount)} currency`};}
+  if(reward.type==='eventCurrency'){const amount=Math.max(0,Number(reward.amount||0));addEventCurrency(def,amount);return {ok:true,label:`${amount} ${def.currency.name}`};}
+  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);if(!item)return {ok:false,label:'Missing item'};const qty=Math.max(1,Number(reward.qty||1));state.inventory[reward.id]=(state.inventory[reward.id]||0)+qty;return {ok:true,label:`${item.name} ×${qty}`};}
+  if(reward.type==='egg'){
+    const sp=state.species[reward.slug];if(!sp)return {ok:false,label:'Missing egg species'};const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug:reward.slug,speciesName:sp.name,displayName:`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-calendar:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {ok:true,label:`${sp.name} Egg`};
+  }
+  if(reward.type==='monster'){
+    const sp=state.species[reward.slug];if(!sp)return {ok:false,label:'Missing monster species'};if(!collectionHasOpenSlot())return {ok:false,label:'No open Collection Pen slot'};
+    const id=uid('M',state.nextMonsterNum++),mon={id,slug:reward.slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:false,faintedUntil:0,parents:null,eventReward:def.id};
+    state.monsters.push(mon);placeMonsterInCollection(id);if(!state.discoveredSpecies.includes(reward.slug))state.discoveredSpecies.push(reward.slug);return {ok:true,label:sp.name};
+  }
+  return {ok:false,label:'Unsupported event prize'};
+}
+function claimEventCalendarDay(eventId,day){
+  const def=EVENT_DEFS[eventId],cfg=eventDailyCalendar(def),es=eventStateFor(def);day=Number(day);if(!def||!cfg||!eventIsActive(def))return;
+  const reward=cfg.entries?.[day];if(!reward||es.calendarClaims[day])return;
+  const current=eventCalendarDay(def),unlocked=cfg.catchUp?day<=current:day===current;if(!unlocked)return;
+  const result=grantEventCalendarReward(def,reward);if(!result.ok){alert(result.label);return;}
+  es.calendarClaims[day]={claimedAt:Date.now(),label:result.label};es.lastMessage=`Winter Calendar Day ${day}: received ${result.label}.`;save();renderAll();
+}
+function renderDailyEventCalendar(def){
+  const cfg=eventDailyCalendar(def);if(!cfg)return '';
+  const es=eventStateFor(def),current=eventCalendarDay(def);
+  const cells=Array.from({length:cfg.days},(_,i)=>i+1).map(day=>{
+    const reward=cfg.entries?.[day],claimed=!!es.calendarClaims?.[day],unlocked=eventIsActive(def)&&(cfg.catchUp?day<=current:day===current),future=day>current;
+    const cls=['event-day-tile',claimed?'claimed':'',unlocked&&reward&&!claimed?'claimable':'',future?'future':'',!reward?'unconfigured':''].filter(Boolean).join(' ');
+    return `<button class="${cls}" type="button" data-event-calendar-claim="${day}" ${!unlocked||!reward||claimed?'disabled':''}><span class="event-day-number">Day ${day}</span><span class="event-day-prize">${calendarRewardIcon(reward,def)}<small>${claimed?'CLAIMED':calendarRewardLabel(reward,def)}</small></span></button>`;
+  }).join('');
+  return `<section class="event-daily-calendar"><div class="event-section-heading"><div><div class="eyebrow">DAILY GIFTS</div><h3>Winter Gift Calendar</h3><p>${cfg.catchUp?'Unlocked days remain claimable until the event ends.':'Only today’s gift can be claimed.'}</p></div><div class="calendar-day-marker"><span>Current Day</span><strong>${current||'—'} / ${cfg.days}</strong></div></div><div class="event-day-grid">${cells}</div></section>`;
+}
+function memorySpeciesPool(def){
+  const configured=(def?.activity?.memorySpecies||[]).filter(slug=>state.species[slug]),seen=new Set(configured),pool=[...configured];
+  for(const [slug,sp] of Object.entries(state.species)){if(pool.length>=8)break;if(seen.has(slug)||sp.isCrossbreed)continue;seen.add(slug);pool.push(slug);}
+  return pool.slice(0,8);
+}
+function freshMemoryBoard(def){const pool=memorySpeciesPool(def);if(pool.length<8)return {board:[],matched:[],open:[],fails:0,cooldownUntil:0,cooldownReason:'',completed:false,message:'Not enough registered species to build a 4×4 board.'};return {board:shuffleCopy(pool.flatMap(slug=>[slug,slug])),matched:[],open:[],fails:0,cooldownUntil:0,cooldownReason:'',completed:false,message:'Find all eight matching monster pairs.'};}
+function ensureMemoryGame(def){
+  const es=eventStateFor(def),a=def?.activity;if(!a||a.type!=='memory')return null;
+  if(!es.memory||!Array.isArray(es.memory.board))es.memory=freshMemoryBoard(def);
+  if(Number(es.memory.cooldownUntil||0)>0&&Date.now()>=Number(es.memory.cooldownUntil||0))es.memory=freshMemoryBoard(def);
+  es.memory.matched=Array.isArray(es.memory.matched)?es.memory.matched:[];es.memory.open=Array.isArray(es.memory.open)?es.memory.open:[];es.memory.fails=Math.max(0,Number(es.memory.fails||0));
+  return es.memory;
+}
+function memoryCooldownText(memory){const ms=Math.max(0,Number(memory?.cooldownUntil||0)-Date.now());if(!ms)return '';const min=Math.floor(ms/60000),sec=Math.floor((ms%60000)/1000);return `${min}:${String(sec).padStart(2,'0')}`;}
+function winterMysteryEggSpecies(def){
+  const pool=[],seen=new Set();
+  for(const slug of def?.activity?.mysteryEggPool||[]){if(state.species[slug]&&!seen.has(slug)){seen.add(slug);pool.push(slug);}}
+  for(const [slug,sp] of Object.entries(state.species)){if(sp.obtain==='Winter Mystery Egg'&&!sp.isCrossbreed&&!seen.has(slug)){seen.add(slug);pool.push(slug);}}
+  return pool;
+}
+function grantWinterMysteryEgg(def){
+  let pool=winterMysteryEggSpecies(def);if(!pool.length)pool=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed).map(([slug])=>slug);if(!pool.length)return null;
+  const slug=randomChoice(pool),sp=state.species[slug],id=uid('E',state.nextEggNum++),label=def.activity?.mysteryEggLabel||'Winter Mystery Egg';state.eggs.push({id,slug,speciesName:sp.name,displayName:label,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-memory:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {id,slug,name:sp.name,label};
+}
+function resetEventMemory(def,message='A fresh board has been shuffled.') {const es=eventStateFor(def);es.memory=freshMemoryBoard(def);es.memory.message=message;}
+function flipEventMemoryCard(eventId,index){
+  const def=EVENT_DEFS[eventId],a=def?.activity,m=ensureMemoryGame(def);index=Number(index);if(!def||a?.type!=='memory'||!m||Date.now()<Number(m.cooldownUntil||0)||m.completed||m.open.length>=2||m.matched.includes(index)||m.open.includes(index)||!m.board[index])return;
+  m.open.push(index);if(m.open.length<2){save();renderAll();return;}renderAll();
+  const [first,second]=m.open,matched=m.board[first]===m.board[second];
+  setTimeout(()=>{
+    const live=ensureMemoryGame(def);if(!live||live.open[0]!==first||live.open[1]!==second)return;
+    if(matched){
+      live.matched.push(first,second);live.open=[];const reward=Math.max(0,Number(a.pairReward||0));if(reward)addEventCurrency(def,reward);live.message=`Pair matched! +${reward} ${def.currency.name}.`;
+      if(live.matched.length>=live.board.length){const egg=grantWinterMysteryEgg(def);live.completed=true;live.cooldownReason='complete';live.cooldownUntil=Date.now()+Math.max(1000,Number(a.clearCooldownMs||3600000));live.message=`Board complete! ${egg?`${egg.label} added to your Eggs.`:'Mystery Egg reward could not be created.'} A new board unlocks in one hour.`;}
+    }else{
+      live.open=[];live.fails++;const max=Math.max(1,Number(a.maxFails||3));if(live.fails>=max){live.cooldownReason='fails';live.cooldownUntil=Date.now()+Math.max(1000,Number(a.failCooldownMs||180000));live.message=`Three failed matches. The board is frozen for ${Math.max(1,Math.round(Number(a.failCooldownMs||180000)/60000))} minutes.`;}else live.message=`Not a match. ${max-live.fails} failed match${max-live.fails===1?'':'es'} remaining.`;
+    }
+    save();renderAll();
+  },650);
+}
+async function renderMemoryEventPage(host,def){
+  const es=eventStateFor(def),a=def.activity,m=ensureMemoryGame(def),cooling=Date.now()<Number(m.cooldownUntil||0),matched=new Set(m.matched||[]),open=new Set(m.open||[]);
+  const cards=(m.board||[]).map((slug,i)=>{const face=matched.has(i)||open.has(i);return `<button class="memory-card ${face?'face-up':''} ${matched.has(i)?'matched':''}" type="button" data-memory-card="${i}" ${cooling||m.completed||matched.has(i)?'disabled':''}><span class="memory-card-back">❄</span><span class="memory-card-face"><img data-memory-slug="${slug}" alt="${state.species[slug]?.name||'Monster'}"><small>${state.species[slug]?.name||slug}</small></span></button>`;}).join('');
+  const failPips=Array.from({length:Math.max(1,Number(a.maxFails||3))},(_,i)=>`<span class="memory-fail-pip ${i<m.fails?'spent':''}">✕</span>`).join('');
+  const shopItems=eventShopItems(def);
+  const shop=(await Promise.all(shopItems.map(async item=>{const bought=Number(es.purchases[item.id]||0),limitText=item.limit?`${bought}/${item.limit} purchased`:'Unlimited',sold=item.limit&&bought>=item.limit,afford=eventCurrency(def)>=item.cost,visual=await eventShopRewardVisual(item);return `<div class="event-shop-card"><div class="event-shop-icon">${visual}</div><span class="shop-category">${item.category}</span><h4>${item.name}</h4><p>${item.description}</p><div class="event-shop-bottom"><span class="event-price">${eventCurrencySpriteMarkup(def,'event-currency-inline')} <strong>${item.cost}</strong></span><small>${limitText}</small><button data-event-buy="${item.id}" class="primary small" type="button" ${sold||!afford?'disabled':''}>${sold?'Sold Out':'Buy'}</button></div></div>`;}))).join('');
+  const mysteryCount=winterMysteryEggSpecies(def).length;
+  host.innerHTML=`<div class="event-hero winter-event-hero"><div><div class="eyebrow event-eyebrow">ACTIVE EVENT • ${glyphSpriteMarkup(def.spriteKey||'winter_event',def.icon||'❄️','event-title-sprite')}</div><h2>${def.name}</h2><p>${def.description}</p><div class="event-countdown" id="eventCountdown">${eventCountdown(def)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(def,'event-wallet-sprite')}</span><div><small>${def.currency.name}</small><strong>${eventCurrency(def)}</strong></div></div></div>
+    ${renderDailyEventCalendar(def)}
+    <div class="event-columns winter-memory-layout"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT MINI-GAME</div><h3>${a.name}</h3><p>Match all eight monster pairs. Each pair earns ${a.pairReward} ${def.currency.name}; three misses trigger a 3-minute cooldown.</p></div><div class="memory-fail-bank"><span>Failed Matches</span><div>${failPips}</div><small>${m.fails} / ${a.maxFails}</small></div></div>
+      <div class="memory-board-wrap"><div class="memory-board">${cards}</div>${cooling?`<div class="memory-cooldown"><strong>${m.cooldownReason==='complete'?'Board Complete':'Board Frozen'}</strong><span>${memoryCooldownText(m)}</span><small>${m.cooldownReason==='complete'?'A new set unlocks after the one-hour completion cooldown.':'A new set shuffles after the 3-minute cooldown.'}</small></div>`:''}</div>
+      <div class="memory-status"><strong>${m.completed?'WINTER SET COMPLETE':cooling?'COOLDOWN ACTIVE':'MATCH THE MONSTERS'}</strong><p>${m.message||'Find all eight matching monster pairs.'}</p></div>
+    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('egg_generic','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
+    <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">WINTER SHOP</div><h3>Snowflake Exchange</h3><p>Spend Snowflakes earned from Winter Memory and seasonal rewards on exclusive Winter stock.</p></div></div><div class="event-shop-grid">${shop||'<div class="event-dev-note">No Winter Shop stock is registered yet.</div>'}</div></section>`;
+  host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
+  host.querySelectorAll('[data-memory-card]').forEach(btn=>btn.addEventListener('click',()=>flipEventMemoryCard(def.id,Number(btn.dataset.memoryCard))));
+  host.querySelectorAll('[data-event-buy]').forEach(btn=>btn.addEventListener('click',()=>buyEventShopItem(def.id,btn.dataset.eventBuy)));
+  for(const img of host.querySelectorAll('img[data-memory-slug]'))await setMonsterImage(img,img.dataset.memorySlug,'base');
+  hydrateSprites(host);
+}
 function renderEventCalendarHTML(){
   return Object.values(EVENT_DEFS).sort((a,b)=>new Date(a.start)-new Date(b.start)).map(def=>`<div class="event-calendar-row"><div class="event-calendar-icon">${glyphSpriteMarkup(def.spriteKey||'event_currency_generic',def.icon||'◆','event-calendar-sprite')}</div><div><strong>${def.name}</strong><small>${formatEventDate(def.start)} – ${formatEventDate(def.end)}</small></div><span class="event-status ${eventIsActive(def)?'active':''}">${eventStatusLabel(def)}</span></div>`).join('');
 }
@@ -1980,17 +2194,19 @@ function eventShopRewardLabel(item){
 }
 function eventShopItems(def){
   const fixed=Array.isArray(def?.shop)?def.shop:[];
-  if(def?.family!=='spooky_halloween')return fixed;
+  const shopObtain=def?.family==='spooky_halloween'?'Halloween Event Shop Egg':def?.family==='winter_event'?'Winter Event Shop Egg':'';
+  if(!shopObtain)return fixed;
+  const eventLabel=def.family==='spooky_halloween'?'Halloween':'Winter';
   const speciesEggs=Object.entries(state.species)
-    .filter(([,sp])=>!sp.isCrossbreed&&sp.obtain==='Halloween Event Shop Egg')
+    .filter(([,sp])=>!sp.isCrossbreed&&sp.obtain===shopObtain)
     .sort((a,b)=>a[1].name.localeCompare(b[1].name))
     .map(([slug,sp])=>({
-      id:`halloween_species_egg_${slug}`,
+      id:`${def.family}_species_egg_${slug}`,
       name:`${sp.name} Egg`,
-      category:'Halloween Monster Egg',
+      category:`${eventLabel} Monster Egg`,
       cost:Math.max(0,Number(sp.shopPrice||0)),
       limit:null,
-      description:`A seasonal ${sp.name} egg sold through the Halloween Event Shop.`,
+      description:`A seasonal ${sp.name} egg sold through the ${eventLabel} Event Shop.`,
       reward:{type:'egg',slug,qty:1},
       speciesShopEgg:true
     }));
@@ -2007,6 +2223,7 @@ async function renderEventPage(){
   if(!active){
     host.innerHTML=`<div class="page-heading"><div class="eyebrow">SEASONAL EVENTS</div><h2>No active event</h2><p>The event framework is ready. Check the calendar for upcoming seasonal windows.</p></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Upcoming & past events</h3>${renderEventCalendarHTML()}</div>`;hydrateSprites(host);return;
   }
+  if(active.activity?.type==='memory'){await renderMemoryEventPage(host,active);return;}
   const es=eventStateFor(active);refreshMazeSteps(active);const maze=ensureMaze(active),a=active.activity,activeMon=activeMonster(),healthy=activeMon&&!isMonsterFainted(activeMon);
   const dirs=[['N','↑'],['W','←'],['S','↓'],['E','→']];
   const movement=dirs.map(([d,g])=>`<button class="maze-dir ${d}" data-maze-move="${d}" type="button" ${maze.completed||!healthy||es.steps<=0||!mazeCanMove(maze,d)?'disabled':''}>${g}</button>`).join('');
@@ -2092,8 +2309,29 @@ async function moveEventMaze(dir){
   }else es.lastMessage=randomChoice(['The corridor is empty, but the walls seem to breathe.','A cold draft curls around the next corner. Nothing else moves.','You hear distant footsteps. They stop when you stop.','Dust stirs across the floor. The path remains quiet.']);
   save();renderAll();
 }
+function renderEventCalendarAdminList(def){
+  const host=document.getElementById('eventCalendarAdminList'),cfg=eventDailyCalendar(def);if(!host||!cfg){if(host)host.innerHTML='';return;}
+  host.innerHTML=Array.from({length:cfg.days},(_,i)=>i+1).map(day=>{const r=cfg.entries?.[day];return `<button type="button" class="event-calendar-admin-row ${r?'configured':''}" data-calendar-edit-day="${day}"><strong>Day ${day}</strong><span>${calendarRewardLabel(r,def)}</span></button>`;}).join('');
+  host.querySelectorAll('[data-calendar-edit-day]').forEach(btn=>btn.addEventListener('click',()=>{document.getElementById('eventCalendarDay').value=btn.dataset.calendarEditDay;loadEventCalendarDayEditor(def,Number(btn.dataset.calendarEditDay));}));
+}
+function updateEventCalendarRewardFields(){
+  const type=document.getElementById('eventCalendarRewardType')?.value||'money';document.getElementById('eventCalendarItemWrap')?.classList.toggle('hidden',type!=='item');document.getElementById('eventCalendarSpeciesWrap')?.classList.toggle('hidden',!['egg','monster'].includes(type));
+  const amountWrap=document.getElementById('eventCalendarAmountWrap');if(amountWrap){amountWrap.classList.toggle('hidden',['egg','monster'].includes(type));const span=amountWrap.firstChild;if(span&&span.nodeType===Node.TEXT_NODE)span.textContent=type==='item'?'Quantity':'Amount';}
+}
+function loadEventCalendarDayEditor(def,day){
+  const cfg=eventDailyCalendar(def),r=cfg?.entries?.[day];if(!cfg)return;
+  document.getElementById('eventCalendarCatchUp').checked=cfg.catchUp!==false;document.getElementById('eventCalendarRewardType').value=r?.type||'money';document.getElementById('eventCalendarAmount').value=r?.type==='item'?Math.max(1,Number(r.qty||1)):Math.max(1,Number(r?.amount||100));
+  if(r?.id)document.getElementById('eventCalendarItem').value=r.id;if(r?.slug)document.getElementById('eventCalendarSpecies').value=r.slug;updateEventCalendarRewardFields();
+}
 function renderEventAdmin(){
-  const select=document.getElementById('eventAdminSelect');if(!select)return;const prev=select.value;select.innerHTML=Object.values(EVENT_DEFS).filter(x=>x.available).map(def=>`<option value="${def.id}">${def.name}</option>`).join('');if(prev&&EVENT_DEFS[prev])select.value=prev;const def=EVENT_DEFS[select.value]||Object.values(EVENT_DEFS).find(x=>x.available);if(def)document.getElementById('eventAdminOverride').value=eventOverride(def);
+  const select=document.getElementById('eventAdminSelect');if(!select)return;const prev=select.value;select.innerHTML=Object.values(EVENT_DEFS).filter(x=>x.available).map(def=>`<option value="${def.id}">${def.name}</option>`).join('');if(prev&&EVENT_DEFS[prev]?.available)select.value=prev;const def=EVENT_DEFS[select.value]||Object.values(EVENT_DEFS).find(x=>x.available);if(!def)return;
+  document.getElementById('eventAdminOverride').value=eventOverride(def);const eventCurrencyOption=document.querySelector('#eventCalendarRewardType option[value="eventCurrency"]');if(eventCurrencyOption)eventCurrencyOption.textContent=def.currency?.name||'Event Currency';const testDayInput=document.getElementById('eventAdminTestDay');testDayInput.value=Math.max(0,Number(state.eventTestDays?.[def.id]||0));
+  const currencyBtn=document.getElementById('eventGrantFangs');currencyBtn.textContent=`Grant 25 ${def.currency?.name||'Event Currency'}`;
+  const isMaze=def.activity?.type==='maze',isMemory=def.activity?.type==='memory';document.getElementById('eventGrantSteps').classList.toggle('hidden',!isMaze);document.getElementById('eventResetMaze').classList.toggle('hidden',!isMaze);document.getElementById('eventResetMemory').classList.toggle('hidden',!isMemory);document.getElementById('eventClearMemoryCooldown').classList.toggle('hidden',!isMemory);
+  const builder=document.getElementById('eventCalendarBuilder'),cfg=eventDailyCalendar(def);builder.classList.toggle('hidden',!cfg);testDayInput.max=cfg?cfg.days:62;if(Number(testDayInput.value)>Number(testDayInput.max))testDayInput.value=testDayInput.max;if(cfg){
+    document.getElementById('eventCalendarDay').max=cfg.days;document.getElementById('eventCalendarItem').innerHTML=ITEM_SHOP.map(item=>`<option value="${item.id}">${item.name}</option>`).join('');document.getElementById('eventCalendarSpecies').innerHTML=Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
+    const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));document.getElementById('eventCalendarDay').value=day;loadEventCalendarDayEditor(def,day);renderEventCalendarAdminList(def);
+  }
 }
 function accountXpToNext(level){return 100+(Math.max(1,Number(level||1))-1)*50;}
 function localDateKey(d=new Date()){
@@ -2119,6 +2357,93 @@ function ensureDailyRequests(){
   const picks=['easy','medium','hard'].map((difficulty,i)=>makeDailyRequest(shuffleCopy(REQUEST_TEMPLATES[difficulty])[0],difficulty,i,key));
   state.dailyRequests={dateKey:key,requests:picks,silverwind:makeSilverwindDailyRequest(key),bonusClaimed:false};
 }
+const BLACK_MARKET_PRISMATIC_REQUEST_CHANCE=.005;
+function blackMarketSpeciesEligible(sp){
+  return !!sp&&!sp.isCrossbreed&&sp.rarity!=='Mythic'&&!sp.isMythic&&(sp.builtin||sp.published!==false);
+}
+function blackMarketEligibleSpecies(){
+  return Object.entries(state.species).filter(([,sp])=>blackMarketSpeciesEligible(sp));
+}
+function generateDailyBlackMarket(dateKey=localDateKey()){
+  const eligible=blackMarketEligibleSpecies();
+  const eligibleMap=new Map(eligible);
+  const ownedNormal=[...new Set(state.monsters.filter(mon=>!mon.isPrismatic&&blackMarketSpeciesEligible(eligibleMap.get(mon.slug))).map(mon=>mon.slug))];
+  const preferred=shuffleCopy(ownedNormal);
+  const remaining=shuffleCopy(eligible.map(([slug])=>slug).filter(slug=>!preferred.includes(slug)));
+  const picks=[...preferred,...remaining].slice(0,3);
+  const requests=picks.map((slug,i)=>{
+    const ownsPrismatic=state.monsters.some(mon=>mon.slug===slug&&mon.isPrismatic);
+    const wantsPrismatic=ownsPrismatic&&Math.random()<BLACK_MARKET_PRISMATIC_REQUEST_CHANCE;
+    return {id:`${dateKey}:black-market:${i}:${slug}`,slug,prismatic:wantsPrismatic,fulfilled:false,payout:0,soldMonsterId:'',fulfilledAt:0};
+  });
+  state.blackMarket={dateKey,requests,lastMessage:''};
+}
+function ensureDailyBlackMarket(){
+  const today=localDateKey(),bm=state.blackMarket&&typeof state.blackMarket==='object'?state.blackMarket:null;
+  const valid=bm?.dateKey===today&&Array.isArray(bm.requests)&&bm.requests.length===3&&bm.requests.every(req=>req&&state.species[req.slug]&&blackMarketSpeciesEligible(state.species[req.slug]));
+  if(!valid){generateDailyBlackMarket(today);return true;}
+  else{
+    bm.lastMessage=String(bm.lastMessage||'');
+    bm.requests=bm.requests.map((req,i)=>({id:req.id||`${today}:black-market:${i}:${req.slug}`,slug:req.slug,prismatic:!!req.prismatic,fulfilled:!!req.fulfilled,payout:Number(req.payout||0),soldMonsterId:String(req.soldMonsterId||''),fulfilledAt:Number(req.fulfilledAt||0)}));
+  }
+  return false;
+}
+function blackMarketTransferBlockReason(mon){
+  if(!mon)return 'Monster not found.';
+  if(state.monsters.length<=1)return 'You must keep at least one monster.';
+  if(state.activeMonsterId===mon.id)return 'Switch to a different Active Monster first.';
+  if(isMonsterBreeding(mon.id))return 'This monster is currently in a breeding pen.';
+  if(isMonsterOnExpedition(mon.id))return 'This monster is currently away on an expedition.';
+  if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)return 'This monster is currently in battle.';
+  return '';
+}
+function blackMarketOffer(mon){
+  const sp=speciesOf(mon);if(!sp)return 0;
+  const base=500+Math.round(Number(sp.p1bst||280)*2)+Math.max(0,Number(mon.level||1)-1)*15+Math.max(0,Number(mon.potential||1)-1)*100;
+  const value=mon.isPrismatic?base*12:base;
+  return Math.max(100,Math.round(value/10)*10);
+}
+function blackMarketMatchingMonsters(req){
+  return state.monsters.filter(mon=>mon.slug===req.slug&&!!mon.isPrismatic===!!req.prismatic);
+}
+async function renderBlackMarket(){
+  ensureDailyBlackMarket();
+  const grid=document.getElementById('blackMarketGrid'),date=document.getElementById('blackMarketDate'),msg=document.getElementById('blackMarketMessage');if(!grid)return;
+  if(date)date.textContent=state.blackMarket.dateKey;
+  if(msg)msg.textContent=state.blackMarket.lastMessage||'His list changes at local midnight. A normal request will never take your Prismatic by accident.';
+  grid.innerHTML='';
+  for(const req of state.blackMarket.requests){
+    const sp=state.species[req.slug];if(!sp)continue;
+    const card=document.createElement('article');card.className=`black-market-card${req.prismatic?' prismatic-request':''}${req.fulfilled?' fulfilled':''}`;
+    const matching=blackMarketMatchingMonsters(req),available=matching.filter(mon=>!blackMarketTransferBlockReason(mon));
+    const requestLabel=req.prismatic?'✦ PRISMATIC WANTED':'STANDARD WANTED';
+    let controls='';
+    if(req.fulfilled){controls=`<div class="black-market-fulfilled">DEAL CLOSED • ${currencyMarkup(req.payout)}</div>`;}
+    else if(available.length){
+      const options=available.map(mon=>`<option value="${mon.id}">${displayName(mon)} • Lv.${mon.level} • P${mon.potential} • ${money(blackMarketOffer(mon))}</option>`).join('');
+      const first=available[0];controls=`<label class="black-market-select-label">Choose a copy<select data-black-market-select="${req.id}">${options}</select></label><button class="primary black-market-sell" data-black-market-sell="${req.id}" data-monster-id="${first.id}" type="button">Sell • ${money(blackMarketOffer(first))}</button>`;
+    }else if(matching.length){controls=`<div class="black-market-none">You own a matching copy, but it is currently locked as Active, breeding, on expedition, or in battle.</div>`;}
+    else{controls=`<div class="black-market-none">No matching ${req.prismatic?'Prismatic ':''}${sp.name} in your Collection.</div>`;}
+    card.innerHTML=`<div class="black-market-art"><img alt="${req.prismatic?'Prismatic ':''}${sp.name}"></div><div class="black-market-copy"><span class="black-market-request-label">${requestLabel}</span><h4>${req.prismatic?'✦ ':''}${sp.name}</h4><p>${req.prismatic?'The buyer is paying an absurd premium for this exact Prismatic specimen.':'One clean specimen. He does not care where you found it.'}</p>${controls}</div>`;
+    grid.appendChild(card);await setMonsterImage(card.querySelector('img'),req.slug,req.prismatic?'prismatic':'base');
+    const select=card.querySelector('[data-black-market-select]'),button=card.querySelector('[data-black-market-sell]');
+    if(select&&button)select.addEventListener('change',()=>{const mon=state.monsters.find(m=>m.id===select.value);button.dataset.monsterId=select.value;button.textContent=`Sell • ${money(blackMarketOffer(mon))}`;});
+  }
+  grid.querySelectorAll('[data-black-market-sell]').forEach(btn=>btn.addEventListener('click',()=>sellBlackMarketMonster(btn.dataset.blackMarketSell,btn.dataset.monsterId)));
+}
+function sellBlackMarketMonster(requestId,monsterId){
+  ensureDailyBlackMarket();
+  const req=state.blackMarket.requests.find(r=>r.id===requestId),mon=state.monsters.find(m=>m.id===monsterId);if(!req||req.fulfilled||!mon)return;
+  const sp=speciesOf(mon);if(!sp||!blackMarketSpeciesEligible(sp)||mon.slug!==req.slug||!!mon.isPrismatic!==!!req.prismatic)return;
+  const blocked=blackMarketTransferBlockReason(mon);if(blocked){alert(blocked);return;}
+  const payout=blackMarketOffer(mon),label=`${displayName(mon)} (${sp.name} • ${mon.id})`;
+  if(!confirm(`Sell ${label} to the Black Market for ${money(payout)}?\n\nThis permanently removes this individual monster from your Collection. Archive discovery stays unlocked.`))return;
+  state.discoveredSpecies=Array.isArray(state.discoveredSpecies)?state.discoveredSpecies:[];if(!state.discoveredSpecies.includes(mon.slug))state.discoveredSpecies.push(mon.slug);
+  state.currency+=payout;state.monsters=state.monsters.filter(m=>m.id!==mon.id);removeMonsterFromCollectionPens(mon.id);
+  req.fulfilled=true;req.payout=payout;req.soldMonsterId=mon.id;req.fulfilledAt=Date.now();state.blackMarket.lastMessage=`Deal closed. ${displayName(mon)} went with the buyer for ${money(payout)}.`;
+  if(selectedMonsterId===mon.id)selectedMonsterId=null;save();renderAll();
+}
+
 function normalizeExpeditionState(){
   state.expeditions=state.expeditions&&typeof state.expeditions==='object'?state.expeditions:{slots:{},lastMessage:''};
   state.expeditions.slots=state.expeditions.slots&&typeof state.expeditions.slots==='object'?state.expeditions.slots:{};
@@ -2180,10 +2505,7 @@ function expeditionTeamBonus(monsters){
   return clamp((monsters.length-1)*.05+avgLevel*.001+avgPotential*.005,0,.35);
 }
 function regularExpeditionSpeciesPool(){
-  return Object.entries(state.species).filter(([,sp])=>{
-    const obtain=String(sp.obtain||'');
-    return !sp.isCrossbreed&&!sp.seasonalEventFamily&&!/event|halloween|haunted/i.test(obtain)&&obtain!=='Breeding Only'&&obtain!=='Admin / Test';
-  });
+  return Object.entries(state.species).filter(([,sp])=>!sp.isCrossbreed&&!sp.seasonalEventFamily&&sp.obtain==='Random Battle Reward');
 }
 function addExpeditionInventory(reward,id,qty=1){if(qty>0)reward.inventory[id]=(reward.inventory[id]||0)+qty;}
 function randomNormalExpeditionEgg(reward,{prismatic=false}={}){
@@ -2464,12 +2786,14 @@ function battleStatsFor(mon){
   const base=statsFor(sp,mon.potential||1);
   const levels=Math.max(0,(mon.level||1)-1);
   const mods=TRAITS[mon.trait]?.mods||{hp:0,attack:0,armor:0,speed:0};
+  const dna={hp:0,attack:0,armor:0,speed:0};
+  if(mon.dnaSplice&&dna.hasOwnProperty(mon.dnaSplice.stat))dna[mon.dnaSplice.stat]=DNA_SPLICE_BONUS;
   return {
-    hp:Math.max(1,base.hp+levels*2+mods.hp),
-    attack:Math.max(1,base.attack+Math.floor(levels*.55)+mods.attack),
-    armor:Math.max(1,base.armor+Math.floor(levels*.55)+mods.armor),
-    speed:Math.max(1,base.speed+Math.floor(levels*.55)+mods.speed),
-    bst:base.bst
+    hp:Math.max(1,base.hp+levels*2+mods.hp+dna.hp),
+    attack:Math.max(1,base.attack+Math.floor(levels*.55)+mods.attack+dna.attack),
+    armor:Math.max(1,base.armor+Math.floor(levels*.55)+mods.armor+dna.armor),
+    speed:Math.max(1,base.speed+Math.floor(levels*.55)+mods.speed+dna.speed),
+    bst:base.bst+(mon.dnaSplice?DNA_SPLICE_BONUS:0)
   };
 }
 function xpToNext(level){
@@ -2588,7 +2912,7 @@ function switchTab(name){
 }
 tabs.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
 document.querySelectorAll('[data-route]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();switchTab(btn.dataset.route);btn.blur();}));
-document.getElementById('home').addEventListener('click',e=>{const btn=e.target.closest('[data-home-go]');if(btn)switchTab(btn.dataset.homeGo);});
+document.getElementById('home').addEventListener('click',e=>{const go=e.target.closest('[data-home-go]');if(go){switchTab(go.dataset.homeGo);return;}const more=e.target.closest('[data-landing-expand]');if(!more)return;const post=more.closest('.landing-post');if(!post)return;const expanded=post.classList.toggle('expanded');more.textContent=expanded?'Show Less':'Read Full Post';if(!expanded)post.scrollIntoView({block:'nearest'});});
 
 let suppressCollectionClickUntil=0;
 function monsterCard(mon){
@@ -2681,7 +3005,7 @@ async function openDetail(id){
   else if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)releaseReason='This monster is currently in battle.';
   releaseBtn.disabled=!!releaseReason;
   releaseHint.textContent=releaseReason||'Permanently remove this individual from your Collection. Archive discovery stays unlocked.';
-  renderMonsterMoves(mon);renderTeachScrolls(mon);document.getElementById('detailModal').showModal();if(mon.isPrismatic)setTimeout(()=>playPrismaticShine(document.querySelector('.detail-art-wrap')),50);
+  renderMonsterMoves(mon);renderTeachScrolls(mon);renderMonsterItemTools(mon);document.getElementById('detailModal').showModal();if(mon.isPrismatic)setTimeout(()=>playPrismaticShine(document.querySelector('.detail-art-wrap')),50);
 }
 function renderMonsterMoves(mon){
   const box=document.getElementById('detailMoves');box.innerHTML='';const arr=[...(mon.attacks||[])].slice(0,2);
@@ -2801,8 +3125,10 @@ async function renderParentPreviews(){
   updateBreedStartState();
 }
 function seasonalCrossbreedAvailable(sp){
-  if(!sp?.seasonalEventId)return true;
-  return isEventActive(EVENT_DEFS[sp.seasonalEventId]);
+  if(!sp)return true;
+  if(sp.seasonalEventId)return !!EVENT_DEFS[sp.seasonalEventId]&&eventIsActive(EVENT_DEFS[sp.seasonalEventId]);
+  if(sp.seasonalEventFamily)return Object.values(EVENT_DEFS).some(def=>def.family===sp.seasonalEventFamily&&eventIsActive(def));
+  return true;
 }
 function pairKey(a,b){return [String(a||''),String(b||'')].sort().join('::');}
 function findCrossbreed(a,b){
@@ -3345,6 +3671,55 @@ function sellTradeGood(id,qty){
   save();
   renderAll();
 }
+function formatShortCooldown(ms){ms=Math.max(0,Number(ms||0));const min=Math.floor(ms/60000),sec=Math.floor((ms%60000)/1000);return `${min}:${String(sec).padStart(2,'0')}`;}
+function refreshJuiceRemaining(){return Math.max(0,Number(state.itemCooldowns?.refreshJuiceUntil||0)-Date.now());}
+function capturePodRemaining(){return Math.max(0,Number(state.buffs?.capturePodUntil||0)-Date.now());}
+function capturePodActive(){return capturePodRemaining()>0;}
+function currentCaptureChance(){return clamp(WILD_MONSTER_REWARD_CHANCE+(capturePodActive()?CAPTURE_POD_BONUS:0),0,1);}
+function useRefreshJuice(){
+  if(!(state.inventory.refresh_juice>0))return;
+  const remaining=refreshJuiceRemaining();if(remaining>0){alert(`Refresh Juice can be used again in ${formatShortCooldown(remaining)}.`);return;}
+  const def=activeEvent();if(!def){alert('There is no active event for Refresh Juice to affect.');return;}
+  let applied=false,message='';
+  if(def.activity?.type==='maze'){
+    const es=eventStateFor(def);refreshMazeSteps(def);const before=Number(es.steps||0),max=Number(def.activity.maxSteps||20);if(before>=max){alert('Your Haunted Maze Step bank is already full.');return;}es.steps=Math.min(max,before+5);applied=es.steps>before;message=`Refresh Juice restored ${es.steps-before} Haunted Maze Step${es.steps-before===1?'':'s'}.`;
+  }else if(def.activity?.type==='memory'){
+    const m=ensureMemoryGame(def);if(!m||Date.now()>=Number(m.cooldownUntil||0)||m.cooldownReason!=='fails'){alert(m?.cooldownReason==='complete'?'Refresh Juice cannot clear the one-hour completion cooldown.':'Winter Memory is not currently under a failed-match lockout.');return;}resetEventMemory(def,'Refresh Juice cracked the ice. A fresh board is ready immediately.');applied=true;message='Refresh Juice cleared the failed-match Winter Memory lockout.';
+  }
+  if(!applied){alert('Refresh Juice has no effect on this event activity.');return;}
+  state.inventory.refresh_juice--;if(state.inventory.refresh_juice<=0)delete state.inventory.refresh_juice;state.itemCooldowns.refreshJuiceUntil=Date.now()+REFRESH_JUICE_COOLDOWN_MS;const es=eventStateFor(def);es.lastMessage=message;save();renderAll();
+}
+function useCapturePod(){
+  if(!(state.inventory.capture_pod>0))return;
+  if(capturePodActive()){alert(`A Capture Pod signal is already active for ${formatShortCooldown(capturePodRemaining())}.`);return;}
+  state.inventory.capture_pod--;if(state.inventory.capture_pod<=0)delete state.inventory.capture_pod;state.buffs.capturePodUntil=Date.now()+CAPTURE_POD_DURATION_MS;save();renderAll();
+}
+function rerollDifferentTrait(current){for(let i=0;i<30;i++){const next=rollTrait();if(next!==current)return next;}return current==='Boring'?'Aggressive':'Boring';}
+function useNatureDiscOnMonster(monId){
+  const mon=state.monsters.find(m=>m.id===monId);if(!mon||!(state.inventory.nature_disc>0))return;const today=localDateKey();if(mon.natureDiscDate===today){alert(`${displayName(mon)} has already used a Nature Disc today.`);return;}const old=mon.trait;if(!confirm(`Use a Nature Disc on ${displayName(mon)}?
+
+Current Trait: ${old}
+This individual cannot use another Nature Disc until tomorrow.`))return;mon.trait=rerollDifferentTrait(old);mon.natureDiscDate=today;state.inventory.nature_disc--;if(state.inventory.nature_disc<=0)delete state.inventory.nature_disc;save();renderAll();openDetail(mon.id);
+}
+function dnaStatLabel(stat){return ({hp:'Vitality',attack:'Attack',armor:'Armor',speed:'Speed'})[stat]||stat;}
+function useDnaSplicerOnMonster(monId,itemId){
+  const mon=state.monsters.find(m=>m.id===monId),item=ITEM_SHOP.find(x=>x.id===itemId),stat=item?.dnaStat;if(!mon||!item||!stat||!(state.inventory[itemId]>0))return;if(mon.dnaSplice){alert(`${displayName(mon)} has already been DNA-spliced for ${dnaStatLabel(mon.dnaSplice.stat)} +${DNA_SPLICE_BONUS}. A monster can only receive one DNA Splicer.`);return;}if(!confirm(`Use ${item.name} on ${displayName(mon)}?
+
+This permanently adds +${DNA_SPLICE_BONUS} ${dnaStatLabel(stat)}. This monster can NEVER receive another DNA Splicer.`))return;mon.dnaSplice={stat,amount:DNA_SPLICE_BONUS,usedAt:Date.now()};state.inventory[itemId]--;if(state.inventory[itemId]<=0)delete state.inventory[itemId];save();renderAll();openDetail(mon.id);
+}
+function renderMonsterItemTools(mon){
+  const box=document.getElementById('monsterItemTools'),status=document.getElementById('monsterItemToolStatus');if(!box||!status||!mon)return;const today=localDateKey(),natureQty=Number(state.inventory.nature_disc||0),natureUsed=mon.natureDiscDate===today;const spliced=mon.dnaSplice;
+  status.textContent=spliced?`DNA: ${dnaStatLabel(spliced.stat)} +${DNA_SPLICE_BONUS}`:'DNA: unused';
+  const nature=`<button class="ghost monster-tool-button" type="button" data-use-nature-disc="${mon.id}" ${natureQty<=0||natureUsed?'disabled':''}><strong>Nature Disc ×${natureQty}</strong><span>${natureUsed?'Used today • available tomorrow':'Reroll Trait • once per monster per day'}</span></button>`;
+  const dnaItems=ITEM_SHOP.filter(x=>x.dnaStat).map(item=>{const qty=Number(state.inventory[item.id]||0),label=dnaStatLabel(item.dnaStat);return `<button class="ghost monster-tool-button" type="button" data-use-dna-splicer="${item.id}" ${qty<=0||!!spliced?'disabled':''}><strong>${label} Splicer ×${qty}</strong><span>${spliced?`Already spliced: ${dnaStatLabel(spliced.stat)} +${DNA_SPLICE_BONUS}`:`Permanently +${DNA_SPLICE_BONUS} ${label}`}</span></button>`;}).join('');
+  box.innerHTML=nature+dnaItems;const nb=box.querySelector('[data-use-nature-disc]');if(nb)nb.onclick=()=>useNatureDiscOnMonster(mon.id);box.querySelectorAll('[data-use-dna-splicer]').forEach(btn=>btn.onclick=()=>useDnaSplicerOnMonster(mon.id,btn.dataset.useDnaSplicer));
+}
+function inventoryConsumableAction(id){
+  if(id==='refresh_juice'){const remain=refreshJuiceRemaining();return `<div class="trade-actions"><button class="ghost small" type="button" data-use-inventory-item="refresh_juice" ${remain>0?'disabled':''}>${remain>0?`Ready in <span data-refresh-juice-timer>${formatShortCooldown(remain)}</span>`:'Use Refresh Juice'}</button></div>`;}
+  if(id==='capture_pod'){const remain=capturePodRemaining();return `<div class="trade-actions"><button class="ghost small" type="button" data-use-inventory-item="capture_pod" ${remain>0?'disabled':''}>${remain>0?`Capture Boost • <span data-capture-pod-timer>${formatShortCooldown(remain)}</span>`:'Activate • 20 min'}</button></div>`;}
+  if(id==='nature_disc'||id.startsWith('dna_splicer_'))return '<div class="trade-good-meta"><span>Use</span><strong>Choose a monster in Collection</strong></div>';
+  return '';
+}
 function renderInventory(){
   const box=document.getElementById('inventoryGrid');
   const entries=Object.entries(state.inventory).filter(([,q])=>q>0);
@@ -3364,14 +3739,14 @@ function renderInventory(){
     const card=document.createElement('div');
     card.className='inventory-card'+(info.isTradeGood?' trade-good-card':'');
     const sale=info.isTradeGood?`<div class="trade-good-meta"><span>Sell value</span><strong>${money(info.sellValue)} each</strong></div>
-      <div class="trade-actions"><button class="ghost small sell-one" type="button">Sell 1 • ${money(info.sellValue)}</button><button class="ghost small sell-all" type="button">Sell All • ${money(info.sellValue*qty)}</button></div>`:'';
+      <div class="trade-actions"><button class="ghost small sell-one" type="button">Sell 1 • ${money(info.sellValue)}</button><button class="ghost small sell-all" type="button">Sell All • ${money(info.sellValue*qty)}</button></div>`:inventoryConsumableAction(id);
     card.innerHTML=`<div class="shop-icon-art">${inventoryIconMarkup(info,'sheet-icon icon-lg')}</div>
       <div><span class="shop-category">${info.category}</span><h4>${info.name}</h4><p>${info.desc}</p>${sale}</div>
       <strong class="qty">×${qty}</strong>`;
     if(info.isTradeGood){
       card.querySelector('.sell-one').onclick=()=>sellTradeGood(id,1);
       card.querySelector('.sell-all').onclick=()=>sellTradeGood(id,'all');
-    }
+    }else{const use=card.querySelector('[data-use-inventory-item]');if(use)use.onclick=()=>use.dataset.useInventoryItem==='refresh_juice'?useRefreshJuice():useCapturePod();}
     box.appendChild(card);
   });
 }
@@ -3381,9 +3756,14 @@ function renderAttackIndex(){
   Object.entries(state.attacks).filter(([,a])=>(ef==='all'||a.element===ef)&&`${a.name} ${a.description} ${a.status}`.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,a])=>{
     const card=document.createElement('div');card.className='attack-card';card.innerHTML=`<div class="attack-top"><div><span class="shop-category">${a.element} • ${a.style}</span><h3>${a.name}</h3></div><strong>${a.power}</strong></div><p>${a.description||''}</p><div class="attack-meta"><span>Accuracy ${a.accuracy}%</span><span>${a.status&&a.status!=='None'?`${a.status} ${a.statusChance}% / ${a.statusDuration}t`:'No status'}</span>${Number(a.lifeSteal||0)>0?`<span>Life Steal ${Math.round(Number(a.lifeSteal))}%</span>`:''}${a.scrollEnabled?'<span>Scroll available</span>':''}</div>`;box.appendChild(card);});
 }
+let archiveView='base';
 async function renderArchive(){
   const box=document.getElementById('archiveGrid');box.innerHTML='';
-  for(const [slug,sp] of Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name))){
+  const baseBtn=document.getElementById('showArchiveBase'),crossBtn=document.getElementById('showArchiveCrossbreeds');
+  if(baseBtn)baseBtn.classList.toggle('active',archiveView==='base');if(crossBtn)crossBtn.classList.toggle('active',archiveView==='crossbreeds');
+  const entries=Object.entries(state.species).filter(([,sp])=>archiveView==='crossbreeds'?!!sp.isCrossbreed:!sp.isCrossbreed).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  if(!entries.length){box.innerHTML=`<div class="empty-card">No ${archiveView==='crossbreeds'?'Crossbreeds':'Base Monsters'} registered yet.</div>`;return;}
+  for(const [slug,sp] of entries){
     const card=document.createElement('div');card.className='archive-card';
     const discovered=speciesDiscovered(slug);
     if(!discovered){
@@ -3429,12 +3809,12 @@ function populateParentDropdowns(excludeSlug=''){
   document.getElementById('parentA').innerHTML=opts;document.getElementById('parentB').innerHTML=opts;
 }
 function newSpeciesForm(){
-  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
+  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
   speciesSignatureDraft='';
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
   for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();
@@ -3461,7 +3841,8 @@ function updateAdminConditional(){
   obtainSelect.disabled=cross;
   const normalShop=!cross&&obtainSelect.value==='Shop Egg';
   const halloweenShop=!cross&&obtainSelect.value==='Halloween Event Shop Egg';
-  const shop=normalShop||halloweenShop,wild=!cross&&obtainSelect.value==='Random Battle Reward';
+  const winterShop=!cross&&obtainSelect.value==='Winter Event Shop Egg';
+  const shop=normalShop||halloweenShop||winterShop,wild=!cross&&obtainSelect.value==='Random Battle Reward';
   const crossbreedFields=document.getElementById('crossbreedFields');
   crossbreedFields.classList.toggle('hidden',!cross);
   // Hidden form controls still participate in browser constraint validation unless
@@ -3469,11 +3850,11 @@ function updateAdminConditional(){
   // hidden min=1 input enabled could silently block the entire Save Monster submit.
   crossbreedFields.querySelectorAll('input,select').forEach(el=>{el.disabled=!cross;});
   document.getElementById('shopPriceWrap').classList.toggle('hidden',!shop);
-  document.getElementById('shopPriceLabel').textContent=halloweenShop?'Halloween shop egg price':'Shop egg price';
-  document.getElementById('shopPriceHelp').textContent=halloweenShop?'Price in Halloween Fangs.':'Price in normal currency.';
+  document.getElementById('shopPriceLabel').textContent=halloweenShop?'Halloween shop egg price':winterShop?'Winter shop egg price':'Shop egg price';
+  document.getElementById('shopPriceHelp').textContent=halloweenShop?'Price in Halloween Fangs.':winterShop?'Price in Snowflakes.':'Price in normal currency.';
   document.getElementById('eggArtCard').classList.toggle('soft-disabled',!shop);
   document.getElementById('eggArt').disabled=!shop;
-  document.getElementById('eggArtHelp').textContent=shop?'Used for this species’ shop egg.':'Available for Shop Egg and Halloween Event Shop Egg species.';
+  document.getElementById('eggArtHelp').textContent=shop?'Used for this species’ shop egg.':'Available for Shop Egg, Halloween Event Shop Egg, and Winter Event Shop Egg species.';
   document.getElementById('encounterDaysWrap').classList.toggle('hidden',!wild);
   document.getElementById('breedTimerLabel').textContent=fmtDuration(document.getElementById('breedTimer').value);
   document.getElementById('hatchTimerLabel').textContent=fmtDuration(document.getElementById('hatchTimer').value);
@@ -3501,7 +3882,7 @@ async function saveSpeciesForm(e){
   const selectedSignature=(visibleSignature&&state.attacks[visibleSignature])?visibleSignature:((speciesSignatureDraft&&state.attacks[speciesSignatureDraft])?speciesSignatureDraft:'');
   if(!confirm(oldSlug?`Save changes to monster "${name}"?`:`Create new monster "${name}"?`))return;
   const {encounterDays:_legacyEncounterDays,signatureAttack:_legacySignatureAttack,...cleanPrev}=prev;
-  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
+  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
   save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadSpeciesIntoForm(slug);
@@ -3610,13 +3991,14 @@ function liveContentManifestFromPack(pack){
     silvyDialogueLines:dialogueLines,
     news:(pack?.landingFeed?.news||[]).length,
     announcements:(pack?.landingFeed?.announcements||[]).length,
+    calendarPrizes:Object.values(pack?.eventCalendars||{}).reduce((n,c)=>n+Object.keys(c?.entries||{}).length,0),
     trials:Object.keys(pack?.trialDefinitions||{}).length,
     trialAssets:trialAssetCount
   };
 }
 function liveContentManifestLabel(manifest){
   const m=manifest||{};
-  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.trials||0)} trials`;
+  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials`;
 }
 async function buildContentPack({publishedOnly=false}={}){
   const customSpecies={};
@@ -3629,9 +4011,9 @@ async function buildContentPack({publishedOnly=false}={}){
   // Sprite Workshop is an authoritative content editor: every uploaded replacement
   // is shared automatically. This includes event/shop/find icons and Silvy poses.
   const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const b=await getAssetBlob(`sprite:${key}`);if(b)customSprites[key]=await blobToDataURL(b);}
-  // Dialogue, landing posts, and Trials are content-layer data, not player save data.
+  // Dialogue, landing posts, Event Calendars, and Trials are content-layer data, not player save data.
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const b=await getAssetBlob(`trial:${id}:${kind}`);if(b)trialAssets[id][kind]=await blobToDataURL(b);}}
-  return {version:7,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,trialDefinitions,trialAssets};
+  return {version:8,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
   const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
@@ -3643,7 +4025,7 @@ async function exportLiveContent(){
   }
   const pack=await buildContentPack({publishedOnly:true});
   const manifest=liveContentManifestFromPack(pack);
-  const payload={kind:'prismwild-live-content',schemaVersion:7,contentRevision:new Date().toISOString(),manifest,...pack};
+  const payload={kind:'prismwild-live-content',schemaVersion:8,contentRevision:new Date().toISOString(),manifest,...pack};
   const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
   const blob=new Blob([text],{type:'application/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-content.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   document.getElementById('adminMessage').textContent=`Exported Live Content: ${liveContentManifestLabel(manifest)}. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
@@ -3682,6 +4064,7 @@ async function applyLiveContent(data){
   for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
   if(data.silverwindDialogue)state.silverwindDialogue=data.silverwindDialogue;
   if(data.landingFeed)state.landingFeed=data.landingFeed;
+  if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
   if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
   for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
   state.liveContentRevision=revision||`legacy-${Date.now()}`;
@@ -3690,7 +4073,7 @@ async function applyLiveContent(data){
 }
 async function exportAdmin(){
   const pack=await buildContentPack({publishedOnly:false});
-  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01527.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01530.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
@@ -3700,9 +4083,10 @@ async function importAdminFile(file){
     for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
+    if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
     if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
     for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
-    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Silvy dialogue, and Trial data.';
+    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Event Calendars, Silvy dialogue, and Trial data.';
   }catch(e){document.getElementById('adminMessage').textContent='Import failed: '+e.message;}
 }
 
@@ -3729,7 +4113,7 @@ async function renderLandingNewest(){
 }
 function renderLandingPosts(kind,hostId){
   const host=document.getElementById(hostId);if(!host)return;const posts=[...(state.landingFeed?.[kind]||[])].sort(landingPostSort).slice(0,5);
-  host.innerHTML=posts.length?posts.map((post,i)=>`<article class="landing-post ${i===0?'featured':''}"><div class="landing-post-date">${landingDisplayDate(post.date)}</div><h4>${post.title}</h4><p>${post.body}</p></article>`).join(''):'<div class="landing-empty">Nothing posted here yet.</div>';
+  host.innerHTML=posts.length?posts.map((post,i)=>{const body=String(post.body||''),long=body.length>280||body.includes('\n');return `<article class="landing-post ${i===0?'featured':''}${long?' has-long-body':''}"><div class="landing-post-date">${landingDisplayDate(post.date)}</div><h4>${post.title}</h4><p class="landing-post-body">${body}</p>${long?'<button class="ghost small landing-post-more" type="button" data-landing-expand>Read Full Post</button>':''}</article>`;}).join(''):'<div class="landing-empty">Nothing posted here yet.</div>';
 }
 function renderLandingEvent(){
   const host=document.getElementById('landingEventContent');if(!host)return;const active=activeEvent();
@@ -4181,6 +4565,7 @@ function renderExploreSupplies(){
       <div><span>Eggs</span><strong>×${looseEggs}</strong></div>
     </div>`);
   }
+  if(capturePodActive())parts.push(`<div class="supply-chip capture-boost-supply">${iconMarkup('mystery_capsule','sheet-icon icon-md')}<div><span>Capture Pod • +20%</span><strong data-capture-pod-timer>${formatShortCooldown(capturePodRemaining())}</strong></div></div>`);
 
   for(const [id,qty] of entries){
     const info=itemInfoForInventoryId(id);
@@ -4927,7 +5312,7 @@ function finishVictory(){
     const fangReward=randomInt(1,2);if(def)addEventCurrency(def,fangReward);
     updateRequestProgress('wild_win',1);
     let monsterReward=null;
-    if(Math.random()<WILD_MONSTER_REWARD_CHANCE){
+    if(Math.random()<currentCaptureChance()){
       if(collectionHasOpenSlot()){
         const id=uid('M',state.nextMonsterNum++),joined={id,slug:enemy.slug,level:enemy.level,xp:0,gender:enemy.gender,potential:enemy.potential,trait:enemy.trait,nickname:'',attacks:[...(enemy.attacks||[])].slice(0,2),isPrismatic:!!enemy.isPrismatic,faintedUntil:0,parents:null};
         state.monsters.push(joined);placeMonsterInCollection(id);monsterReward={id,name:enemySp.name,level:enemy.level,isPrismatic:!!enemy.isPrismatic};battleSession.log.push(`${enemy.isPrismatic?'Prismatic ':''}Event ${enemySp.name} joined your Collection!`);
@@ -4939,7 +5324,7 @@ function finishVictory(){
   state.currency+=rewards.currency;
   updateRequestProgress('wild_win',1);
   let monsterReward=null;
-  if(Math.random()<WILD_MONSTER_REWARD_CHANCE){
+  if(Math.random()<currentCaptureChance()){
     if(collectionHasOpenSlot()){
       const id=uid('M',state.nextMonsterNum++);
       const joined={id,slug:enemy.slug,level:enemy.level,xp:0,gender:enemy.gender,potential:enemy.potential,trait:enemy.trait,nickname:'',attacks:[...(enemy.attacks||[])].slice(0,2),isPrismatic:!!enemy.isPrismatic,faintedUntil:0,parents:null};
@@ -5101,6 +5486,7 @@ async function renderAll(){
   const version=++uiRenderVersion;
 
   ensureDailyRequests();
+  const blackMarketRolled=ensureDailyBlackMarket();if(blackMarketRolled)save();
   document.getElementById('currency').textContent=money(state.currency);
   renderAccountProgress();
   applyAccountAccessUI();
@@ -5122,6 +5508,8 @@ async function renderAll(){
   if(version!==uiRenderVersion)return;
 
   await renderShop();
+  if(version!==uiRenderVersion)return;
+  await renderBlackMarket();
   if(version!==uiRenderVersion)return;
 
   renderInventory();
@@ -5210,6 +5598,8 @@ document.getElementById('showSilverwindArchive').addEventListener('click',()=>{c
 document.getElementById('showSilverwindAttacks').addEventListener('click',()=>{currentSilverwindPane='attacks';showSilverwindPane('attacks');});
 document.getElementById('motherSelect').addEventListener('change',renderParentPreviews);document.getElementById('fatherSelect').addEventListener('change',renderParentPreviews);document.getElementById('startBreed').addEventListener('click',startBreeding);
 document.getElementById('breedingPens').addEventListener('click',e=>{const btn=e.target.closest('[data-breed-action]');if(!btn)return;const i=Number(btn.dataset.penIndex);if(!Number.isInteger(i)||i<0||i>=5)return;if(btn.dataset.breedAction==='collect')collectEgg(i);else if(btn.dataset.breedAction==='catalyst')useHormoneCatalyst(i);});
+document.getElementById('showArchiveBase').addEventListener('click',()=>{archiveView='base';renderArchive();});
+document.getElementById('showArchiveCrossbreeds').addEventListener('click',()=>{archiveView='crossbreeds';renderArchive();});
 document.getElementById('saveRename').addEventListener('click',saveRename);document.getElementById('setActiveMonster').addEventListener('click',setSelectedActive);document.getElementById('releaseMonster').addEventListener('click',releaseSelectedMonster);document.getElementById('useReviveGem').addEventListener('click',useReviveGemOnSelected);document.getElementById('swapAttacks').addEventListener('click',swapSelectedAttacks);document.getElementById('teachAttackButton').addEventListener('click',teachSelectedAttack);
 document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('detailModal').close());document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))document.getElementById('detailModal').close();});
 document.getElementById('closeShopDetail').addEventListener('click',()=>document.getElementById('shopDetailModal').close());document.getElementById('shopDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('shopDetailModal'))document.getElementById('shopDetailModal').close();});document.getElementById('shopPurchaseButton').addEventListener('click',requestShopPurchase);document.getElementById('shopCancelPurchase').addEventListener('click',resetShopPurchaseConfirmation);document.getElementById('shopConfirmPurchase').addEventListener('click',confirmShopPurchase);
@@ -5225,7 +5615,7 @@ document.getElementById('showEventAdmin').addEventListener('click',()=>showAdmin
 document.getElementById('showExpeditionAdmin').addEventListener('click',()=>showAdminPane('expedition'));
 document.getElementById('showTrialAdmin').addEventListener('click',()=>showAdminPane('trial'));
 
-document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
+document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('crossbreedSeason').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
 document.getElementById('baseArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('basePreview')));document.getElementById('prismaticArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('prismaticPreview')));document.getElementById('eggArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('eggPreview')));
 document.getElementById('exportData').addEventListener('click',exportAdmin);document.getElementById('exportLiveContent').addEventListener('click',exportLiveContent);document.getElementById('importData').addEventListener('change',e=>{if(e.target.files?.[0])importAdminFile(e.target.files[0]);});
 
@@ -5244,11 +5634,17 @@ document.getElementById('silverwindDialogueTarget').addEventListener('change',()
 document.getElementById('saveSilverwindDialogue').addEventListener('click',saveSilverwindDialogueEntry);
 document.getElementById('cancelSilverwindDialogueEdit').addEventListener('click',()=>{clearSilverwindDialogueEditor();document.getElementById('silverwindDialogueMessage').textContent='';});
 
-document.getElementById('eventAdminSelect').addEventListener('change',renderEventAdmin);
-document.getElementById('applyEventOverride').addEventListener('click',()=>{const id=document.getElementById('eventAdminSelect').value,mode=document.getElementById('eventAdminOverride').value;if(!EVENT_DEFS[id])return;state.eventOverrides[id]=mode;save();document.getElementById('eventAdminMessage').textContent=`${EVENT_DEFS[id].name}: ${mode==='auto'?'automatic dates restored':mode==='active'?'forced active':'forced inactive'}.`;renderAll();});
-document.getElementById('eventGrantFangs').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(!def)return;addEventCurrency(def,25);save();document.getElementById('eventAdminMessage').textContent='Granted 25 Fangs for testing.';renderAll();});
-document.getElementById('eventGrantSteps').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],es=eventStateFor(def);if(!def?.activity)return;refreshMazeSteps(def);es.steps=Math.min(def.activity.maxSteps,es.steps+5);es.stepUpdatedAt=Date.now();save();document.getElementById('eventAdminMessage').textContent='Granted up to 5 Maze Steps for testing.';renderAll();});
-document.getElementById('eventResetMaze').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(!def?.activity)return;const es=eventStateFor(def);es.maze=generateMaze(def.activity.size||7);es.lastMessage='Maze reset from Admin.';save();document.getElementById('eventAdminMessage').textContent='Haunted Maze layout reset.';renderAll();});
+document.getElementById('eventAdminSelect').addEventListener('change',()=>{document.getElementById('eventCalendarDay').value=1;renderEventAdmin();});
+document.getElementById('applyEventOverride').addEventListener('click',()=>{const id=document.getElementById('eventAdminSelect').value,mode=document.getElementById('eventAdminOverride').value;if(!EVENT_DEFS[id])return;state.eventOverrides[id]=mode;const cfg=eventDailyCalendar(EVENT_DEFS[id]),testMax=cfg?cfg.days:62;state.eventTestDays[id]=Math.max(0,Math.min(testMax,Number(document.getElementById('eventAdminTestDay').value||0)));save();document.getElementById('eventAdminMessage').textContent=`${EVENT_DEFS[id].name}: ${mode==='auto'?'automatic dates restored':mode==='active'?'forced active':'forced inactive'}${state.eventTestDays[id]?` • calendar test day ${state.eventTestDays[id]}`:''}.`;renderAll();});
+document.getElementById('eventGrantFangs').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(!def)return;addEventCurrency(def,25);save();document.getElementById('eventAdminMessage').textContent=`Granted 25 ${def.currency.name} for testing.`;renderAll();});
+document.getElementById('eventGrantSteps').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],es=eventStateFor(def);if(def?.activity?.type!=='maze')return;refreshMazeSteps(def);es.steps=Math.min(def.activity.maxSteps,es.steps+5);es.stepUpdatedAt=Date.now();save();document.getElementById('eventAdminMessage').textContent='Granted up to 5 Maze Steps for testing.';renderAll();});
+document.getElementById('eventResetMaze').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='maze')return;const es=eventStateFor(def);es.maze=generateMaze(def.activity.size||7);es.lastMessage='Maze reset from Admin.';save();document.getElementById('eventAdminMessage').textContent='Haunted Maze layout reset.';renderAll();});
+document.getElementById('eventResetMemory').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='memory')return;resetEventMemory(def,'Memory board reset from Admin.');save();document.getElementById('eventAdminMessage').textContent='Winter Memory board reset.';renderAll();});
+document.getElementById('eventClearMemoryCooldown').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],m=ensureMemoryGame(def);if(def?.activity?.type!=='memory'||!m)return;resetEventMemory(def,'Cooldown cleared from Admin. Fresh board ready.');save();document.getElementById('eventAdminMessage').textContent='Memory cooldown cleared and a fresh board was shuffled.';renderAll();});
+document.getElementById('eventCalendarRewardType').addEventListener('change',updateEventCalendarRewardFields);
+document.getElementById('eventCalendarDay').addEventListener('change',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def)loadEventCalendarDayEditor(def,Number(document.getElementById('eventCalendarDay').value||1));});
+document.getElementById('saveEventCalendarDay').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],cfg=eventDailyCalendar(def);if(!def||!cfg)return;const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1))),type=document.getElementById('eventCalendarRewardType').value;let reward;if(type==='money'||type==='eventCurrency')reward={type,amount:Math.max(1,Number(document.getElementById('eventCalendarAmount').value||1))};else if(type==='item')reward={type,id:document.getElementById('eventCalendarItem').value,qty:Math.max(1,Number(document.getElementById('eventCalendarAmount').value||1))};else reward={type,slug:document.getElementById('eventCalendarSpecies').value};cfg.entries[day]=reward;cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();document.getElementById('eventAdminMessage').textContent=`Saved ${def.name} Day ${day}: ${calendarRewardLabel(reward,def)}. This prize will be included in the next Live Content export.`;renderAll();});
+document.getElementById('clearEventCalendarDay').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],cfg=eventDailyCalendar(def);if(!def||!cfg)return;const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));delete cfg.entries[day];cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();document.getElementById('eventAdminMessage').textContent=`Cleared ${def.name} Day ${day} prize.`;renderAll();});
 document.getElementById('newTrial').addEventListener('click',newTrialForm);
 document.getElementById('trialForm').addEventListener('submit',saveTrialForm);
 document.getElementById('deleteTrial').addEventListener('click',deleteCurrentTrial);
@@ -5276,7 +5672,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.29 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.34 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
@@ -5348,13 +5744,20 @@ function tickLiveTimers(){
   if(def){
     const es=eventStateFor(def),before=es.steps;refreshMazeSteps(def);
     if(es.steps!==before){save();renderEventPage();}
+    if(def.activity?.type==='memory'){
+      const oldUntil=Number(es.memory?.cooldownUntil||0),m=ensureMemoryGame(def);
+      if(oldUntil>0&&Date.now()>=oldUntil){save();renderEventPage();}
+      const memoryTimer=document.querySelector('.memory-cooldown span');if(memoryTimer&&m)memoryTimer.textContent=memoryCooldownText(m);
+    }
     const regen=document.getElementById('mazeRegenTimer');if(regen)regen.textContent=mazeRegenText(def);
     const countdown=document.getElementById('eventCountdown');if(countdown)countdown.textContent=eventCountdown(def);
   }
+  document.querySelectorAll('[data-capture-pod-timer]').forEach(el=>{const r=capturePodRemaining();el.textContent=formatShortCooldown(r);if(r<=0)renderAll();});
+  document.querySelectorAll('[data-refresh-juice-timer]').forEach(el=>{const r=refreshJuiceRemaining();el.textContent=formatShortCooldown(r);if(r<=0)renderAll();});
 }
 setInterval(tickLiveTimers,500);
 
-(async()=>{await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
+(async()=>{await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 </body>
 </html>

@@ -70,3 +70,12 @@ Publishing remains:
 
 LIVE CONTENT DIAGNOSTICS
 Admin shows the currently loaded Live Content revision plus counts for Monsters, Attacks, Sprite overrides, Silvy lines, News, Announcements, and Trials. If a public update seems missing, compare that revision after refreshing the live site.
+
+
+v0.15.30: Event Calendar prize configurations are part of the Live Content layer (schema v8). Event availability overrides, simulated Calendar Test Day values, Memory cooldown resets, and other tester controls remain local-only and are not published.
+
+
+v0.15.31: Winter Gift Calendar is capped at 25 days. Imported or previously saved Winter calendar entries beyond Day 25 are pruned during normalization.
+
+
+v0.15.32: Winter Event monster hooks are registry-driven. Published custom species using Winter Event Shop Egg automatically appear in the Snowflake Shop; Winter Mystery Egg species automatically enter the Mystery Egg pool; seasonal Crossbreeds can be assigned to Winter or Halloween through Monster Workshop and publish through Live Content.
