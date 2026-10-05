@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.27</title>
+<title>Prismwild Prototype v0.15.29</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.27</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.29</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -28,13 +28,40 @@
 
   <nav class="tabs">
     <button class="tab active" data-tab="home">Home</button>
-    <button class="tab" data-tab="hideout">My Hideout</button>
-    <button class="tab" data-tab="adventure">Explore</button>
-    <button class="tab" data-tab="expeditions">Expeditions <span id="expeditionBadge" class="badge">0</span></button>
+
+    <div class="nav-menu">
+      <button class="tab nav-menu-trigger" data-tab="hideout" type="button">My Hideout <span class="nav-caret">▾</span></button>
+      <div class="nav-dropdown">
+        <button class="nav-link" data-route="collection" type="button">Collection</button>
+        <button class="nav-link" data-route="eggs" type="button">Incubators</button>
+        <button class="nav-link" data-route="breed" type="button">Breeding Pens</button>
+        <button class="nav-link" data-route="inventory" type="button">Inventory</button>
+        <button class="nav-link" data-route="profile" type="button">Profile</button>
+      </div>
+    </div>
+
+    <div class="nav-menu">
+      <button class="tab nav-menu-trigger" data-tab="adventure" type="button">Explore <span class="nav-caret">▾</span></button>
+      <div class="nav-dropdown">
+        <button class="nav-link" data-route="battle" type="button">Battle</button>
+        <button class="nav-link" data-route="expeditions" type="button">Expeditions <span id="expeditionBadge" class="badge">0</span></button>
+        <button class="nav-link" data-route="trials" type="button">Trials</button>
+      </div>
+    </div>
+
+    <button class="tab" data-tab="shop">Shop</button>
     <button class="tab event-nav-tab" data-tab="event">Event <span id="eventBadge" class="badge">LIVE</span></button>
     <button class="tab" data-tab="requests">Requests <span id="requestBadge" class="badge">0</span></button>
-    <button class="tab" data-tab="profile">Profile</button>
-    <button class="tab silverwind-tab" data-tab="silverwind">Silverwind</button>
+
+    <div class="nav-menu">
+      <button class="tab silverwind-tab nav-menu-trigger" data-tab="silverwind" type="button">Silverwind <span class="nav-caret">▾</span></button>
+      <div class="nav-dropdown">
+        <button class="nav-link" data-route="silverwind-desk" type="button">Keeper's Desk</button>
+        <button class="nav-link" data-route="silverwind-archive" type="button">Monster Archive</button>
+        <button class="nav-link" data-route="silverwind-attacks" type="button">Attack Index</button>
+      </div>
+    </div>
+
     <button class="tab admin-tab" data-tab="admin">Admin</button>
   </nav>
 
@@ -86,6 +113,7 @@
         <button id="showHideoutIncubators" class="subtab" type="button">Incubators <span id="eggBadge" class="badge">0</span></button>
         <button id="showHideoutBreed" class="subtab" type="button">Breeding Pens</button>
         <button id="showHideoutInventory" class="subtab" type="button">Inventory <span id="invBadge" class="badge">0</span></button>
+        <button id="showHideoutProfile" class="subtab" type="button">Profile</button>
       </div>
 <div id="collection" class="hideout-pane active">
       <div class="collection-pen-toolbar">
@@ -156,7 +184,7 @@
       <div id="breedingPens" class="breeding-pens"></div>
       <div class="note-card">
         <strong>Attack inheritance</strong>
-        <p>The Mother-role monster contributes Attack Slot 1. The Father-role monster contributes Attack Slot 1 and its personality Trait. Crossbreeds always hatch with their species Signature Attack in Slot 1.</p><p class="prismatic-odds-note">Prismatic odds: <strong>0.50%</strong> normally • <strong>0.75%</strong> with one Pristine parent • <strong>1.00%</strong> with two Pristine parents. Prismatic parents do not add a bonus.</p>
+        <p>The Mother-role monster contributes Attack Slot 1 and its Potential. The Father-role monster contributes Attack Slot 1 and its personality Trait. Every bred egg has a <strong>5% chance</strong> to improve the inherited Potential by +1 stage, up to P12. Crossbreeds always hatch with their species Signature Attack in Slot 1.</p><p class="prismatic-odds-note">Prismatic odds: <strong>0.50%</strong> normally • <strong>0.75%</strong> with one Pristine parent • <strong>1.00%</strong> with two Pristine parents. Prismatic parents do not add a bonus.</p>
       </div>
     </div>
 <div id="inventory" class="hideout-pane hidden">
@@ -170,17 +198,41 @@
       </div>
       <div id="inventoryGrid" class="inventory-grid"></div>
     </div>
+    <div id="profile" class="hideout-pane hidden">
+      <div class="page-heading"><div class="eyebrow">KEEPER PROFILE</div><h2>Your Prismwild Profile</h2><p>Account progress, your strongest partners, and the Trial Badges you've earned.</p></div>
+      <section class="keeper-account-panel">
+        <div class="keeper-account-heading"><div><div class="eyebrow">KEEPER ACCOUNT</div><h3>Local Account Controls</h3></div><span id="profileRoleBadge" class="role-badge player">PLAYER</span></div>
+        <div class="keeper-account-grid">
+          <label>Keeper name<div class="keeper-name-row"><input id="keeperNameInput" maxlength="20" placeholder="Keeper name"><button id="saveKeeperName" class="primary" type="button">Save</button></div></label>
+          <div class="keeper-account-id"><span>Local Account ID</span><strong id="profileAccountId">KPR-LOCAL</strong><small>Useful when reporting public-test bugs from this browser.</small></div>
+        </div>
+        <div class="keeper-account-actions">
+          <button id="toggleAdminAccess" class="ghost" type="button">Local Admin Access</button>
+          <button id="replayOnboarding" class="ghost admin-only-control" type="button">Replay Newcomer Experience</button>
+          <button id="resetLocalProgress" class="danger" type="button">Reset Local Progress</button>
+        </div>
+        <p id="keeperAccountMessage" class="keeper-account-message">This prototype stores the account in this browser. Player/Admin roles here are for testing and are not server-secure.</p>
+      </section>
+      <div class="profile-hero">
+        <div class="profile-level-card"><span>ACCOUNT LEVEL</span><strong id="profileAccountLevel">Lv. 1</strong><div class="account-xp-track"><div id="profileAccountXpFill" class="account-xp-fill"></div></div><small id="profileAccountXpText">0 / 100 XP</small></div>
+        <div class="profile-summary-card"><div><span>Monsters</span><strong id="profileMonsterCount">0</strong></div><div><span>Trial Badges</span><strong id="profileBadgeCount">0</strong></div><div><span>Hard Trials</span><strong id="profileHardCount">0</strong></div></div>
+      </div>
+      <div class="profile-section-heading"><div><div class="eyebrow">TOP PARTNERS</div><h3>Highest-Level Monsters</h3></div><small>Your three highest-level monsters.</small></div>
+      <div id="profileTopMonsters" class="profile-top-monsters"></div>
+      <div class="profile-section-heading"><div><div class="eyebrow">TRIAL CIRCUIT</div><h3>Trial Badges</h3></div><small>Normal-mode victories are recorded here.</small></div>
+      <div id="profileBadgeGrid" class="profile-badge-grid"></div>
+    </div>
     </section>
 
 <section id="adventure" class="page">
       <div class="page-heading">
         <div class="eyebrow">BEYOND THE HIDEOUT</div>
         <h2>Explore</h2>
-        <p>Head into the wilds, stock up at the Shop, or challenge one of Prismwild's Trials.</p>
+        <p>Head into the wilds, send a team on an Expedition, or challenge one of Prismwild's Trials.</p>
       </div>
       <div class="admin-switch adventure-switch">
         <button id="showAdventureBattle" class="subtab active" type="button">Battle</button>
-        <button id="showAdventureShop" class="subtab" type="button">Shop</button>
+        <button id="showAdventureExpeditions" class="subtab" type="button">Expeditions <span class="badge expedition-inline-badge">0</span></button>
         <button id="showAdventureTrials" class="subtab" type="button">Trials</button>
       </div>
       <div id="adventureBattlePane" class="adventure-pane">
@@ -210,18 +262,18 @@
         <div class="battle-note-top"><div><div class="eyebrow">TWO WAYS TO PLAY</div><p>Explore is for discovery and scavenging. The Wild Gauntlet is a deliberate battle challenge where unclaimed rewards grow with every cleared stage.</p></div><button id="battleTypeChartHub" class="ghost small" type="button">Type Chart</button></div>
       </div>
       </div>
-      <div id="adventureShopPane" class="adventure-pane hidden">
+      <div id="adventureExpeditionsPane" class="adventure-pane hidden">
       <div class="page-heading">
-        <div class="eyebrow">SUPPLY COUNTER</div>
-        <h2>Shop</h2>
-        <p>Browse the counter. Select an icon to inspect its details before purchasing.</p>
+        <div class="eyebrow">KEEPER EXPEDITION BOARD</div>
+        <h2>Daily Expeditions</h2>
+        <p>Send one to five available monsters on timed jobs across Prismwild. Longer expeditions bring home larger hauls and better rare-reward chances.</p>
       </div>
-      <div class="shop-sections">
-        <div><h3>Monster Eggs</h3><div id="eggShopGrid" class="shop-grid"></div></div>
-        <div><h3>Attack Scrolls</h3><div id="scrollShopGrid" class="shop-grid"></div></div>
-        <div><h3>Items</h3><div id="shopGrid" class="shop-grid"></div></div>
-        <div><h3>Facility Upgrades</h3><div id="facilityShop" class="shop-grid"></div></div>
+      <div class="expedition-rules-card">
+        <div><strong>Three contracts each day</strong><span>Short • 1 hour</span><span>Extended • 5 hours</span><span>Long • 12 hours</span></div>
+        <p>Monsters on an active expedition cannot battle, breed, or leave on another expedition. Bigger and stronger teams improve the chance of bringing home bonus loot. Started jobs survive the daily refresh.</p>
       </div>
+      <div id="expeditionGrid" class="expedition-grid"></div>
+      <p id="expeditionMessage" class="expedition-message"></p>
       </div>
       <div id="adventureTrialsPane" class="adventure-pane hidden">
         <div class="page-heading trial-heading">
@@ -236,18 +288,18 @@
       </div>
     </section>
 
-    <section id="expeditions" class="page">
+    <section id="shop" class="page">
       <div class="page-heading">
-        <div class="eyebrow">KEEPER EXPEDITION BOARD</div>
-        <h2>Daily Expeditions</h2>
-        <p>Send one to five available monsters on timed jobs across Prismwild. Longer expeditions bring home larger hauls and better rare-reward chances.</p>
+        <div class="eyebrow">SUPPLY COUNTER</div>
+        <h2>Shop</h2>
+        <p>Browse the counter. Select an icon to inspect its details before purchasing.</p>
       </div>
-      <div class="expedition-rules-card">
-        <div><strong>Three contracts each day</strong><span>Short • 1 hour</span><span>Extended • 5 hours</span><span>Long • 12 hours</span></div>
-        <p>Monsters on an active expedition cannot battle, breed, or leave on another expedition. Bigger and stronger teams improve the chance of bringing home bonus loot. Started jobs survive the daily refresh.</p>
+      <div class="shop-sections">
+        <div><h3>Monster Eggs</h3><div id="eggShopGrid" class="shop-grid"></div></div>
+        <div><h3>Attack Scrolls</h3><div id="scrollShopGrid" class="shop-grid"></div></div>
+        <div><h3>Items</h3><div id="shopGrid" class="shop-grid"></div></div>
+        <div><h3>Facility Upgrades</h3><div id="facilityShop" class="shop-grid"></div></div>
       </div>
-      <div id="expeditionGrid" class="expedition-grid"></div>
-      <p id="expeditionMessage" class="expedition-message"></p>
     </section>
 
     <section id="event" class="page">
@@ -281,31 +333,6 @@
       <div id="requestGrid" class="request-grid"></div>
       <div id="dailyBoardBonus" class="daily-board-bonus"></div>
       <p id="requestBoardMessage" class="request-board-message"></p>
-    </section>
-
-    <section id="profile" class="page">
-      <div class="page-heading"><div class="eyebrow">KEEPER PROFILE</div><h2>Your Prismwild Profile</h2><p>Account progress, your strongest partners, and the Trial Badges you've earned.</p></div>
-      <section class="keeper-account-panel">
-        <div class="keeper-account-heading"><div><div class="eyebrow">KEEPER ACCOUNT</div><h3>Local Account Controls</h3></div><span id="profileRoleBadge" class="role-badge player">PLAYER</span></div>
-        <div class="keeper-account-grid">
-          <label>Keeper name<div class="keeper-name-row"><input id="keeperNameInput" maxlength="20" placeholder="Keeper name"><button id="saveKeeperName" class="primary" type="button">Save</button></div></label>
-          <div class="keeper-account-id"><span>Local Account ID</span><strong id="profileAccountId">KPR-LOCAL</strong><small>Useful when reporting public-test bugs from this browser.</small></div>
-        </div>
-        <div class="keeper-account-actions">
-          <button id="toggleAdminAccess" class="ghost" type="button">Local Admin Access</button>
-          <button id="replayOnboarding" class="ghost admin-only-control" type="button">Replay Newcomer Experience</button>
-          <button id="resetLocalProgress" class="danger" type="button">Reset Local Progress</button>
-        </div>
-        <p id="keeperAccountMessage" class="keeper-account-message">This prototype stores the account in this browser. Player/Admin roles here are for testing and are not server-secure.</p>
-      </section>
-      <div class="profile-hero">
-        <div class="profile-level-card"><span>ACCOUNT LEVEL</span><strong id="profileAccountLevel">Lv. 1</strong><div class="account-xp-track"><div id="profileAccountXpFill" class="account-xp-fill"></div></div><small id="profileAccountXpText">0 / 100 XP</small></div>
-        <div class="profile-summary-card"><div><span>Monsters</span><strong id="profileMonsterCount">0</strong></div><div><span>Trial Badges</span><strong id="profileBadgeCount">0</strong></div><div><span>Hard Trials</span><strong id="profileHardCount">0</strong></div></div>
-      </div>
-      <div class="profile-section-heading"><div><div class="eyebrow">TOP PARTNERS</div><h3>Highest-Level Monsters</h3></div><small>Your three highest-level monsters.</small></div>
-      <div id="profileTopMonsters" class="profile-top-monsters"></div>
-      <div class="profile-section-heading"><div><div class="eyebrow">TRIAL CIRCUIT</div><h3>Trial Badges</h3></div><small>Normal-mode victories are recorded here.</small></div>
-      <div id="profileBadgeGrid" class="profile-badge-grid"></div>
     </section>
 
     <section id="silverwind" class="page">
@@ -1195,6 +1222,7 @@ const TRADE_GOODS={
   expedition_gilded_idol:{name:'Gilded Idol',category:'Expedition Treasure',sellValue:75,icon:'mystery_capsule',desc:'A small gold-leaf idol from a lost shrine. It is worth far more than ordinary field junk.'},
   expedition_starstone_relic:{name:'Starstone Relic',category:'Expedition Treasure',sellValue:150,icon:'prismatic_shard',desc:'A rare relic veined with glassy starstone. Traders practically fight over these.'}
 };
+function fieldFindIds(){return Object.keys(TRADE_GOODS).filter(id=>TRADE_GOODS[id]?.category==='Field Find');}
 function itemInfoForInventoryId(id){
   if(id.startsWith('scroll:')){
     const attack=attackOf(id.slice(7));
@@ -2282,7 +2310,7 @@ async function renderExpeditions(){
     grid.appendChild(card);
     for(const m of team){const img=card.querySelector(`[data-expedition-face="${m.id}"]`);if(img)await setMonsterImage(img,m.slug,monsterArtKind(m));}
   }
-  const badge=document.getElementById('expeditionBadge');if(badge)badge.textContent=String(readyCount);
+  const badge=document.getElementById('expeditionBadge');if(badge)badge.textContent=String(readyCount);document.querySelectorAll('.expedition-inline-badge').forEach(el=>el.textContent=String(readyCount));
   const msg=document.getElementById('expeditionMessage');if(msg)msg.textContent=state.expeditions.lastMessage||'Three contracts are generated each day. Pick a team whenever you are ready.';
 }
 
@@ -2519,18 +2547,19 @@ function showSilverwindPane(name='desk'){
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
 }
-let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle';
+let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle',currentSilverwindPane='desk';
 function showAdventurePane(name='battle'){
-  const panes={battle:'adventureBattlePane',shop:'adventureShopPane',trials:'adventureTrialsPane'};
-  const buttons={battle:'showAdventureBattle',shop:'showAdventureShop',trials:'showAdventureTrials'};
+  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane'};
+  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials'};
   if(!panes[name])name='battle';currentAdventurePane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
+  if(name==='expeditions')renderExpeditions();
   if(name==='trials')renderTrials();
 }
 function showHideoutPane(name='collection'){
-  const panes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory'};
-  const buttons={collection:'showHideoutCollection',eggs:'showHideoutIncubators',breed:'showHideoutBreed',inventory:'showHideoutInventory'};
+  const panes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory',profile:'profile'};
+  const buttons={collection:'showHideoutCollection',eggs:'showHideoutIncubators',breed:'showHideoutBreed',inventory:'showHideoutInventory',profile:'showHideoutProfile'};
   if(!panes[name])name='collection';
   currentHideoutPane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
@@ -2539,21 +2568,26 @@ function showHideoutPane(name='collection'){
 function switchTab(name){
   if(name==='admin'&&!isAdminAccount())name='profile';
   if(exploreExpeditionActive)endExploreExpedition();
-  // Legacy internal destinations route into their newer hub homes.
-  const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory'};
-  const adventureRoutes={battle:'battle',shop:'shop',trials:'trials'};
-  const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null;
-  const mainName=hideoutPane?'hideout':adventurePane?'adventure':name;
+  // Internal destinations route straight into their hub homes.
+  const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory',profile:'profile'};
+  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials'};
+  const silverwindRoutes={'silverwind-desk':'desk','silverwind-archive':'archive','silverwind-attacks':'attacks'};
+  const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null,silverwindPane=silverwindRoutes[name]||null;
+  const mainName=hideoutPane?'hideout':adventurePane?'adventure':silverwindPane?'silverwind':name;
   clearResolvedBattleSession();
   tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===mainName));
   pages.forEach(p=>p.classList.toggle('active',p.id===mainName));
   if(mainName==='hideout')showHideoutPane(hideoutPane||currentHideoutPane||'collection');
   if(mainName==='adventure')showAdventurePane(adventurePane||currentAdventurePane||'battle');
-  if(mainName==='silverwind')showSilverwindPane('desk');
+  if(mainName==='silverwind'){
+    currentSilverwindPane=silverwindPane||currentSilverwindPane||'desk';
+    showSilverwindPane(currentSilverwindPane);
+  }
   if(mainName==='requests'&&state.onboarding?.completed){updateNewKeeperTask('requests');save();}
   renderAll();
 }
 tabs.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+document.querySelectorAll('[data-route]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();switchTab(btn.dataset.route);btn.blur();}));
 document.getElementById('home').addEventListener('click',e=>{const btn=e.target.closest('[data-home-go]');if(btn)switchTab(btn.dataset.homeGo);});
 
 let suppressCollectionClickUntil=0;
@@ -2788,9 +2822,13 @@ function buildPendingBreedingEgg(mother,father){
   const sp=state.species[targetSlug];if(!sp)return null;
   const inherited=[mother.attacks?.[0],father.attacks?.[0]].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,2);
   const inheritedAttacks=sp.isCrossbreed?[sp.signatureAttackId,father.attacks?.[0]].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,2):inherited;
+  const inheritedPotential=clamp(Number(mother.potential||1),1,12);
+  const potentialRaised=inheritedPotential<12&&Math.random()<.05;
+  const offspringPotential=potentialRaised?inheritedPotential+1:inheritedPotential;
   return {
     id:nextUniqueEggId(),slug:targetSlug,speciesName:sp.name,motherId:mother.id,fatherId:father.id,
-    motherPotential:mother.potential,inheritedTrait:father.trait,inheritedAttacks,isPrismatic:rollPrismatic(mother,father),
+    motherPotential:inheritedPotential,potentialOverride:offspringPotential,potentialRaised,
+    inheritedTrait:father.trait,inheritedAttacks,isPrismatic:rollPrismatic(mother,father),
     source:'breeding',createdAt:Date.now(),status:'waiting',catalystUsed:false
   };
 }
@@ -2938,7 +2976,8 @@ async function renderEggInventory(renderVersion=null){
       card.className='egg-card';
       const mom=state.monsters.find(m=>m.id===egg.motherId),dad=state.monsters.find(m=>m.id===egg.fatherId);
       const origin=mom?`Parents: ${displayName(mom)} × ${displayName(dad)}`:egg.source==='newcomer'?'New Keeper Bundle':egg.source==='expedition'||egg.source==='prismatic'?'Expedition Reward':'Obtained from Shop / Admin';
-      card.innerHTML=`<div class="egg-visual">${await eggVisual(egg.slug,'egg-image',egg.source||'generic')}</div><div><strong>${eggDisplayName(egg)}</strong><span>${egg.id}</span><p>${origin}</p></div>`;
+      const potentialLine=egg.source==='breeding'?`<p class="${egg.potentialRaised?'potential-boost':''}">Potential: P${egg.motherPotential||1}${egg.potentialRaised?` → <strong>P${egg.potentialOverride}</strong> ✦`:''}</p>`:'';
+      card.innerHTML=`<div class="egg-visual">${await eggVisual(egg.slug,'egg-image',egg.source||'generic')}</div><div><strong>${eggDisplayName(egg)}</strong><span>${egg.id}</span><p>${origin}</p>${potentialLine}</div>`;
       const actions=document.createElement('div');
       actions.className='egg-card-actions';
       const btn=document.createElement('button');
@@ -3073,7 +3112,7 @@ function hatchEgg(slotIndex){
   }
 
   state.monsters.push({
-    id,slug:egg.slug,level:1,xp:0,gender:hatchGender(),potential:egg.potentialOverride??mother?.potential??1,
+    id,slug:egg.slug,level:1,xp:0,gender:hatchGender(),potential:egg.potentialOverride??egg.motherPotential??mother?.potential??1,
     trait:egg.inheritedTrait||rollTrait(),nickname:'',attacks,isPrismatic:!!egg.isPrismatic,
     parents:{mother:egg.motherId||null,father:egg.fatherId||null}
   });
@@ -3993,7 +4032,7 @@ function randomScrollInventoryId(){
 function generateGauntletStageReward(stage){
   const ranges=[[35,55],[55,80],[80,115],[115,165],[170,240]],r=ranges[Math.max(0,Math.min(4,stage-1))];
   const reward={currency:randomInt(r[0],r[1]),inventory:{},eggSlugs:[]};
-  const fieldId=randomChoice(Object.keys(TRADE_GOODS));
+  const fieldId=randomChoice(fieldFindIds());
   reward.inventory[fieldId]=(reward.inventory[fieldId]||0)+(1+Math.floor((stage-1)/2));
   if(stage>=2&&Math.random()<.25)reward.inventory.heal_gel=(reward.inventory.heal_gel||0)+1;
   if(stage>=3&&Math.random()<.20)reward.inventory.incu_catalyst=(reward.inventory.incu_catalyst||0)+1;
@@ -4219,7 +4258,7 @@ function trailEventWeights(sign=null){
   return Object.entries(EXPLORE_RATES).map(([value,base])=>({value,weight:Math.max(.01,base+Number(sign?.bias?.[value]||0))}));
 }
 function chooseFieldFind(sign=null){
-  const entries=Object.keys(TRADE_GOODS).map(id=>({value:id,weight:10+(sign?.prefer===id?16:0)}));
+  const entries=fieldFindIds().map(id=>({value:id,weight:10+(sign?.prefer===id?16:0)}));
   return weightedChoice(entries);
 }
 async function moveExploreMaze(dir){
@@ -5121,8 +5160,8 @@ document.getElementById('expeditionFinishActive').addEventListener('click',finis
 document.getElementById('expeditionRerollDaily').addEventListener('click',()=>{rerollUnstartedExpeditions();document.getElementById('expeditionAdminMessage').textContent='Unstarted daily expedition contracts rerolled.';});
 
 document.getElementById('search').addEventListener('input',renderCollection);document.getElementById('filter').addEventListener('change',renderCollection);
-document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));
-document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureShop').addEventListener('click',()=>showAdventurePane('shop'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));
+document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));document.getElementById('showHideoutProfile').addEventListener('click',()=>showHideoutPane('profile'));
+document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));
 document.getElementById('moveMonsterPen').addEventListener('click',moveSelectedMonsterPen);
 let collectionHoldTimer=null,collectionDrag=null;
 const collectionGrid=document.getElementById('grid');
@@ -5166,9 +5205,9 @@ collectionGrid.addEventListener('pointercancel',cancelCollectionHold);
 collectionGrid.addEventListener('contextmenu',e=>{if(collectionDrag?.active)e.preventDefault();});
 document.getElementById('attackSearch').addEventListener('input',renderAttackIndex);document.getElementById('attackElementFilter').addEventListener('change',renderAttackIndex);
 document.getElementById('silverwindCheckIn').addEventListener('click',silverwindCheckIn);
-document.getElementById('showSilverwindDesk').addEventListener('click',()=>showSilverwindPane('desk'));
-document.getElementById('showSilverwindArchive').addEventListener('click',()=>showSilverwindPane('archive'));
-document.getElementById('showSilverwindAttacks').addEventListener('click',()=>showSilverwindPane('attacks'));
+document.getElementById('showSilverwindDesk').addEventListener('click',()=>{currentSilverwindPane='desk';showSilverwindPane('desk');});
+document.getElementById('showSilverwindArchive').addEventListener('click',()=>{currentSilverwindPane='archive';showSilverwindPane('archive');});
+document.getElementById('showSilverwindAttacks').addEventListener('click',()=>{currentSilverwindPane='attacks';showSilverwindPane('attacks');});
 document.getElementById('motherSelect').addEventListener('change',renderParentPreviews);document.getElementById('fatherSelect').addEventListener('change',renderParentPreviews);document.getElementById('startBreed').addEventListener('click',startBreeding);
 document.getElementById('breedingPens').addEventListener('click',e=>{const btn=e.target.closest('[data-breed-action]');if(!btn)return;const i=Number(btn.dataset.penIndex);if(!Number.isInteger(i)||i<0||i>=5)return;if(btn.dataset.breedAction==='collect')collectEgg(i);else if(btn.dataset.breedAction==='catalyst')useHormoneCatalyst(i);});
 document.getElementById('saveRename').addEventListener('click',saveRename);document.getElementById('setActiveMonster').addEventListener('click',setSelectedActive);document.getElementById('releaseMonster').addEventListener('click',releaseSelectedMonster);document.getElementById('useReviveGem').addEventListener('click',useReviveGemOnSelected);document.getElementById('swapAttacks').addEventListener('click',swapSelectedAttacks);document.getElementById('teachAttackButton').addEventListener('click',teachSelectedAttack);
@@ -5237,7 +5276,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.27 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.29 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,

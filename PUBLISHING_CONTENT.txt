@@ -1,4 +1,4 @@
-PRISMWILD LIVE CONTENT PUBLISHING • v0.15.27
+PRISMWILD LIVE CONTENT PUBLISHING • v0.15.29
 ============================================
 
 WHAT LIVE CONTENT DOES
@@ -31,8 +31,8 @@ NOT PUBLISHED
 - Expedition Tester fast-forward state
 - Other local testing state
 
-FIRST DEPLOYMENT OF v0.15.27
-1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.27 build.
+FIRST DEPLOYMENT OF v0.15.29
+1. Replace the files in your local GitHub Desktop prismwild-test folder with the contents of this v0.15.29 build.
 2. Make sure content/prismwild-content.js exists.
 3. In GitHub Desktop, Commit to main, then Push origin.
 4. Refresh the public Prismwild site.

@@ -1,4 +1,4 @@
-PRISMWILD PROTOTYPE v0.15.27
+PRISMWILD PROTOTYPE v0.15.29
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
@@ -803,3 +803,25 @@ v0.15.27 live-content publishing:
 - Published custom Monsters and custom Attacks retain Draft/Published gates.
 - Export status and the loaded-content status now show a content manifest with category counts.
 - Local test controls and player/account save state are intentionally excluded from publishing.
+
+
+v0.15.28 — Navigation + Breeding Polish
+-----------------------------------------
+- Shop is restored as a permanent main navigation button.
+- Expeditions now occupy Shop's former slot inside Explore: Battle / Expeditions / Trials.
+- Profile moved into My Hideout.
+- My Hideout, Explore, and Silverwind now have direct dropdown shortcuts from the main bar.
+- Fixed Expedition Treasure leaking into normal Explore Field Find rolls.
+- Fixed the same mixed-registry leak in Wild Gauntlet Field Find rewards.
+- Breeding now has a 5% chance to improve the Mother-role monster's inherited Potential by +1 stage, capped at P12.
+- The Potential improvement is rolled and persisted when pendingEgg is created, so reloads and timer catalysts cannot reroll it.
+- Bred eggs display their inherited Potential; successful improvements are marked with a gold P# → P# ✦ callout.
+- Hatch now uses the egg's snapshotted motherPotential as a fallback, so releasing a parent after egg collection cannot accidentally collapse offspring Potential to P1.
+
+
+v0.15.29 — Navigation Dropdown Hover Hotfix
+--------------------------------------------
+- Fixed main navigation dropdowns closing while the cursor crossed the small visual gap between a top-bar trigger and its menu.
+- Added an invisible hover bridge above each dropdown so My Hideout, Explore, and Silverwind remain open while moving the cursor into their menu options.
+- Existing click/focus behavior remains intact.
+- No gameplay, save, breeding, loot, content, or balance logic changed in this hotfix.
