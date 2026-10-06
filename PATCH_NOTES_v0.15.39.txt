@@ -1,0 +1,14 @@
+PRISMWILD v0.15.39 — DYNAMIC HALLOWEEN MAZE ENCOUNTERS
+
+HALLOWEEN MAZE
+- Removed the fixed encounter-pool dependency that only allowed Dirgewake, Vesperfang, and Harrowjack.
+- The Haunted Maze now scans the current species registry for published, non-Crossbreed monsters whose Obtain Method is "Halloween Maze Encounter".
+- Grievwing is therefore eligible immediately from Dell's current authored content data.
+- Existing eventSpeciesWeights remain valid for hand-tuned monsters.
+- Newly tagged Maze species use a default weight of 40 unless a specific override is added later.
+- The on-screen registered Event-monster count now uses the dynamic pool.
+- The legacy eventSpecies list remains as a fallback only when no tagged species exist, preserving older saves/build assumptions.
+
+CONTENT SAFETY
+- content/prismwild-content.js is unchanged from v0.15.38.
+- Roswyn / Trial Captain work from v0.15.38 is preserved.

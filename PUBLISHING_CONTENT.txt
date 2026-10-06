@@ -1,4 +1,4 @@
-PRISMWILD LIVE CONTENT PUBLISHING • v0.15.29
+PRISMWILD LIVE CONTENT PUBLISHING • v0.15.41
 ============================================
 
 WHAT LIVE CONTENT DOES
@@ -43,13 +43,13 @@ FUTURE CONTENT UPDATES • NO NEW BUILD NEEDED
 3. For a custom Monster, check its Published box when it is ready.
 4. For a custom Attack, check its Published box when it is ready.
 5. Sprite Workshop, Silvy Dialogue, Landing Page, and Trial changes need no extra Published checkbox. Their current saved versions are included automatically.
-6. Click Export Live Content.
-7. Your browser downloads prismwild-content.js.
-8. Replace content/prismwild-content.js in your local GitHub repository with that downloaded file.
-9. Open GitHub Desktop.
-10. Commit the change with a short message such as "Update Halloween icons" or "Add NewMonsterName".
-11. Click Push origin.
-12. Refresh the public site. Existing player saves remain separate from the shared content update.
+6. Click Export Live Package.
+7. Your browser downloads prismwild-live-content.zip.
+8. Extract that ZIP directly into the ROOT of your local GitHub repository and allow matching paths to merge/overwrite.
+9. The ZIP updates content/prismwild-content.js and assets/live/... together.
+10. Open GitHub Desktop.
+11. Commit the changed files with a short message such as "Update Halloween icons" or "Add NewMonsterName".
+12. Click Push origin, then refresh the public site. Existing player saves remain separate from the shared content update.
 
 DRAFT SAFETY
 - New custom Monsters default to Draft.
@@ -60,13 +60,13 @@ DRAFT SAFETY
 
 BACKUPS
 - Export Admin Data = full local workshop backup.
-- Export Live Content = public publishing package.
+- Export Live Package = public publishing package ZIP.
 - Keep occasional Admin Data backups somewhere safe. Live Content should not be your only backup.
 
 STATIC-HOSTING NOTE
 The public site cannot safely write directly to GitHub. Do not put a GitHub password or token inside Prismwild.
 Publishing remains:
-  Export Live Content -> replace content/prismwild-content.js -> Commit -> Push origin
+  Export Live Package -> extract ZIP into repo root -> Commit -> Push origin
 
 LIVE CONTENT DIAGNOSTICS
 Admin shows the currently loaded Live Content revision plus counts for Monsters, Attacks, Sprite overrides, Silvy lines, News, Announcements, and Trials. If a public update seems missing, compare that revision after refreshing the live site.
@@ -79,3 +79,12 @@ v0.15.31: Winter Gift Calendar is capped at 25 days. Imported or previously save
 
 
 v0.15.32: Winter Event monster hooks are registry-driven. Published custom species using Winter Event Shop Egg automatically appear in the Snowflake Shop; Winter Mystery Egg species automatically enter the Mystery Egg pool; seasonal Crossbreeds can be assigned to Winter or Halloween through Monster Workshop and publish through Live Content.
+
+
+v0.15.38: Trial Captain personality fields (Normal/Hard intro, victory, defeat, lore, philosophy) are part of the Trial definition and publish through Live Content. Trial Captain art continues to publish with Trial assets.
+
+
+v0.15.40: The packaged Live Content includes the current Nature and Magma Trials, their Captain art/dialogue/lore, Aeralith, Cirrulong, and Flamecoil. The Haunted Maze continues to derive tagged event encounters dynamically.
+
+
+v0.15.41: Published image assets moved out of prismwild-content.js into assets/live/... files. Export Live Package now produces a ZIP containing both the lightweight content JS and all published image files. This avoids GitHub's 100 MB single-file limit while preserving portable Admin Data backups.

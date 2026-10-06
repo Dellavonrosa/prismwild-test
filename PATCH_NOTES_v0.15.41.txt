@@ -1,0 +1,20 @@
+PRISMWILD v0.15.41 — GITHUB-SAFE LIVE CONTENT HOTFIX
+======================================================
+
+FIXED
+- content/prismwild-content.js had grown past GitHub's 100 MB per-file limit because published PNGs were embedded as Base64 data URLs.
+- Published monster art, Prismatic art, egg art, Sprite Workshop replacements, and Trial art now live as normal files under assets/live/.
+- The packaged prismwild-content.js is now lightweight and references those assets by path.
+
+PUBLISHING WORKFLOW
+- Admin now uses Export Live Package instead of exporting one giant JavaScript file.
+- Export Live Package downloads prismwild-live-content.zip.
+- Extract that ZIP into the root of the local GitHub repo, allow matching paths to merge/overwrite, then Commit and Push.
+- The ZIP contains content/prismwild-content.js plus assets/live/... so content data and art stay together.
+
+BACKUPS
+- Export Admin Data remains the portable workshop backup and still embeds image data so one JSON backup contains the local custom art.
+
+COMPATIBILITY
+- Existing v0.15.40 game/content data is preserved.
+- Existing player saves remain separate and compatible.

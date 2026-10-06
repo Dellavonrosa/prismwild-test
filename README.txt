@@ -1,4 +1,42 @@
-PRISMWILD PROTOTYPE v0.15.37
+PRISMWILD PROTOTYPE v0.15.41
+
+
+V0.15.41 — GITHUB-SAFE LIVE ASSET PACKAGING
+- Live Content images are stored as normal files under assets/live instead of giant Base64 strings inside prismwild-content.js.
+- Export Live Content is now Export Live Package and downloads prismwild-live-content.zip.
+- Extract that ZIP into the GitHub repository root before Commit + Push.
+- This prevents content/prismwild-content.js from crossing GitHub's 100 MB single-file limit as the custom roster grows.
+- Existing Admin Data backups still embed art for portable local backup/import.
+
+V0.15.40 — FIRE TRIAL + WORKSHOP CONTENT PACK
+- Added Dell's latest authored Live Content export.
+- Added Flamecoil as the finalized Kilnslug x Aeralith Fire/Air Crossbreed, including Base + Prismatic art.
+- Updated Thermal Spiral to use Flamecoil's final name.
+- Updated the Magma Trial lineup to use Flamecoil as Razzik's ace.
+- Completed Razzik's Hard intro and Captain lore fields; corrected the Flame Jewel Badge label.
+- Latest content now includes 22 custom species, 22 custom attacks, 2 Trials, and both Captain asset sets.
+- Added the v0.15.40 News post summarizing Monster Census improvements, Battle FX, Trial Captains, new Air monsters, Flamecoil, and the dynamic Haunted Maze fix.
+- v0.15.39's dynamic Halloween Maze encounter logic remains intact.
+
+
+V0.15.39 — DYNAMIC HALLOWEEN MAZE ENCOUNTERS
+- Haunted Maze encounters now build their monster pool automatically from the species registry.
+- Any published, non-Crossbreed species with Obtain Method set to "Halloween Maze Encounter" is eligible without a code change.
+- Grievwing now joins the Haunted Maze encounter pool automatically from its authored species data.
+- Existing per-species maze weights remain supported; unlisted tagged species use the standard default weight of 40.
+- The Maze screen's registered-monster count now reflects the live dynamic pool instead of the old hard-coded list.
+- The previous hard-coded eventSpecies list remains only as a backwards-compatible fallback if no tagged species are available.
+
+V0.15.38 — ROSWYN + TRIAL CAPTAIN PERSONALITY UPDATE
+- Roswyn Cloverhoof is now the Nature Trial Captain, with her new full-body pixel-art Captain asset.
+- Nature Trial lineup preserved from Dell's current authored content: Thornjack, Bloomreign, then Wraithwood.
+- Trial Captains now support separate talk, Normal intro, Hard intro, victory, defeat, lore, and Trial philosophy text.
+- Trial pages display Captain philosophy and lore while keeping the click-to-talk interaction.
+- The first Trial battle now opens with the Captain's Normal or Hard challenge line in the battle log.
+- Trial victory and defeat result screens can show Captain-specific dialogue.
+- Trial Workshop now exposes all new Captain dialogue/lore fields for future Trial Captains.
+- Updated to Dell's current Live Content pack with 21 custom species and 20 custom attacks.
+- Roswyn's authored Live Content data and Captain art are included in content/prismwild-content.js.
 
 V0.15.37 — BATTLE ATTACK VISUAL FX
 - Added reusable combat FX families: Bite, Slash, Slam, Projectile, Burst, Beam, and Wave.
@@ -9,7 +47,7 @@ V0.15.37 — BATTLE ATTACK VISUAL FX
 - Heavy successful attacks add a small battlefield kick; misses visibly whiff or veer away.
 - Attack Registry and live preview display the resolved FX family.
 - Custom Visual FX selections are preserved through normal Live Content export/import.
-- Current authored prismwild-content.js remains byte-for-byte unchanged from Dell's supplied file.
+- v0.15.37 originally preserved the authored prismwild-content.js from that build's supplied content file.
 
 
 V0.15.36 — MONSTER CENSUS + ADMIN ROSTER FILTERS

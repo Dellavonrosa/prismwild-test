@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.37</title>
+<title>Prismwild Prototype v0.15.41</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.37</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.41</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -425,9 +425,9 @@
         <div class="admin-toolbar">
           <button id="newSpecies" class="primary">New Monster</button>
           <button id="exportData" class="ghost">Export Admin Data</button>
-          <button id="exportLiveContent" class="primary">Export Live Content</button>
+          <button id="exportLiveContent" class="primary">Export Live Package</button>
           <label class="ghost file-label">Import Admin Data<input id="importData" type="file" accept=".json,application/json"></label>
-          <span class="form-note"><strong>Published</strong> on Monsters/Attacks means “include in the next Live Content export.” Sprite replacements, Silvy dialogue, Landing News/Announcements, Event Calendars, and Trials are included automatically. To make changes live: Export Live Content → replace <code>content/prismwild-content.js</code> in GitHub → Commit &amp; Push.</span>
+          <span class="form-note"><strong>Published</strong> on Monsters/Attacks means “include in the next Live Content export.” Sprite replacements, Silvy dialogue, Landing News/Announcements, Event Calendars, and Trials are included automatically. To make changes live: Export Live Package → extract the ZIP into the GitHub repo root → Commit &amp; Push. The package contains <code>content/prismwild-content.js</code> plus any published image assets.</span>
           <span id="liveContentStatus" class="form-note">Live Content: checking…</span>
         </div>
         <div class="note-card"><strong>Live Content publishes the Admin content layer</strong><p>Included automatically: Sprite Workshop overrides (including Halloween/event/shop icons), Silvy Dialogue, News &amp; Announcements, Event Calendar prize configurations, and Trial definitions plus Captain/Badge art. Published custom Monsters and Published custom Attacks are included too. Local test controls, account data, player saves, Event Tester overrides/day simulation, and Expedition Tester fast-forwards are never published.</p></div>
@@ -599,7 +599,7 @@
         <div class="admin-layout">
           <aside class="registry-panel">
             <h3>Sprite Registry</h3>
-            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used. <strong>All uploaded Sprite Workshop replacements are automatically included in Export Live Content</strong>, including Halloween/event/shop icons.</p>
+            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used. <strong>All uploaded Sprite Workshop replacements are automatically included in Export Live Package</strong>, including Halloween/event/shop icons.</p>
             <input id="spriteAdminSearch" placeholder="Search sprites...">
             <div id="spriteRegistryList" class="registry-list"></div>
           </aside>
@@ -694,7 +694,7 @@
           </div>
 
           <div id="eventCalendarBuilder" class="event-calendar-builder hidden">
-            <div class="dialogue-library-heading"><div><div class="eyebrow">PUBLISHABLE EVENT CONTENT</div><h3>Daily Event Calendar</h3></div><small>These prizes are included in Export Live Content.</small></div>
+            <div class="dialogue-library-heading"><div><div class="eyebrow">PUBLISHABLE EVENT CONTENT</div><h3>Daily Event Calendar</h3></div><small>These prizes are included in Export Live Package.</small></div>
             <div class="form-grid three">
               <label>Calendar day<input id="eventCalendarDay" type="number" min="1" max="25" step="1" value="1"></label>
               <label>Reward type<select id="eventCalendarRewardType"><option value="money">Money</option><option value="eventCurrency">Event Currency</option><option value="item">Item</option><option value="egg">Egg</option><option value="monster">Monster</option></select></label>
@@ -737,8 +737,13 @@
               <div class="section-title"><span>◆</span><div><h3>Trial Identity</h3><p>Captain, element, requirements, badge, and Hard-mode reward.</p></div></div>
               <div class="form-grid three"><label>Trial name<input id="trialName" required maxlength="50" placeholder="e.g. Nature Trial"></label><label>Element<select id="trialElement"></select></label><label>Captain name<input id="trialCaptainName" maxlength="50" placeholder="Nature Captain"></label></div>
               <div class="form-grid three"><label>Normal level requirement<input id="trialNormalReq" type="number" min="1" max="100" value="20"></label><label>Hard level requirement<input id="trialHardReq" type="number" min="1" max="100" value="70"></label><label>Normal badge name<input id="trialBadgeName" maxlength="50" value="Nature Badge"></label></div>
-              <label class="single-field">Captain dialogue<textarea id="trialCaptainDialogue" rows="3" maxlength="320" placeholder="A short line shown when the player clicks the Captain."></textarea></label>
-              <label class="single-field">Hard-mode attack reward<select id="trialRewardAttack"></select></label>
+              <label class="single-field">Captain talk line<textarea id="trialCaptainDialogue" rows="3" maxlength="420" placeholder="Shown when the player clicks the Captain."></textarea></label>
+              <div class="form-grid two"><label>Trial philosophy<input id="trialPhilosophy" maxlength="80" placeholder="e.g. Adaptation & Endurance"></label><label>Hard-mode attack reward<select id="trialRewardAttack"></select></label></div>
+              <label class="single-field">Normal challenge line<textarea id="trialNormalIntroDialogue" rows="2" maxlength="320" placeholder="Shown at the start of a Normal Trial."></textarea></label>
+              <label class="single-field">Hard challenge line<textarea id="trialHardIntroDialogue" rows="2" maxlength="320" placeholder="Shown at the start of a Hard Trial."></textarea></label>
+              <label class="single-field">Victory line<textarea id="trialVictoryDialogue" rows="2" maxlength="320" placeholder="Shown after the full Trial is cleared."></textarea></label>
+              <label class="single-field">Defeat line<textarea id="trialDefeatDialogue" rows="2" maxlength="320" placeholder="Shown if the challenger loses the Trial."></textarea></label>
+              <label class="single-field">Captain lore<textarea id="trialCaptainLore" rows="3" maxlength="600" placeholder="Short character/lore blurb shown on the Trial page."></textarea></label>
               <div class="upload-grid two-up"><label class="upload-card"><span>Captain Sprite</span><input id="trialCaptainArt" type="file" accept="image/png,image/webp,image/jpeg"><img id="trialCaptainPreview" alt="Trial Captain preview"><small>Transparent pixel-art PNG recommended.</small></label><label class="upload-card"><span>Badge Sprite</span><input id="trialBadgeArt" type="file" accept="image/png,image/webp,image/jpeg"><img id="trialBadgePreview" alt="Trial Badge preview"><small>Square transparent PNG recommended.</small></label></div>
             </div>
             <div class="form-section">
@@ -1063,15 +1068,21 @@ BUILTIN_ATTACKS.nature_beam={name:"Nature Beam",element:"Nature",style:"Heavy",p
 
 const BUILTIN_TRIALS={
   nature_trial:{
-    name:"Nature Trial",element:"Nature",captainName:"Nature Captain",
-    captainDialogue:"The grove does not care how loud you are. Show me that your monster can endure what grows here.",
+    name:"Nature Trial",element:"Nature",captainName:"Roswyn Cloverhoof",
+    captainDialogue:"Ah, perfect timing! I just finished recording today's activity patterns. I'm Roswyn Cloverhoof, Nature Trial Captain. If you're ready, I'd love to see how your team adapts.",
+    normalIntroDialogue:"Nature survives by changing with the pressure around it. Let's see what your monsters do when the easy answer stops working.",
+    hardIntroDialogue:"You already understand the basics. Good. This time I'm giving you the version I use when I actually want to test a theory.",
+    victoryDialogue:"You adjusted beautifully! That's exactly what I wanted to see. Strong monsters help, but good instincts matter just as much.",
+    defeatDialogue:"That's useful data too. Seriously! You know more now than you did when you walked in. Come back when you're ready.",
+    captainLore:"Roswyn spends more time cataloguing wild monster behavior than maintaining her Trial grounds. Her notebooks are filled with migration patterns, feeding habits, unusual mutations, and several pages of excited handwriting about monsters nobody else thought were interesting.",
+    trialPhilosophy:"Adaptation & Endurance",
     normalRequirement:20,hardRequirement:70,badgeName:"Nature Badge",rewardAttackId:"nature_beam",
     lineup:[
       {slug:"thornjack",normalLevel:20,hardLevel:70},
-      {slug:"thornjack",normalLevel:22,hardLevel:72},
-      {slug:"bloomreign",normalLevel:25,hardLevel:75}
+      {slug:"bloomreign",normalLevel:22,hardLevel:72},
+      {slug:"wraithwood",normalLevel:25,hardLevel:75}
     ],
-    captainFallback:"assets/icons/basic_sprites/trial_captain_generic.png",
+    captainFallback:"assets/icons/basic_sprites/trial_captain_roswyn.png",
     badgeFallback:"assets/icons/basic_sprites/trial_badge_nature.png",builtin:true
   }
 };
@@ -1518,7 +1529,7 @@ const ITEM_SHOP = [
 ];
 
 const DB_NAME='monsterGameAssets_v05', DB_VERSION=1, STORE='assets';
-let assetDB=null, assetUrlCache={}, selectedMonsterId=null, selectedSpriteKey='currency';
+let assetDB=null, assetUrlCache={}, liveAssetRefs={}, selectedMonsterId=null, selectedSpriteKey='currency';
 
 function openAssetDB(){
   return new Promise((resolve,reject)=>{
@@ -1552,8 +1563,8 @@ async function storedAssetUrl(key){
   const blob=await getAssetBlob(key); if(!blob)return null;
   const url=URL.createObjectURL(blob); assetUrlCache[key]=url; return url;
 }
-async function customAssetUrl(slug,kind){return storedAssetUrl(`${slug}:${kind}`);}
-async function customSpriteUrl(key){return storedAssetUrl(`sprite:${key}`);}
+async function customAssetUrl(slug,kind){return (await storedAssetUrl(`${slug}:${kind}`))||liveAssetRefs[`${slug}:${kind}`]||null;}
+async function customSpriteUrl(key){return (await storedAssetUrl(`sprite:${key}`))||liveAssetRefs[`sprite:${key}`]||null;}
 async function hydrateSpriteElement(el){
   if(!el?.dataset?.spriteKey)return;
   const url=await customSpriteUrl(el.dataset.spriteKey);
@@ -1797,6 +1808,13 @@ function normalizeState(){
     trial.element=ELEMENTS.includes(trial.element)?trial.element:'Nature';
     trial.normalRequirement=clamp(Number(trial.normalRequirement||20),1,100);
     trial.hardRequirement=clamp(Number(trial.hardRequirement||70),1,100);
+    trial.captainDialogue=String(trial.captainDialogue||'');
+    trial.normalIntroDialogue=String(trial.normalIntroDialogue||trial.captainDialogue||'');
+    trial.hardIntroDialogue=String(trial.hardIntroDialogue||trial.normalIntroDialogue||trial.captainDialogue||'');
+    trial.victoryDialogue=String(trial.victoryDialogue||'');
+    trial.defeatDialogue=String(trial.defeatDialogue||'');
+    trial.captainLore=String(trial.captainLore||'');
+    trial.trialPhilosophy=String(trial.trialPhilosophy||'');
     trial.lineup=Array.isArray(trial.lineup)?trial.lineup.slice(0,3):[];
     while(trial.lineup.length<3)trial.lineup.push({slug:Object.keys(state.species)[0]||'thornjack',normalLevel:trial.normalRequirement,hardLevel:trial.hardRequirement});
     trial.lineup=trial.lineup.map(slot=>({slug:state.species[slot.slug]?slot.slug:(Object.keys(state.species)[0]||'thornjack'),normalLevel:clamp(Number(slot.normalLevel||trial.normalRequirement),1,100),hardLevel:clamp(Number(slot.hardLevel||trial.hardRequirement),1,100)}));
@@ -2287,7 +2305,7 @@ async function renderEventPage(){
   const shop=(await Promise.all(shopItems.map(async item=>{const bought=Number(es.purchases[item.id]||0),limitText=item.limit?`${bought}/${item.limit} purchased`:'Unlimited',sold=item.limit&&bought>=item.limit,afford=eventCurrency(active)>=item.cost,visual=await eventShopRewardVisual(item);return `<div class="event-shop-card"><div class="event-shop-icon">${visual}</div><span class="shop-category">${item.category}</span><h4>${item.name}</h4><p>${item.description}</p><div class="event-shop-bottom"><span class="event-price">${eventCurrencySpriteMarkup(active,'event-currency-inline')} <strong>${item.cost}</strong></span><small>${limitText}</small><button data-event-buy="${item.id}" class="primary small" type="button" ${sold||!afford?'disabled':''}>${sold?'Sold Out':'Buy'}</button></div></div>`;}))).join('');
   host.innerHTML=`<div class="event-hero"><div><div class="eyebrow event-eyebrow">ACTIVE EVENT • ${glyphSpriteMarkup(active.spriteKey||'event_currency_generic',active.icon||'◆','event-title-sprite')}</div><h2>${active.name}</h2><p>${active.description}</p><div class="event-countdown" id="eventCountdown">${eventCountdown(active)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(active,'event-wallet-sprite')}</span><div><small>${active.currency.name}</small><strong>${eventCurrency(active)}</strong></div></div></div>
     <div class="event-columns"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT ACTIVITY</div><h3>${a.name}</h3><p>Escape a newly generated maze. Every successful move costs one Step and may uncover loot or an Event monster encounter.</p></div><div class="maze-step-bank"><span>Steps</span><strong>${es.steps} / ${a.maxSteps}</strong><small id="mazeRegenTimer">${mazeRegenText(active)}</small></div></div>
-      <div class="maze-play-layout"><div>${renderMazeGrid(active,maze)}<div class="maze-legend"><span><b>◆</b> You</span><span>🚪 Exit</span><span>Fog hides unexplored halls</span></div></div><div class="maze-side"><div class="maze-control-pad">${movement}</div><div class="maze-status"><strong>${maze.completed?'ESCAPED!':healthy?'Find the exit.':'Healthy Active Monster required.'}</strong><p id="mazeMessage">${es.lastMessage||'The walls groan softly. Pick a direction.'}</p></div>${maze.completed?'<button id="newMazeAfterEscape" class="primary" type="button">Enter New Maze</button>':'<button id="abandonMaze" class="ghost small" type="button">Abandon & Generate New Maze</button>'}<div class="maze-run-stats"><span>Escapes</span><strong>${es.escapes}</strong></div>${(a.eventSpecies||[]).filter(slug=>state.species[slug]).length?`<div class="event-dev-note ready">${(a.eventSpecies||[]).filter(slug=>state.species[slug]).length} Event monster${(a.eventSpecies||[]).filter(slug=>state.species[slug]).length===1?'':'s'} registered in the maze.</div>`:'<div class="event-dev-note">Framework test: no Event monsters are registered yet. Encounter rolls become eerie empty-hall moments until we add the first Halloween species.</div>'}</div></div>
+      <div class="maze-play-layout"><div>${renderMazeGrid(active,maze)}<div class="maze-legend"><span><b>◆</b> You</span><span>🚪 Exit</span><span>Fog hides unexplored halls</span></div></div><div class="maze-side"><div class="maze-control-pad">${movement}</div><div class="maze-status"><strong>${maze.completed?'ESCAPED!':healthy?'Find the exit.':'Healthy Active Monster required.'}</strong><p id="mazeMessage">${es.lastMessage||'The walls groan softly. Pick a direction.'}</p></div>${maze.completed?'<button id="newMazeAfterEscape" class="primary" type="button">Enter New Maze</button>':'<button id="abandonMaze" class="ghost small" type="button">Abandon & Generate New Maze</button>'}<div class="maze-run-stats"><span>Escapes</span><strong>${es.escapes}</strong></div>${halloweenMazeEncounterPool(active).length?`<div class="event-dev-note ready">${halloweenMazeEncounterPool(active).length} Event monster${halloweenMazeEncounterPool(active).length===1?'':'s'} registered in the maze.</div>`:'<div class="event-dev-note">No published monsters are currently tagged Halloween Maze Encounter.</div>'}</div></div>
     </section>
     <aside class="event-side-stack"><div class="event-exchange-card"><div class="eyebrow">MAZE FINDS</div><h3>Exchange for Fangs</h3><p>These event finds are kept separately from normal Field Finds.</p>${finds}</div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
     <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">EVENT SHOP</div><h3>Fang Exchange</h3><p>Spend Fangs gathered in the Haunted Maze on seasonal supplies and exclusive Halloween rewards.</p></div></div><div class="event-shop-grid">${shop}</div></section>`;
@@ -2326,6 +2344,15 @@ function grantRareEventEgg(def){
   state.eggs.push({id,slug,speciesName:sp.name,displayName:'Haunted Event Egg',motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'event-maze',createdAt:Date.now(),status:'waiting',catalystUsed:false});
   return {slug,name:sp.name,id};
 }
+function halloweenMazeEncounterPool(def){
+  const tagged=Object.entries(state.species||{}).filter(([,sp])=>sp&&!sp.isCrossbreed&&sp.obtain==='Halloween Maze Encounter'&&(sp.builtin||sp.published!==false)).map(([slug])=>slug);
+  if(tagged.length)return tagged;
+  return (def?.activity?.eventSpecies||[]).filter(slug=>state.species[slug]);
+}
+function halloweenMazeEncounterWeight(def,slug){
+  const a=def?.activity||{},weights=a.eventSpeciesWeights||{};
+  return Math.max(.001,Number(weights[slug]??a.defaultEventSpeciesWeight??40));
+}
 async function moveEventMaze(dir){
   const def=activeEvent();if(!def||def.activity?.type!=='maze')return;const es=eventStateFor(def);refreshMazeSteps(def);const maze=ensureMaze(def),mon=activeMonster();if(maze.completed||es.steps<=0||!mon||isMonsterFainted(mon)||!mazeCanMove(maze,dir))return;
   if(es.steps>=def.activity.maxSteps)es.stepUpdatedAt=Date.now();
@@ -2340,11 +2367,10 @@ async function moveEventMaze(dir){
     es.lastMessage=`You escaped the Haunted Maze! +10 Fangs and +25 Account XP.${clearEgg?' BONUS: Haunted Event Egg!':''}${levelRewards.length?' '+levelRewards.join(' • '):''}`;
     save();renderAll();return;
   }
-  const a=def.activity,roll=Math.random(),pool=(a.eventSpecies||[]).filter(slug=>state.species[slug]);
+  const a=def.activity,roll=Math.random(),pool=halloweenMazeEncounterPool(def);
   const chooseEventSpecies=()=>{
     if(!pool.length)return null;
-    const weights=a.eventSpeciesWeights||{};
-    return weightedChoice(pool.map(slug=>({value:slug,weight:Math.max(.001,Number(weights[slug]??1))})));
+    return weightedChoice(pool.map(slug=>({value:slug,weight:halloweenMazeEncounterWeight(def,slug)})));
   };
   const eggChance=Math.max(0,Number(a.rareEggChance||0));
   const encounterChance=Math.max(0,Number(a.encounterChance??.20));
@@ -3995,7 +4021,7 @@ async function saveSpeciesForm(e){
   state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
-  save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadSpeciesIntoForm(slug);
+  save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Package when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadSpeciesIntoForm(slug);
 }
 function grantTestCopy(){
   const slug=document.getElementById('editSlug').value,sp=state.species[slug];if(!slug||!sp){document.getElementById('adminMessage').textContent='Save the species first.';return;}
@@ -4079,7 +4105,7 @@ function saveAttackForm(e){
   e.preventDefault();const oldId=document.getElementById('editAttackId').value,name=document.getElementById('attackName').value.trim();if(!name)return;let id=oldId||slugify(name);if(!oldId&&state.attacks[id])id=`${id}-${Date.now().toString().slice(-5)}`;const prev=state.attacks[id]||{};
   if(!confirm(oldId?`Save changes to attack "${name}"?`:`Create new attack "${name}"?`))return;
   state.attacks[id]={...prev,name,element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,fxStyle:document.getElementById('attackFxStyle').value,power:Number(document.getElementById('attackPower').value),accuracy:Number(document.getElementById('attackAccuracy').value),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value),statusDuration:Number(document.getElementById('attackStatusDuration').value),lifeSteal:Math.max(0,Math.min(100,Number(document.getElementById('attackLifeSteal').value||0))),evadeNext:Math.max(0,Math.min(100,Number(document.getElementById('attackEvadeNext').value||0))),description:document.getElementById('attackDescription').value.trim(),scrollEnabled:document.getElementById('scrollEnabled').checked,scrollPrice:Number(document.getElementById('scrollPrice').value||5000),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishAttack').checked};
-  save();document.getElementById('editAttackId').value=id;document.getElementById('attackAdminMessage').textContent=`Saved ${name}.${state.attacks[id].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadAttackIntoForm(id);
+  save();document.getElementById('editAttackId').value=id;document.getElementById('attackAdminMessage').textContent=`Saved ${name}.${state.attacks[id].published?' Export Live Package when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadAttackIntoForm(id);
 }
 function deleteCurrentAttack(){
   const id=document.getElementById('editAttackId').value,a=state.attacks[id];if(!id||!a||a.builtin)return;
@@ -4090,6 +4116,80 @@ function deleteCurrentAttack(){
 
 async function blobToDataURL(blob){return await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(blob);});}
 async function dataURLToBlob(data){return await (await fetch(data)).blob();}
+async function liveAssetReferenceToBlob(ref){
+  if(!ref)return null;
+  if(String(ref).startsWith('data:'))return dataURLToBlob(ref);
+  const response=await fetch(ref,{cache:'no-cache'});
+  if(!response.ok)throw new Error(`Asset HTTP ${response.status}: ${ref}`);
+  return response.blob();
+}
+async function exportableAssetDataUrl(key){
+  const stored=await getAssetBlob(key);if(stored)return blobToDataURL(stored);
+  const ref=liveAssetRefs[key];if(!ref)return null;
+  if(String(ref).startsWith('data:'))return ref;
+  try{return blobToDataURL(await liveAssetReferenceToBlob(ref));}catch(_e){return ref;}
+}
+function safeLiveFilePart(value,fallback='asset'){return String(value||fallback).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'')||fallback;}
+function liveAssetExtension(blob){const type=String(blob?.type||'').toLowerCase();if(type.includes('jpeg'))return 'jpg';if(type.includes('webp'))return 'webp';if(type.includes('gif'))return 'gif';return 'png';}
+function zipCrc32(bytes){
+  if(!zipCrc32.table){zipCrc32.table=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);return c>>>0;});}
+  let c=0xffffffff;for(const b of bytes)c=zipCrc32.table[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;
+}
+function zipDosDateTime(date=new Date()){
+  const year=Math.max(1980,date.getFullYear());
+  const time=((date.getHours()&31)<<11)|((date.getMinutes()&63)<<5)|((Math.floor(date.getSeconds()/2))&31);
+  const day=((year-1980)<<9)|((date.getMonth()+1)<<5)|date.getDate();
+  return {time,day};
+}
+function zipWrite16(view,offset,value){view.setUint16(offset,value,true);}
+function zipWrite32(view,offset,value){view.setUint32(offset,value>>>0,true);}
+async function buildStoredZip(fileEntries){
+  const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+  for(const entry of fileEntries){
+    const name=String(entry.name||'file').replace(/^\/+/,''),nameBytes=enc.encode(name);
+    const bytes=typeof entry.data==='string'?enc.encode(entry.data):new Uint8Array(await entry.data.arrayBuffer());
+    const crc=zipCrc32(bytes),stamp=zipDosDateTime();
+    const local=new Uint8Array(30+nameBytes.length),lv=new DataView(local.buffer);
+    zipWrite32(lv,0,0x04034b50);zipWrite16(lv,4,20);zipWrite16(lv,6,0);zipWrite16(lv,8,0);zipWrite16(lv,10,stamp.time);zipWrite16(lv,12,stamp.day);zipWrite32(lv,14,crc);zipWrite32(lv,18,bytes.length);zipWrite32(lv,22,bytes.length);zipWrite16(lv,26,nameBytes.length);zipWrite16(lv,28,0);local.set(nameBytes,30);
+    parts.push(local,bytes);
+    const cent=new Uint8Array(46+nameBytes.length),cv=new DataView(cent.buffer);
+    zipWrite32(cv,0,0x02014b50);zipWrite16(cv,4,20);zipWrite16(cv,6,20);zipWrite16(cv,8,0);zipWrite16(cv,10,0);zipWrite16(cv,12,stamp.time);zipWrite16(cv,14,stamp.day);zipWrite32(cv,16,crc);zipWrite32(cv,20,bytes.length);zipWrite32(cv,24,bytes.length);zipWrite16(cv,28,nameBytes.length);zipWrite16(cv,30,0);zipWrite16(cv,32,0);zipWrite16(cv,34,0);zipWrite16(cv,36,0);zipWrite32(cv,38,0);zipWrite32(cv,42,offset);cent.set(nameBytes,46);central.push(cent);
+    offset+=local.length+bytes.length;
+  }
+  const centralOffset=offset,centralSize=central.reduce((n,p)=>n+p.length,0),end=new Uint8Array(22),ev=new DataView(end.buffer);
+  zipWrite32(ev,0,0x06054b50);zipWrite16(ev,4,0);zipWrite16(ev,6,0);zipWrite16(ev,8,fileEntries.length);zipWrite16(ev,10,fileEntries.length);zipWrite32(ev,12,centralSize);zipWrite32(ev,16,centralOffset);zipWrite16(ev,20,0);
+  return new Blob([...parts,...central,end],{type:'application/zip'});
+}
+async function buildLivePublishingPackage(){
+  const files=[],customSpecies={};
+  for(const [slug,sp] of Object.entries(state.species)){
+    if(sp.builtin||!sp.published)continue;
+    customSpecies[slug]={species:{...sp,builtin:false},base:null,prismatic:null,egg:null};
+    for(const kind of ['base','prismatic','egg']){
+      const key=`${slug}:${kind}`,b=await getAssetBlob(key);
+      if(b){const path=`assets/live/monsters/${safeLiveFilePart(slug,'monster')}_${kind}.${liveAssetExtension(b)}`;customSpecies[slug][kind]=path;files.push({name:path,data:b});}
+      else if(liveAssetRefs[key])customSpecies[slug][kind]=liveAssetRefs[key];
+    }
+  }
+  const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin&&a.published));
+  const customSprites={};
+  for(const key of Object.keys(SPRITE_DEFS)){
+    const assetKey=`sprite:${key}`,b=await getAssetBlob(assetKey);
+    if(b){const path=`assets/live/sprites/${safeLiveFilePart(key,'sprite')}.${liveAssetExtension(b)}`;customSprites[key]=path;files.push({name:path,data:b});}
+    else if(liveAssetRefs[assetKey])customSprites[key]=liveAssetRefs[assetKey];
+  }
+  const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};
+  for(const id of Object.keys(state.trials||{})){
+    trialAssets[id]={};
+    for(const kind of ['captain','badge']){
+      const key=`trial:${id}:${kind}`,b=await getAssetBlob(key);
+      if(b){const path=`assets/live/trials/${safeLiveFilePart(id,'trial')}_${kind}.${liveAssetExtension(b)}`;trialAssets[id][kind]=path;files.push({name:path,data:b});}
+      else if(liveAssetRefs[key])trialAssets[id][kind]=liveAssetRefs[key];
+    }
+  }
+  const pack={version:9,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,trialDefinitions,trialAssets};
+  return {pack,files};
+}
 function liveContentManifestFromPack(pack){
   const dialogue=pack?.silverwindDialogue||{};
   const dialogueLines=(dialogue.general||[]).length+Object.values(dialogue.monsters||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0)+Object.values(dialogue.events||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0);
@@ -4115,14 +4215,14 @@ async function buildContentPack({publishedOnly=false}={}){
   for(const [slug,sp] of Object.entries(state.species)){
     if(sp.builtin||(publishedOnly&&!sp.published))continue;
     customSpecies[slug]={species:{...sp,builtin:false},base:null,prismatic:null,egg:null};
-    for(const kind of ['base','prismatic','egg']){const b=await getAssetBlob(`${slug}:${kind}`);if(b)customSpecies[slug][kind]=await blobToDataURL(b);}
+    for(const kind of ['base','prismatic','egg']){const ref=await exportableAssetDataUrl(`${slug}:${kind}`);if(ref)customSpecies[slug][kind]=ref;}
   }
   const customAttacks=Object.fromEntries(Object.entries(state.attacks).filter(([,a])=>!a.builtin&&(!publishedOnly||a.published)));
   // Sprite Workshop is an authoritative content editor: every uploaded replacement
   // is shared automatically. This includes event/shop/find icons and Silvy poses.
-  const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const b=await getAssetBlob(`sprite:${key}`);if(b)customSprites[key]=await blobToDataURL(b);}
+  const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const ref=await exportableAssetDataUrl(`sprite:${key}`);if(ref)customSprites[key]=ref;}
   // Dialogue, landing posts, Event Calendars, and Trials are content-layer data, not player save data.
-  const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const b=await getAssetBlob(`trial:${id}:${kind}`);if(b)trialAssets[id][kind]=await blobToDataURL(b);}}
+  const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const ref=await exportableAssetDataUrl(`trial:${id}:${kind}`);if(ref)trialAssets[id][kind]=ref;}}
   return {version:8,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
@@ -4133,12 +4233,14 @@ async function exportLiveContent(){
     document.getElementById('adminMessage').textContent=`Cannot export yet: a published monster uses a Draft custom attack (${names}). Publish that attack first.`;
     return;
   }
-  const pack=await buildContentPack({publishedOnly:true});
+  const {pack,files}=await buildLivePublishingPackage();
   const manifest=liveContentManifestFromPack(pack);
-  const payload={kind:'prismwild-live-content',schemaVersion:8,contentRevision:new Date().toISOString(),manifest,...pack};
+  const payload={kind:'prismwild-live-content',schemaVersion:9,contentRevision:new Date().toISOString(),manifest,...pack};
   const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
-  const blob=new Blob([text],{type:'application/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-content.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  document.getElementById('adminMessage').textContent=`Exported Live Content: ${liveContentManifestLabel(manifest)}. Replace content/prismwild-content.js in the GitHub repo, then Commit and Push.`;
+  const readme=`PRISMWILD LIVE CONTENT PACKAGE\n\nExtract this ZIP directly into the ROOT of your local prismwild-test GitHub repository.\nAllow your unzip tool to merge/overwrite matching paths.\n\nThis package contains:\n- content/prismwild-content.js\n- assets/live/... published monster, sprite, and Trial artwork\n\nThen use GitHub Desktop to Commit and Push origin.\nPlayer save data is not included.\n`;
+  files.unshift({name:'content/prismwild-content.js',data:text},{name:'LIVE_CONTENT_PACKAGE_README.txt',data:readme});
+  const blob=await buildStoredZip(files),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild-live-content.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  document.getElementById('adminMessage').textContent=`Exported Live Package: ${liveContentManifestLabel(manifest)}. Extract prismwild-live-content.zip into the GitHub repo root, then Commit and Push.`;
 }
 
 async function loadLiveContentScript(){
@@ -4164,38 +4266,47 @@ async function loadLiveContentScript(){
 }
 async function applyLiveContent(data){
   if(!data||data.kind!=='prismwild-live-content')return false;
+  // Path-based Live Content art must be re-hydrated on every page load even when
+  // the content revision is already saved, because liveAssetRefs is in-memory only.
+  liveAssetRefs={};
+  for(const [slug,entry] of Object.entries(data.customSpecies||{}))for(const kind of ['base','prismatic','egg'])if(entry?.[kind]&&!String(entry[kind]).startsWith('data:'))liveAssetRefs[`${slug}:${kind}`]=entry[kind];
+  for(const [key,ref] of Object.entries(data.customSprites||{}))if(ref&&!String(ref).startsWith('data:'))liveAssetRefs[`sprite:${key}`]=ref;
+  for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]&&!String(assets[kind]).startsWith('data:'))liveAssetRefs[`trial:${id}:${kind}`]=assets[kind];
   const revision=String(data.contentRevision||'');
   if(revision&&state.liveContentRevision===revision)return false;
   for(const [slug,entry] of Object.entries(data.customSpecies||{})){
     state.species[slug]={...(state.species[slug]||{}),...(entry.species||{}),builtin:false,published:true};
-    for(const kind of ['base','prismatic','egg'])if(entry?.[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));
+    for(const kind of ['base','prismatic','egg'])if(entry?.[kind]){
+      const key=`${slug}:${kind}`,ref=entry[kind];
+      if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;
+    }
   }
   for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...(state.attacks[id]||{}),...a,builtin:false,published:true};
-  for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
+  for(const [key,ref] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&ref){if(String(ref).startsWith('data:'))await putAsset(`sprite:${key}`,await dataURLToBlob(ref));else liveAssetRefs[`sprite:${key}`]=ref;}}
   if(data.silverwindDialogue)state.silverwindDialogue=data.silverwindDialogue;
   if(data.landingFeed)state.landingFeed=data.landingFeed;
   if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
   if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
-  for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
+  for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]){const key=`trial:${id}:${kind}`,ref=assets[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
   state.liveContentRevision=revision||`legacy-${Date.now()}`;
   state.liveContentManifest=data.manifest||liveContentManifestFromPack(data);
   return true;
 }
 async function exportAdmin(){
   const pack=await buildContentPack({publishedOnly:false});
-  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01530.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01541.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
     const data=JSON.parse(await file.text());
-    for(const [slug,entry] of Object.entries(data.customSpecies||{})){const wasPublished=!!state.species[slug]?.published;state.species[slug]={...entry.species,builtin:false,published:entry.species?.published===undefined?wasPublished:!!entry.species.published};for(const kind of ['base','prismatic','egg'])if(entry[kind])await putAsset(`${slug}:${kind}`,await dataURLToBlob(entry[kind]));}
+    for(const [slug,entry] of Object.entries(data.customSpecies||{})){const wasPublished=!!state.species[slug]?.published;state.species[slug]={...entry.species,builtin:false,published:entry.species?.published===undefined?wasPublished:!!entry.species.published};for(const kind of ['base','prismatic','egg'])if(entry[kind]){const key=`${slug}:${kind}`,ref=entry[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}}
     for(const [id,a] of Object.entries(data.customAttacks||{})){const wasPublished=!!state.attacks[id]?.published;state.attacks[id]={...a,builtin:false,published:a?.published===undefined?wasPublished:!!a.published};}
-    for(const [key,dataUrl] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&dataUrl)await putAsset(`sprite:${key}`,await dataURLToBlob(dataUrl));}
+    for(const [key,ref] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&ref){if(String(ref).startsWith('data:'))await putAsset(`sprite:${key}`,await dataURLToBlob(ref));else liveAssetRefs[`sprite:${key}`]=ref;}}
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
     if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
     if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
-    for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind])await putAsset(`trial:${id}:${kind}`,await dataURLToBlob(assets[kind]));
+    for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]){const key=`trial:${id}:${kind}`,ref=assets[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
     normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Event Calendars, Silvy dialogue, and Trial data.';
   }catch(e){document.getElementById('adminMessage').textContent='Import failed: '+e.message;}
 }
@@ -4340,7 +4451,7 @@ let selectedTrialId='nature_trial';
 let trialSession=null;
 
 async function trialAssetUrl(trialId,kind){
-  const custom=await storedAssetUrl(`trial:${trialId}:${kind}`);if(custom)return custom;
+  const custom=(await storedAssetUrl(`trial:${trialId}:${kind}`))||liveAssetRefs[`trial:${trialId}:${kind}`];if(custom)return custom;
   const trial=state.trials?.[trialId];
   if(kind==='captain')return trial?.captainFallback||GENERIC_TRIAL_CAPTAIN;
   return trial?.badgeFallback||GENERIC_TRIAL_BADGE;
@@ -4387,7 +4498,7 @@ async function renderTrialDetail(){
   const resumeBanner=thisTrial?`<div class="trial-resume-card"><div><span class="shop-category">TRIAL IN PROGRESS</span><strong>${trial.modeLabel||trial.name} • ${trialSession.mode==='hard'?'Hard':'Normal'}</strong><small>Opponent ${Math.min(3,(trialSession.index||0)+1)} of 3 • ${displayName(state.monsters.find(m=>m.id===trialSession.playerId)||active)}</small></div><button id="resumeTrialBattle" class="primary" type="button">Resume Trial</button></div>`:'';
   const normalDisabled=!active||isMonsterFainted(active)||active.level<normalReq||battleBusy;
   const hardDisabled=!active||isMonsterFainted(active)||active.level<hardReq||battleBusy;
-  box.innerHTML=`${resumeBanner}<div class="trial-captain-focus"><button id="trialCaptainTalk" class="trial-captain-click" type="button"><img id="trialCaptainFocusArt" alt="${trial.captainName||'Trial Captain'}"><span>Click Captain</span></button><div><div class="eyebrow">${trial.element.toUpperCase()} TRIAL</div><h2>${trial.name}</h2><h3>${trial.captainName||'Trial Captain'}</h3><p id="trialCaptainLine" class="trial-captain-line">Click the Captain to hear what they have to say.</p></div></div>
+  box.innerHTML=`${resumeBanner}<div class="trial-captain-focus"><button id="trialCaptainTalk" class="trial-captain-click" type="button"><img id="trialCaptainFocusArt" alt="${trial.captainName||'Trial Captain'}"><span>Click Captain</span></button><div><div class="eyebrow">${trial.element.toUpperCase()} TRIAL</div><h2>${trial.name}</h2><h3>${trial.captainName||'Trial Captain'}</h3>${trial.trialPhilosophy?`<div class="trial-philosophy">${trial.trialPhilosophy}</div>`:''}<p id="trialCaptainLine" class="trial-captain-line">Click the Captain to hear what they have to say.</p>${trial.captainLore?`<p class="trial-captain-lore">${trial.captainLore}</p>`:''}</div></div>
     <div class="trial-lineup-preview">${trial.lineup.map((slot,i)=>`<div><strong>${i+1}. ${state.species[slot.slug]?.name||slot.slug}</strong><span>Normal Lv.${trialModeLevel(slot,'normal')} • Hard Lv.${trialModeLevel(slot,'hard')}</span></div>`).join('')}</div>
     <div class="trial-mode-grid"><div class="trial-mode-card"><span>NORMAL</span><h3>Lv.${normalReq}+</h3><p>Clear all three opponents to earn <strong>${trial.badgeName||`${trial.element} Badge`}</strong>.</p><button id="startTrialNormal" class="primary" type="button" ${normalDisabled?'disabled':''}>${battleBusy?'Battle in Progress':prog.normal?'Challenge Again':'Start Normal Trial'}</button><small>${prog.normal?'Badge earned ✓':active?`Active: ${displayName(active)} Lv.${active.level}`:'Choose an Active Monster'}</small></div>
     <div class="trial-mode-card hard"><span>HARD</span><h3>Lv.${hardReq}+</h3><p>First clear awards the exclusive move <strong>${reward}</strong>.</p><button id="startTrialHard" class="primary" type="button" ${hardDisabled?'disabled':''}>${battleBusy?'Battle in Progress':prog.hard?'Challenge Again':'Start Hard Trial'}</button><small>${prog.hard?'Hard reward earned ✓':active?`Active: ${displayName(active)} Lv.${active.level}`:'Choose an Active Monster'}</small></div></div>
@@ -4401,7 +4512,7 @@ async function renderTrialDetail(){
 function prepareTrialBattle(){
   const trial=state.trials?.[trialSession?.trialId],player=state.monsters.find(m=>m.id===trialSession?.playerId),slot=trial?.lineup?.[trialSession?.index||0];if(!trial||!player||!slot||isMonsterFainted(player))return false;
   const sp=state.species[slot.slug];if(!sp)return false;const level=trialModeLevel(slot,trialSession.mode),enemy={id:`trial-${Date.now()}-${trialSession.index}`,slug:slot.slug,level,xp:0,gender:hatchGender(),potential:1,trait:rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:false};
-  const ps=battleStatsFor(player),es=battleStatsFor(enemy);battleSession={mode:'trial',trialId:trialSession.trialId,trialMode:trialSession.mode,trialIndex:trialSession.index,started:true,playerId:player.id,enemy,playerHp:Math.max(1,Math.min(ps.hp,Number(trialSession.currentHp||ps.hp))),enemyHp:es.hp,playerStatus:null,enemyStatus:null,log:[`${trial.name} • ${trialSession.mode==='hard'?'Hard':'Normal'} • Opponent ${trialSession.index+1}/3: ${sp.name} Lv.${level}!`],result:null,locked:false};return true;
+  const ps=battleStatsFor(player),es=battleStatsFor(enemy),introLine=trialSession.index===0?(trialSession.mode==='hard'?(trial.hardIntroDialogue||trial.normalIntroDialogue||trial.captainDialogue):(trial.normalIntroDialogue||trial.captainDialogue)):'';const log=[];if(introLine)log.push(`${trial.captainName||'Trial Captain'}: "${introLine}"`);log.push(`${trial.name} • ${trialSession.mode==='hard'?'Hard':'Normal'} • Opponent ${trialSession.index+1}/3: ${sp.name} Lv.${level}!`);battleSession={mode:'trial',trialId:trialSession.trialId,trialMode:trialSession.mode,trialIndex:trialSession.index,started:true,playerId:player.id,enemy,playerHp:Math.max(1,Math.min(ps.hp,Number(trialSession.currentHp||ps.hp))),enemyHp:es.hp,playerStatus:null,enemyStatus:null,log,result:null,locked:false};return true;
 }
 async function startTrial(trialId,mode){
   const trial=state.trials?.[trialId],active=activeMonster();if(!trial||!active||isMonsterFainted(active)||active.level<trialModeRequirement(trial,mode)||battleSession)return;
@@ -4426,15 +4537,15 @@ function renderTrialRegistry(){
 }
 async function setTrialAdminPreview(id,kind,imgId){const img=document.getElementById(imgId);if(!img)return;img.src=await trialAssetUrl(id,kind);}
 function newTrialForm(){
-  document.getElementById('trialForm').reset();document.getElementById('editTrialId').value='';populateTrialAdminDropdowns();document.getElementById('trialElement').value='Nature';document.getElementById('trialNormalReq').value=20;document.getElementById('trialHardReq').value=70;document.getElementById('trialBadgeName').value='Nature Badge';document.getElementById('trialCaptainName').value='Trial Captain';document.getElementById('trialRewardAttack').value=state.attacks.nature_beam?'nature_beam':Object.keys(state.attacks)[0]||'';const slugs=Object.keys(state.species);for(let i=1;i<=3;i++){document.getElementById(`trialLineup${i}Species`).value=slugs[Math.min(i-1,slugs.length-1)]||'';document.getElementById(`trialLineup${i}Normal`).value=20+(i-1)*2;document.getElementById(`trialLineup${i}Hard`).value=70+(i-1)*2;}document.getElementById('trialCaptainPreview').src=GENERIC_TRIAL_CAPTAIN;document.getElementById('trialBadgePreview').src=GENERIC_TRIAL_BADGE;document.getElementById('deleteTrial').classList.add('hidden');document.getElementById('trialAdminMessage').textContent='';
+  document.getElementById('trialForm').reset();document.getElementById('editTrialId').value='';populateTrialAdminDropdowns();document.getElementById('trialElement').value='Nature';document.getElementById('trialNormalReq').value=20;document.getElementById('trialHardReq').value=70;document.getElementById('trialBadgeName').value='Nature Badge';document.getElementById('trialCaptainName').value='Trial Captain';document.getElementById('trialPhilosophy').value='';document.getElementById('trialRewardAttack').value=state.attacks.nature_beam?'nature_beam':Object.keys(state.attacks)[0]||'';const slugs=Object.keys(state.species);for(let i=1;i<=3;i++){document.getElementById(`trialLineup${i}Species`).value=slugs[Math.min(i-1,slugs.length-1)]||'';document.getElementById(`trialLineup${i}Normal`).value=20+(i-1)*2;document.getElementById(`trialLineup${i}Hard`).value=70+(i-1)*2;}document.getElementById('trialCaptainPreview').src=GENERIC_TRIAL_CAPTAIN;document.getElementById('trialBadgePreview').src=GENERIC_TRIAL_BADGE;document.getElementById('deleteTrial').classList.add('hidden');document.getElementById('trialAdminMessage').textContent='';
 }
 async function loadTrialIntoForm(id){
-  const t=state.trials[id];if(!t)return;populateTrialAdminDropdowns();document.getElementById('editTrialId').value=id;document.getElementById('trialName').value=t.name;document.getElementById('trialElement').value=t.element;document.getElementById('trialCaptainName').value=t.captainName||'';document.getElementById('trialNormalReq').value=t.normalRequirement;document.getElementById('trialHardReq').value=t.hardRequirement;document.getElementById('trialBadgeName').value=t.badgeName||'';document.getElementById('trialCaptainDialogue').value=t.captainDialogue||'';document.getElementById('trialRewardAttack').value=t.rewardAttackId||'';for(let i=1;i<=3;i++){const slot=t.lineup[i-1]||{};document.getElementById(`trialLineup${i}Species`).value=slot.slug||'';document.getElementById(`trialLineup${i}Normal`).value=slot.normalLevel||t.normalRequirement;document.getElementById(`trialLineup${i}Hard`).value=slot.hardLevel||t.hardRequirement;}document.getElementById('deleteTrial').classList.toggle('hidden',!!t.builtin);document.getElementById('trialAdminMessage').textContent=`Editing ${t.name}`;await setTrialAdminPreview(id,'captain','trialCaptainPreview');await setTrialAdminPreview(id,'badge','trialBadgePreview');
+  const t=state.trials[id];if(!t)return;populateTrialAdminDropdowns();document.getElementById('editTrialId').value=id;document.getElementById('trialName').value=t.name;document.getElementById('trialElement').value=t.element;document.getElementById('trialCaptainName').value=t.captainName||'';document.getElementById('trialNormalReq').value=t.normalRequirement;document.getElementById('trialHardReq').value=t.hardRequirement;document.getElementById('trialBadgeName').value=t.badgeName||'';document.getElementById('trialCaptainDialogue').value=t.captainDialogue||'';document.getElementById('trialPhilosophy').value=t.trialPhilosophy||'';document.getElementById('trialNormalIntroDialogue').value=t.normalIntroDialogue||'';document.getElementById('trialHardIntroDialogue').value=t.hardIntroDialogue||'';document.getElementById('trialVictoryDialogue').value=t.victoryDialogue||'';document.getElementById('trialDefeatDialogue').value=t.defeatDialogue||'';document.getElementById('trialCaptainLore').value=t.captainLore||'';document.getElementById('trialRewardAttack').value=t.rewardAttackId||'';for(let i=1;i<=3;i++){const slot=t.lineup[i-1]||{};document.getElementById(`trialLineup${i}Species`).value=slot.slug||'';document.getElementById(`trialLineup${i}Normal`).value=slot.normalLevel||t.normalRequirement;document.getElementById(`trialLineup${i}Hard`).value=slot.hardLevel||t.hardRequirement;}document.getElementById('deleteTrial').classList.toggle('hidden',!!t.builtin);document.getElementById('trialAdminMessage').textContent=`Editing ${t.name}`;await setTrialAdminPreview(id,'captain','trialCaptainPreview');await setTrialAdminPreview(id,'badge','trialBadgePreview');
 }
 async function saveTrialForm(e){
   e.preventDefault();const oldId=document.getElementById('editTrialId').value,name=document.getElementById('trialName').value.trim();if(!name)return;let id=oldId||slugify(name).replace(/-/g,'_');if(!oldId&&state.trials[id])id=`${id}_${Date.now().toString().slice(-5)}`;const prev=state.trials[id]||{};
   if(!confirm(oldId?`Save changes to Trial "${name}"?`:`Create new Trial "${name}"?`))return;
-  const lineup=[];for(let i=1;i<=3;i++)lineup.push({slug:document.getElementById(`trialLineup${i}Species`).value,normalLevel:clamp(Number(document.getElementById(`trialLineup${i}Normal`).value||20),1,100),hardLevel:clamp(Number(document.getElementById(`trialLineup${i}Hard`).value||70),1,100)});state.trials[id]={...prev,name,element:document.getElementById('trialElement').value,captainName:document.getElementById('trialCaptainName').value.trim()||'Trial Captain',captainDialogue:document.getElementById('trialCaptainDialogue').value.trim(),normalRequirement:clamp(Number(document.getElementById('trialNormalReq').value||20),1,100),hardRequirement:clamp(Number(document.getElementById('trialHardReq').value||70),1,100),badgeName:document.getElementById('trialBadgeName').value.trim()||`${document.getElementById('trialElement').value} Badge`,rewardAttackId:document.getElementById('trialRewardAttack').value,lineup,builtin:!!prev.builtin,captainFallback:prev.captainFallback||GENERIC_TRIAL_CAPTAIN,badgeFallback:prev.badgeFallback||GENERIC_TRIAL_BADGE};state.trialProgress[id]=state.trialProgress[id]||{normal:false,hard:false};const cap=document.getElementById('trialCaptainArt').files?.[0],badge=document.getElementById('trialBadgeArt').files?.[0];if(cap)await putAsset(`trial:${id}:captain`,cap);if(badge)await putAsset(`trial:${id}:badge`,badge);save();selectedTrialId=id;document.getElementById('editTrialId').value=id;document.getElementById('trialAdminMessage').textContent=`Saved ${name}.`;renderAll();await loadTrialIntoForm(id);
+  const lineup=[];for(let i=1;i<=3;i++)lineup.push({slug:document.getElementById(`trialLineup${i}Species`).value,normalLevel:clamp(Number(document.getElementById(`trialLineup${i}Normal`).value||20),1,100),hardLevel:clamp(Number(document.getElementById(`trialLineup${i}Hard`).value||70),1,100)});state.trials[id]={...prev,name,element:document.getElementById('trialElement').value,captainName:document.getElementById('trialCaptainName').value.trim()||'Trial Captain',captainDialogue:document.getElementById('trialCaptainDialogue').value.trim(),trialPhilosophy:document.getElementById('trialPhilosophy').value.trim(),normalIntroDialogue:document.getElementById('trialNormalIntroDialogue').value.trim(),hardIntroDialogue:document.getElementById('trialHardIntroDialogue').value.trim(),victoryDialogue:document.getElementById('trialVictoryDialogue').value.trim(),defeatDialogue:document.getElementById('trialDefeatDialogue').value.trim(),captainLore:document.getElementById('trialCaptainLore').value.trim(),normalRequirement:clamp(Number(document.getElementById('trialNormalReq').value||20),1,100),hardRequirement:clamp(Number(document.getElementById('trialHardReq').value||70),1,100),badgeName:document.getElementById('trialBadgeName').value.trim()||`${document.getElementById('trialElement').value} Badge`,rewardAttackId:document.getElementById('trialRewardAttack').value,lineup,builtin:!!prev.builtin,captainFallback:prev.captainFallback||GENERIC_TRIAL_CAPTAIN,badgeFallback:prev.badgeFallback||GENERIC_TRIAL_BADGE};state.trialProgress[id]=state.trialProgress[id]||{normal:false,hard:false};const cap=document.getElementById('trialCaptainArt').files?.[0],badge=document.getElementById('trialBadgeArt').files?.[0];if(cap)await putAsset(`trial:${id}:captain`,cap);if(badge)await putAsset(`trial:${id}:badge`,badge);save();selectedTrialId=id;document.getElementById('editTrialId').value=id;document.getElementById('trialAdminMessage').textContent=`Saved ${name}.`;renderAll();await loadTrialIntoForm(id);
 }
 async function deleteCurrentTrial(){const id=document.getElementById('editTrialId').value,t=state.trials[id];if(!id||!t||t.builtin)return;if(!confirm(`Delete custom Trial "${t.name}"?`))return;delete state.trials[id];delete state.trialProgress[id];await deleteAsset(`trial:${id}:captain`);await deleteAsset(`trial:${id}:badge`);selectedTrialId=Object.keys(state.trials)[0]||null;save();newTrialForm();renderAll();}
 function renderTrialAdmin(){if(!document.getElementById('trialRegistryList'))return;renderTrialRegistry();}
@@ -5265,7 +5376,7 @@ function checkBattleEnd(){
     if(battleSession.mode==='trial'){
       const t=state.trials?.[battleSession.trialId];
       trialSession=null;save();
-      battleSession.result={type:'trial-defeat',title:'Trial Run Ended',text:`${displayName(player)} fainted during ${t?.name||'the Trial'}. The Captain will be waiting when you are ready to try again.`};
+      battleSession.result={type:'trial-defeat',title:'Trial Run Ended',text:`${displayName(player)} fainted during ${t?.name||'the Trial'}.`,captainName:t?.captainName||'Trial Captain',captainLine:t?.defeatDialogue||'The Captain will be waiting when you are ready to try again.'};
     }else if(battleSession.mode==='gauntlet'){
       const cleared=gauntletSession?.completedStage||0,consolation=10+cleared*8;
       state.currency+=consolation;
@@ -5504,7 +5615,7 @@ function finishVictory(){
       save();battleSession.result={type:'trial-round-victory',title:`Opponent ${index+1} Cleared!`,text:`${displayName(player)} defeated ${enemySp.name} Lv.${enemy.level}.`,xp:rewards.xp,levels,nextIndex:index+1};
     }else{
       const completed=finishTrialRun(player,levels,rewards);
-      battleSession.result={type:'trial-complete',title:`${trial?.name||'Trial'} Cleared!`,text:`${displayName(player)} defeated the full ${completed.mode==='hard'?'Hard':'Normal'} lineup.`,xp:rewards.xp,levels,rewardText:completed.rewardText,trialId:battleSession.trialId,mode:completed.mode};
+      battleSession.result={type:'trial-complete',title:`${trial?.name||'Trial'} Cleared!`,text:`${displayName(player)} defeated the full ${completed.mode==='hard'?'Hard':'Normal'} lineup.`,captainName:trial?.captainName||'Trial Captain',captainLine:trial?.victoryDialogue||'',xp:rewards.xp,levels,rewardText:completed.rewardText,trialId:battleSession.trialId,mode:completed.mode};
       trialSession=null;
     }
     if(levels)battleSession.log.push(`${displayName(player)} gained ${levels} level${levels===1?'':'s'}!`);return;
@@ -5591,10 +5702,10 @@ async function refreshBattleUI(){
       result.innerHTML=`<div class="eyebrow">TRIAL VICTORY</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>+${r.xp} Monster XP</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Face Opponent ${r.nextIndex+1}</button>`;
       document.getElementById('leaveBattle').onclick=continueTrial;
     }else if(r.type==='trial-complete'){
-      result.innerHTML=`<div class="eyebrow">TRIAL CLEARED</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>+${r.xp} Monster XP</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.rewardText?`<strong class="monster-reward">${r.rewardText}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Return to Trials</button>`;
+      result.innerHTML=`<div class="eyebrow">TRIAL CLEARED</div><h3>${r.title}</h3><p>${r.text}</p>${r.captainLine?`<div class="trial-result-quote"><strong>${r.captainName}</strong><span>${r.captainLine}</span></div>`:''}<div class="reward-line"><strong>+${r.xp} Monster XP</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.rewardText?`<strong class="monster-reward">${r.rewardText}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Return to Trials</button>`;
       document.getElementById('leaveBattle').onclick=()=>returnToTrials(r.rewardText||'Trial cleared.');
     }else if(r.type==='trial-defeat'){
-      result.innerHTML=`<div class="eyebrow">TRIAL DEFEAT</div><h3>${r.title}</h3><p>${r.text}</p><button id="leaveBattle" class="primary" type="button">Back to Trials</button>`;
+      result.innerHTML=`<div class="eyebrow">TRIAL DEFEAT</div><h3>${r.title}</h3><p>${r.text}</p>${r.captainLine?`<div class="trial-result-quote"><strong>${r.captainName}</strong><span>${r.captainLine}</span></div>`:''}<button id="leaveBattle" class="primary" type="button">Back to Trials</button>`;
       document.getElementById('leaveBattle').onclick=()=>returnToTrials('Recover, regroup, and challenge the Captain again when you are ready.');
     }else if(r.type==='gauntlet-victory'){
       const stageSummary=gauntletRewardSummary(r.stageReward);
@@ -5892,7 +6003,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.37 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.41 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
