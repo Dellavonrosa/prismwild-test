@@ -18,3 +18,5 @@ BACKUPS
 COMPATIBILITY
 - Existing v0.15.40 game/content data is preserved.
 - Existing player saves remain separate and compatible.
+
+Deployment retry after GitHub Pages environment fix.
