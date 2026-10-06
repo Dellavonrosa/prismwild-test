@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.34</title>
+<title>Prismwild Prototype v0.15.37</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.34</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.37</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -434,8 +434,24 @@
 
         <div class="admin-layout">
           <aside class="registry-panel">
-            <h3>Registered Species</h3>
+            <div class="registry-heading-row"><h3>Registered Species</h3><button id="clearSpeciesFilters" class="ghost tiny" type="button">Clear</button></div>
             <input id="adminSearch" placeholder="Search registry...">
+
+            <div class="monster-census">
+              <div class="monster-census-head">
+                <div><strong>Monster Census</strong><small>Roster health at a glance</small></div>
+                <label>Element count<select id="censusElementMode"><option value="primary">Primary only</option><option value="contains">Contains element</option></select></label>
+              </div>
+              <div id="monsterCensusSummary" class="census-summary"></div>
+              <div id="monsterCensusElements" class="census-elements"></div>
+            </div>
+
+            <div class="registry-filters">
+              <label>Battle type<select id="adminBattleFilter"><option value="all">All battle types</option><option value="Speed">Speed</option><option value="Brute">Brute</option><option value="Defender">Defender</option></select></label>
+              <label>Roster<select id="adminRosterFilter"><option value="all">Whole roster</option><option value="base">Base Monsters</option><option value="crossbreed">Crossbreeds</option><option value="builtin">Built-in only</option><option value="custom">Custom only</option><option value="published">Published custom</option><option value="draft">Draft custom</option><option value="mythic">Mythic only</option></select></label>
+              <label>Sort<select id="adminSpeciesSort"><option value="name">Name A–Z</option><option value="element">Element</option><option value="battle">Battle type</option><option value="bstLow">P1 BST low → high</option><option value="bstHigh">P1 BST high → low</option></select></label>
+            </div>
+            <div id="registryFilterSummary" class="registry-filter-summary"></div>
             <div id="registryList" class="registry-list"></div>
           </aside>
 
@@ -546,11 +562,13 @@
             <input id="editAttackId" type="hidden">
             <div class="form-section">
               <div class="section-title"><span>⚔</span><div><h3>Attack Definition</h3><p>Build a move once, then assign it anywhere.</p></div></div>
-              <div class="form-grid three">
+              <div class="form-grid four">
                 <label>Attack name<input id="attackName" required maxlength="50" placeholder="e.g. Polar Bite"></label>
                 <label>Element<select id="attackElement"></select></label>
                 <label>Style<select id="attackStyle"></select></label>
+                <label>Visual FX<select id="attackFxStyle"></select></label>
               </div>
+              <p class="form-note">Visual FX controls the motion family used in battle. Auto reads the attack name and description, while an explicit choice lets you override it.</p>
               <div class="form-grid four">
                 <label>Power<input id="attackPower" type="number" min="0" max="999" value="50"></label>
                 <label>Accuracy %<input id="attackAccuracy" type="number" min="1" max="100" value="95"></label>
@@ -1084,6 +1102,43 @@ const TYPE_MAX_MULTIPLIER=2;
 const OBTAIN_METHODS = ["Random Battle Reward", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Admin / Test"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
+const ATTACK_FX_STYLES = ["Auto","Bite","Slash","Slam","Projectile","Burst","Beam","Wave"];
+const ATTACK_FX_NAME_OVERRIDES={
+  "Rift Claw":"Slash","Magma Ram":"Slam","Caustic Belch":"Projectile","Thunder Dive":"Slam","Velvet Rend":"Slash",
+  "Petal Guillotine":"Slash","Abyss Coil":"Wave","Briar Impale":"Slam","Polar Bite":"Bite","Toll of Dread":"Wave",
+  "Crypt Crusher":"Slam","Razor Thread":"Slash","Meteor Crash":"Slam","Quickstep Cut":"Slash","Iron Shell":"Slam",
+  "Crescent Flash":"Slash","Crucible Horn":"Slam","Soul Lantern":"Burst","Shear Maw":"Bite","Gutter Clamp":"Bite",
+  "Gale Shear":"Slash","Rimebreak Charge":"Slam","Hollow Reap":"Slash","Rail Surge":"Slam","Undertow Aria":"Wave",
+  "Glacier Break":"Slam","Ruin Hammer":"Slam","Funeral Rush":"Slam","Lantern Dirge":"Wave","Pale Gallop":"Slam",
+  "Crimson Siphon":"Bite","Veil of Bones":"Wave","Reaping Shackle":"Wave","Phantom Stride":"Slash","Gallows Charge":"Slam",
+  "Wickmare Howl":"Wave","Doom Procession":"Slam","Snow Boulder":"Projectile","Ornament Bomb":"Projectile","Deadwinter Charge":"Slam",
+  "Burrow Blitz":"Slam","Mourning Dive":"Slam","Blackstar Breach":"Burst","Nullstep":"Slam","Tail Bite":"Bite",
+  "Thunder Claw Swipe":"Slash","Thunder Tail Slam":"Slam","Venom Crush":"Slam","Infectious Stomp":"Slam","Celestial Feather":"Projectile",
+  "Glacier Crush":"Slam","School Surge":"Wave","Pressure Croak":"Wave","Cascade Collapse":"Slam","Nutcracker Rush":"Slam",
+  "Pallbearer Flame":"Burst","Furnace Spit":"Projectile","Ashen Bloom":"Burst"
+};
+function inferAttackFxStyle(attack){
+  if(!attack)return 'Burst';
+  const explicit=String(attack.fxStyle||'').trim();
+  if(explicit&&explicit!=='Auto'&&ATTACK_FX_STYLES.includes(explicit))return explicit;
+  if(ATTACK_FX_NAME_OVERRIDES[attack.name])return ATTACK_FX_NAME_OVERRIDES[attack.name];
+  const name=String(attack.name||'').toLowerCase(),text=`${name} ${attack.description||''}`.toLowerCase();
+  if(/slam|stomp|crush|crusher|charge|rush|ram|dive|gallop|blitz|impale|horn|hammer|collapse|surge|tackle/.test(name))return 'Slam';
+  if(/bite|maw|clamp|fang/.test(name))return 'Bite';
+  if(/slash|claw|rend|reap|cut|shear|thread|guillotine|swipe/.test(name))return 'Slash';
+  if(/feather|spit|boulder|bomb|shot|bolt/.test(name))return 'Projectile';
+  if(/beam|ray|laser|lance/.test(name))return 'Beam';
+  if(/howl|aria|croak|toll|dirge|song|wave|undertow/.test(name))return 'Wave';
+  if(/bloom|flame|lantern|breach|blast|pulse|nova/.test(name))return 'Burst';
+  if(/feather|spit|boulder|bomb|hurl|shoot|projectile/.test(text))return 'Projectile';
+  if(/beam|ray|laser|lance/.test(text))return 'Beam';
+  if(/howl|aria|croak|toll|dirge|song|wave|undertow|pressure current|current/.test(text))return 'Wave';
+  if(/bite|maw|clamp|fang/.test(text))return 'Bite';
+  if(/slash|claw|rend|reap|cut|shear|thread|guillotine|swipe|arc/.test(text))return 'Slash';
+  if(/slam|stomp|crush|crusher|charge|rush|ram|dive|gallop|blitz|impale|horn|hammer|collapse|surge|tackle|body/.test(text))return 'Slam';
+  return 'Burst';
+}
+function attackFxLabel(attack){return inferAttackFxStyle(attack);}
 const INTERSEX_HATCH_CHANCE = 0.05;
 const INCUBATOR_COSTS = [0,500,1000,2000,4000];
 const BREEDING_PEN_COSTS = [0,10000,25000,50000,100000];
@@ -3783,6 +3838,7 @@ function populateStatic(){
   document.getElementById('obtainMethod').innerHTML=OBTAIN_METHODS.map(x=>`<option>${x}</option>`).join('');
   document.getElementById('attackElement').innerHTML=ELEMENTS.map(x=>`<option>${x}</option>`).join('');
   document.getElementById('attackStyle').innerHTML=ATTACK_STYLES.map(x=>`<option>${x}</option>`).join('');
+  document.getElementById('attackFxStyle').innerHTML=ATTACK_FX_STYLES.map(x=>`<option>${x}</option>`).join('');
   document.getElementById('attackStatus').innerHTML=STATUSES.map(x=>`<option>${x}</option>`).join('');
   document.getElementById('attackElementFilter').innerHTML='<option value="all">All elements</option>'+ELEMENTS.map(x=>`<option>${x}</option>`).join('');
 }
@@ -3799,10 +3855,64 @@ function renderSignatureDropdown(selected=null){
 function renderSignaturePreview(){
   const a=attackOf(document.getElementById('signatureAttack').value);document.getElementById('signatureAttackPreview').innerHTML=a?`<strong>${a.name}</strong><span>${attackSummary(a)}</span><p>${a.description||''}</p>`:'No signature attack selected.';
 }
+let adminElementFilter='all';
+function speciesContainsElement(sp,element,mode='primary'){
+  if(!sp||!element||element==='all')return true;
+  if(mode==='contains')return sp.element===element||sp.secondaryElement===element;
+  return sp.element===element;
+}
+function speciesMatchesRosterFilter(sp,filter='all'){
+  if(filter==='base')return !sp.isCrossbreed;
+  if(filter==='crossbreed')return !!sp.isCrossbreed;
+  if(filter==='builtin')return !!sp.builtin;
+  if(filter==='custom')return !sp.builtin;
+  if(filter==='published')return !sp.builtin&&!!sp.published;
+  if(filter==='draft')return !sp.builtin&&!sp.published;
+  if(filter==='mythic')return sp.rarity==='Mythic'||!!sp.isMythic;
+  return true;
+}
+function sortSpeciesEntries(entries,sort='name'){
+  const nameSort=(a,b)=>a[1].name.localeCompare(b[1].name);
+  return entries.sort((a,b)=>{
+    if(sort==='element')return (a[1].element||'').localeCompare(b[1].element||'')||nameSort(a,b);
+    if(sort==='battle')return (a[1].battleType||'').localeCompare(b[1].battleType||'')||nameSort(a,b);
+    if(sort==='bstLow')return Number(a[1].p1bst||0)-Number(b[1].p1bst||0)||nameSort(a,b);
+    if(sort==='bstHigh')return Number(b[1].p1bst||0)-Number(a[1].p1bst||0)||nameSort(a,b);
+    return nameSort(a,b);
+  });
+}
+function renderMonsterCensus(){
+  const entries=Object.values(state.species||{});
+  const mode=document.getElementById('censusElementMode')?.value||'primary';
+  const summary=document.getElementById('monsterCensusSummary'),elements=document.getElementById('monsterCensusElements');
+  if(!summary||!elements)return;
+  const builtin=entries.filter(sp=>sp.builtin).length,custom=entries.length-builtin,cross=entries.filter(sp=>sp.isCrossbreed).length,mythic=entries.filter(sp=>sp.rarity==='Mythic'||sp.isMythic).length;
+  summary.innerHTML=`<span><strong>${entries.length}</strong>Total</span><span><strong>${custom}</strong>Custom</span><span><strong>${cross}</strong>Cross</span><span><strong>${mythic}</strong>Mythic</span>`;
+  elements.innerHTML='';
+  const counts=ELEMENTS.map(element=>({element,count:entries.filter(sp=>speciesContainsElement(sp,element,mode)).length}));
+  counts.forEach(({element,count})=>{
+    const b=document.createElement('button');b.type='button';b.className='census-element'+(adminElementFilter===element?' active':'');b.dataset.element=element;b.title=`Filter registry to ${element} (${mode==='contains'?'primary or secondary':'primary'} element)`;
+    b.innerHTML=`<span>${element}</span><strong>${count}</strong>`;
+    b.onclick=()=>{adminElementFilter=adminElementFilter===element?'all':element;renderRegistry();};elements.appendChild(b);
+  });
+}
 function renderRegistry(){
   const liveStatus=document.getElementById('liveContentStatus');if(liveStatus)liveStatus.textContent=state.liveContentRevision?`Live Content loaded: ${state.liveContentRevision} • ${liveContentManifestLabel(state.liveContentManifest)}`:'Live Content: no published content pack loaded.';
+  renderMonsterCensus();
   const q=document.getElementById('adminSearch').value.trim().toLowerCase(),box=document.getElementById('registryList');box.innerHTML='';
-  Object.entries(state.species).filter(([,sp])=>sp.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?'':` • ${sp.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
+  const battle=document.getElementById('adminBattleFilter')?.value||'all',roster=document.getElementById('adminRosterFilter')?.value||'all',sort=document.getElementById('adminSpeciesSort')?.value||'name',mode=document.getElementById('censusElementMode')?.value||'primary';
+  let entries=Object.entries(state.species).filter(([,sp])=>{
+    const searchable=[sp.name,sp.element,sp.secondaryElement,sp.battleType,sp.role].filter(Boolean).join(' ').toLowerCase();
+    return searchable.includes(q)&&speciesContainsElement(sp,adminElementFilter,mode)&&(battle==='all'||sp.battleType===battle)&&speciesMatchesRosterFilter(sp,roster);
+  });
+  entries=sortSpeciesEntries(entries,sort);
+  const filterSummary=document.getElementById('registryFilterSummary');
+  if(filterSummary){
+    const bits=[];if(adminElementFilter!=='all')bits.push(`${adminElementFilter} ${mode==='contains'?'any slot':'primary'}`);if(battle!=='all')bits.push(battle);if(roster!=='all')bits.push(document.getElementById('adminRosterFilter').selectedOptions[0]?.textContent||roster);if(q)bits.push(`“${q}”`);
+    filterSummary.textContent=`Showing ${entries.length} of ${Object.keys(state.species).length}${bits.length?` • ${bits.join(' • ')}`:''}`;
+  }
+  if(!entries.length){box.innerHTML='<div class="registry-empty">No monsters match these filters.</div>';return;}
+  entries.forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?' • BUILT-IN':` • ${sp.published?'PUBLISHED':'DRAFT'}`}${sp.rarity==='Mythic'||sp.isMythic?' • MYTHIC':''}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
 }
 function populateParentDropdowns(excludeSlug=''){
   const opts=Object.entries(state.species).filter(([slug])=>slug!==excludeSlug).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
@@ -3953,22 +4063,22 @@ async function resetCurrentSprite(){
 
 function renderAttackRegistry(){
   const q=document.getElementById('attackAdminSearch').value.trim().toLowerCase(),box=document.getElementById('attackRegistryList');box.innerHTML='';
-  Object.entries(state.attacks).filter(([,a])=>a.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,a])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${a.name}</strong><span>${a.element} • ${a.style} • PWR ${a.power}${a.builtin?'':` • ${a.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadAttackIntoForm(id);box.appendChild(b);});
+  Object.entries(state.attacks).filter(([,a])=>a.name.toLowerCase().includes(q)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,a])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${a.name}</strong><span>${a.element} • ${a.style} • ${attackFxLabel(a)} FX • PWR ${a.power}${a.builtin?'':` • ${a.published?'PUBLISHED':'DRAFT'}`}</span>`;b.onclick=()=>loadAttackIntoForm(id);box.appendChild(b);});
 }
 function newAttackForm(){
-  document.getElementById('attackForm').reset();document.getElementById('editAttackId').value='';document.getElementById('attackElement').value='Aether';document.getElementById('attackStyle').value='Standard';document.getElementById('attackPower').value=50;document.getElementById('attackAccuracy').value=95;document.getElementById('attackStatus').value='None';document.getElementById('attackStatusChance').value=0;document.getElementById('attackStatusDuration').value=0;document.getElementById('attackLifeSteal').value=0;document.getElementById('attackEvadeNext').value=0;document.getElementById('scrollPrice').value=5000;document.getElementById('publishAttack').checked=false;document.getElementById('publishAttack').disabled=false;document.getElementById('deleteAttack').classList.add('hidden');document.getElementById('attackAdminMessage').textContent='';updateAttackConditional();updateAttackPreview();
+  document.getElementById('attackForm').reset();document.getElementById('editAttackId').value='';document.getElementById('attackElement').value='Aether';document.getElementById('attackStyle').value='Standard';document.getElementById('attackFxStyle').value='Auto';document.getElementById('attackPower').value=50;document.getElementById('attackAccuracy').value=95;document.getElementById('attackStatus').value='None';document.getElementById('attackStatusChance').value=0;document.getElementById('attackStatusDuration').value=0;document.getElementById('attackLifeSteal').value=0;document.getElementById('attackEvadeNext').value=0;document.getElementById('scrollPrice').value=5000;document.getElementById('publishAttack').checked=false;document.getElementById('publishAttack').disabled=false;document.getElementById('deleteAttack').classList.add('hidden');document.getElementById('attackAdminMessage').textContent='';updateAttackConditional();updateAttackPreview();
 }
 function loadAttackIntoForm(id){
-  const a=state.attacks[id];if(!a)return;document.getElementById('editAttackId').value=id;document.getElementById('attackName').value=a.name;document.getElementById('attackElement').value=a.element;document.getElementById('attackStyle').value=a.style;document.getElementById('attackPower').value=a.power;document.getElementById('attackAccuracy').value=a.accuracy;document.getElementById('attackStatus').value=a.status;document.getElementById('attackStatusChance').value=a.statusChance;document.getElementById('attackStatusDuration').value=a.statusDuration;document.getElementById('attackLifeSteal').value=Number(a.lifeSteal||0);document.getElementById('attackEvadeNext').value=Number(a.evadeNext||0);document.getElementById('attackDescription').value=a.description||'';document.getElementById('scrollEnabled').checked=!!a.scrollEnabled;document.getElementById('scrollPrice').value=a.scrollPrice||5000;document.getElementById('publishAttack').checked=!a.builtin&&!!a.published;document.getElementById('publishAttack').disabled=!!a.builtin;document.getElementById('deleteAttack').classList.toggle('hidden',!!a.builtin);document.getElementById('attackAdminMessage').textContent='Editing '+a.name;updateAttackConditional();updateAttackPreview();
+  const a=state.attacks[id];if(!a)return;document.getElementById('editAttackId').value=id;document.getElementById('attackName').value=a.name;document.getElementById('attackElement').value=a.element;document.getElementById('attackStyle').value=a.style;document.getElementById('attackFxStyle').value=ATTACK_FX_STYLES.includes(a.fxStyle)?a.fxStyle:'Auto';document.getElementById('attackPower').value=a.power;document.getElementById('attackAccuracy').value=a.accuracy;document.getElementById('attackStatus').value=a.status;document.getElementById('attackStatusChance').value=a.statusChance;document.getElementById('attackStatusDuration').value=a.statusDuration;document.getElementById('attackLifeSteal').value=Number(a.lifeSteal||0);document.getElementById('attackEvadeNext').value=Number(a.evadeNext||0);document.getElementById('attackDescription').value=a.description||'';document.getElementById('scrollEnabled').checked=!!a.scrollEnabled;document.getElementById('scrollPrice').value=a.scrollPrice||5000;document.getElementById('publishAttack').checked=!a.builtin&&!!a.published;document.getElementById('publishAttack').disabled=!!a.builtin;document.getElementById('deleteAttack').classList.toggle('hidden',!!a.builtin);document.getElementById('attackAdminMessage').textContent='Editing '+a.name;updateAttackConditional();updateAttackPreview();
 }
 function updateAttackConditional(){document.getElementById('scrollPriceWrap').classList.toggle('hidden',!document.getElementById('scrollEnabled').checked);}
 function updateAttackPreview(){
-  const a={name:document.getElementById('attackName').value||'Untitled Attack',element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,power:Number(document.getElementById('attackPower').value||0),accuracy:Number(document.getElementById('attackAccuracy').value||100),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value||0),statusDuration:Number(document.getElementById('attackStatusDuration').value||0),lifeSteal:Number(document.getElementById('attackLifeSteal').value||0),evadeNext:Number(document.getElementById('attackEvadeNext').value||0),description:document.getElementById('attackDescription').value||''};document.getElementById('attackLivePreview').innerHTML=`<strong>${a.name}</strong><span>${attackSummary(a)}</span><p>${a.description}</p>`;
+  const a={name:document.getElementById('attackName').value||'Untitled Attack',element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,fxStyle:document.getElementById('attackFxStyle').value,power:Number(document.getElementById('attackPower').value||0),accuracy:Number(document.getElementById('attackAccuracy').value||100),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value||0),statusDuration:Number(document.getElementById('attackStatusDuration').value||0),lifeSteal:Number(document.getElementById('attackLifeSteal').value||0),evadeNext:Number(document.getElementById('attackEvadeNext').value||0),description:document.getElementById('attackDescription').value||''};document.getElementById('attackLivePreview').innerHTML=`<strong>${a.name}</strong><span>${attackSummary(a)} • FX ${attackFxLabel(a)}</span><p>${a.description}</p>`;
 }
 function saveAttackForm(e){
   e.preventDefault();const oldId=document.getElementById('editAttackId').value,name=document.getElementById('attackName').value.trim();if(!name)return;let id=oldId||slugify(name);if(!oldId&&state.attacks[id])id=`${id}-${Date.now().toString().slice(-5)}`;const prev=state.attacks[id]||{};
   if(!confirm(oldId?`Save changes to attack "${name}"?`:`Create new attack "${name}"?`))return;
-  state.attacks[id]={...prev,name,element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,power:Number(document.getElementById('attackPower').value),accuracy:Number(document.getElementById('attackAccuracy').value),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value),statusDuration:Number(document.getElementById('attackStatusDuration').value),lifeSteal:Math.max(0,Math.min(100,Number(document.getElementById('attackLifeSteal').value||0))),evadeNext:Math.max(0,Math.min(100,Number(document.getElementById('attackEvadeNext').value||0))),description:document.getElementById('attackDescription').value.trim(),scrollEnabled:document.getElementById('scrollEnabled').checked,scrollPrice:Number(document.getElementById('scrollPrice').value||5000),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishAttack').checked};
+  state.attacks[id]={...prev,name,element:document.getElementById('attackElement').value,style:document.getElementById('attackStyle').value,fxStyle:document.getElementById('attackFxStyle').value,power:Number(document.getElementById('attackPower').value),accuracy:Number(document.getElementById('attackAccuracy').value),status:document.getElementById('attackStatus').value,statusChance:Number(document.getElementById('attackStatusChance').value),statusDuration:Number(document.getElementById('attackStatusDuration').value),lifeSteal:Math.max(0,Math.min(100,Number(document.getElementById('attackLifeSteal').value||0))),evadeNext:Math.max(0,Math.min(100,Number(document.getElementById('attackEvadeNext').value||0))),description:document.getElementById('attackDescription').value.trim(),scrollEnabled:document.getElementById('scrollEnabled').checked,scrollPrice:Number(document.getElementById('scrollPrice').value||5000),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishAttack').checked};
   save();document.getElementById('editAttackId').value=id;document.getElementById('attackAdminMessage').textContent=`Saved ${name}.${state.attacks[id].published?' Export Live Content when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadAttackIntoForm(id);
 }
 function deleteCurrentAttack(){
@@ -4891,6 +5001,121 @@ function playBattleHitSound(attackerSide){
 }
 function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 
+const BATTLE_FX_PALETTES={
+  Fire:['#ff7a3d','#ffd06a','#ff3b30'],
+  Earth:['#b88a55','#e0bb76','#755038'],
+  Metal:['#d6e2ee','#8fb0c9','#ffffff'],
+  Nature:['#76d56b','#c7ef72','#2f8f58'],
+  Air:['#d9f7ff','#91dff2','#ffffff'],
+  Lightning:['#ffe763','#8cecff','#fff7c2'],
+  Shadow:['#9c6dd8','#4b315f','#d7a8ff'],
+  Void:['#bc54ff','#28173e','#ff70d6'],
+  Aether:['#62e6df','#a98cff','#ecffff'],
+  Light:['#fff4a8','#ffffff','#ffcf63'],
+  Ice:['#9be7ff','#dffbff','#5ab7ef'],
+  Toxic:['#9ce85c','#d5ff73','#6c4ca0'],
+  Water:['#55b9ff','#99ebff','#2576d5'],
+  Spirit:['#a6f3e6','#d7b8ff','#edfaff']
+};
+function battleFxPalette(element){return BATTLE_FX_PALETTES[element]||['#ffffff','#b9d6ff','#8ba0b8'];}
+function battleFxWeight(move){return ['Light','Standard','Heavy'].includes(move?.style)?move.style:'Standard';}
+function battleFxPoint(side){
+  const field=document.querySelector('.battlefield');
+  const wrap=document.getElementById(side==='player'?'battlePlayerArtWrap':'battleEnemyArtWrap');
+  if(!field||!wrap)return {x:0,y:0};
+  const fr=field.getBoundingClientRect(),wr=wrap.getBoundingClientRect();
+  return {x:wr.left-fr.left+wr.width/2,y:wr.top-fr.top+wr.height*.5};
+}
+function battleFxNode(family,move){
+  const field=document.querySelector('.battlefield');if(!field)return null;
+  const node=document.createElement('div');
+  const [main,hot,deep]=battleFxPalette(move?.element);
+  node.className=`battle-fx fx-${family.toLowerCase()} fx-${battleFxWeight(move).toLowerCase()}`;
+  node.style.setProperty('--fx-main',main);node.style.setProperty('--fx-hot',hot);node.style.setProperty('--fx-deep',deep);
+  node.dataset.element=move?.element||'Neutral';
+  field.appendChild(node);return node;
+}
+function battleFxRemove(node){if(node?.parentNode)node.parentNode.removeChild(node);}
+function battleFxImpact(defenderSide,move,feedback){
+  if(!['hit','super','resist'].includes(feedback?.kind))return;
+  const card=document.getElementById(defenderSide==='player'?'battlePlayerCard':'battleEnemyCard');
+  const field=document.querySelector('.battlefield'),weight=battleFxWeight(move).toLowerCase();
+  if(card){
+    card.classList.remove('fx-hit-light','fx-hit-standard','fx-hit-heavy');void card.offsetWidth;
+    card.classList.add(`fx-hit-${weight}`);
+    setTimeout(()=>card.classList.remove(`fx-hit-${weight}`),430);
+  }
+  if(field&&weight==='heavy'){
+    field.classList.remove('fx-shake-heavy');void field.offsetWidth;field.classList.add('fx-shake-heavy');
+    setTimeout(()=>field.classList.remove('fx-shake-heavy'),360);
+  }
+  createBattleFxParticles(defenderSide,move);
+}
+function createBattleFxParticles(side,move){
+  const field=document.querySelector('.battlefield');if(!field)return;
+  const p=battleFxPoint(side),weight=battleFxWeight(move),count=weight==='Heavy'?12:weight==='Light'?6:9;
+  const [main,hot,deep]=battleFxPalette(move?.element);
+  for(let i=0;i<count;i++){
+    const s=document.createElement('span');s.className=`fx-particle fx-particle-${String(move?.element||'neutral').toLowerCase()}`;
+    const ang=(Math.PI*2*i/count)+((i%2)*.19),dist=(weight==='Heavy'?72:weight==='Light'?42:56)*(0.65+(i%3)*.18);
+    s.style.left=`${p.x}px`;s.style.top=`${p.y}px`;s.style.setProperty('--px',`${Math.cos(ang)*dist}px`);s.style.setProperty('--py',`${Math.sin(ang)*dist}px`);
+    s.style.setProperty('--fx-main',main);s.style.setProperty('--fx-hot',hot);s.style.setProperty('--fx-deep',deep);
+    field.appendChild(s);setTimeout(()=>battleFxRemove(s),620);
+  }
+}
+async function playBattleAttackFx(attackerSide,defenderSide,move,feedback){
+  if(!move||feedback?.kind==='status')return;
+  const family=inferAttackFxStyle(move),weight=battleFxWeight(move),hit=['hit','super','resist'].includes(feedback?.kind);
+  const start=battleFxPoint(attackerSide),baseEnd=battleFxPoint(defenderSide);
+  const missOffset=attackerSide==='player'?-1:1;
+  const end=hit?baseEnd:{x:baseEnd.x,y:baseEnd.y+(weight==='Heavy'?82:58)*missOffset};
+  const lunge=animateAttacker(attackerSide);
+  await wait(weight==='Light'?55:75);
+  const impact=()=>{if(hit){playBattleHitSound(attackerSide);battleFxImpact(defenderSide,move,feedback);}};
+  const travel=weight==='Light'?220:weight==='Heavy'?340:280;
+
+  if(family==='Projectile'){
+    const n=battleFxNode('projectile',move);if(n){
+      n.style.left=`${start.x}px`;n.style.top=`${start.y}px`;
+      const dx=end.x-start.x,dy=end.y-start.y;
+      const anim=n.animate([{transform:'translate(-50%,-50%) scale(.55)',opacity:.25},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(1)`,opacity:1}],{duration:travel,easing:'cubic-bezier(.2,.8,.3,1)',fill:'forwards'});
+      await anim.finished.catch(()=>{});battleFxRemove(n);
+    }
+    impact();
+  }else if(family==='Beam'){
+    const n=battleFxNode('beam',move);if(n){
+      const dx=end.x-start.x,dy=end.y-start.y,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)*180/Math.PI;
+      n.style.left=`${start.x}px`;n.style.top=`${start.y}px`;n.style.width=`${d}px`;n.style.transform=`translateY(-50%) rotate(${ang}deg) scaleX(0)`;
+      const anim=n.animate([{transform:`translateY(-50%) rotate(${ang}deg) scaleX(0)`,opacity:0},{transform:`translateY(-50%) rotate(${ang}deg) scaleX(1)`,opacity:1,offset:.25},{transform:`translateY(-50%) rotate(${ang}deg) scaleX(1)`,opacity:.9,offset:.75},{transform:`translateY(-50%) rotate(${ang}deg) scaleX(.96)`,opacity:0}],{duration:travel,easing:'ease-out',fill:'forwards'});
+      await wait(Math.round(travel*.34));impact();await anim.finished.catch(()=>{});battleFxRemove(n);
+    }else impact();
+  }else if(family==='Wave'){
+    const n=battleFxNode('wave',move);if(n){
+      n.style.left=`${start.x}px`;n.style.top=`${start.y}px`;
+      const dx=end.x-start.x,dy=end.y-start.y;
+      const anim=n.animate([{transform:'translate(-50%,-50%) scale(.45,.8)',opacity:.15},{transform:`translate(calc(-50% + ${dx*.7}px),calc(-50% + ${dy*.7}px)) scale(1.25,1)`,opacity:1,offset:.68},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(1.5,1.1)`,opacity:0}],{duration:travel,easing:'cubic-bezier(.18,.72,.28,1)',fill:'forwards'});
+      await wait(Math.round(travel*.72));impact();await anim.finished.catch(()=>{});battleFxRemove(n);
+    }else impact();
+  }else{
+    await wait(weight==='Light'?35:60);
+    const n=battleFxNode(family,move);if(n){
+      n.style.left=`${end.x}px`;n.style.top=`${end.y}px`;
+      if(family==='Slash')n.innerHTML='<i></i><i></i><i></i>';
+      if(family==='Bite')n.innerHTML='<i></i><i></i>';
+      const duration=weight==='Heavy'?330:weight==='Light'?210:270;
+      const frames=family==='Slam'
+        ?[{transform:'translate(-50%,-75%) scale(.4)',opacity:0},{transform:'translate(-50%,-50%) scale(1.18)',opacity:1,offset:.35},{transform:'translate(-50%,-42%) scale(1.45)',opacity:0}]
+        :family==='Burst'
+          ?[{transform:'translate(-50%,-50%) scale(.25)',opacity:0},{transform:'translate(-50%,-50%) scale(1.1)',opacity:1,offset:.4},{transform:'translate(-50%,-50%) scale(1.65)',opacity:0}]
+          :[{transform:'translate(-50%,-50%) scale(.65)',opacity:.1},{transform:'translate(-50%,-50%) scale(1.08)',opacity:1,offset:.42},{transform:'translate(-50%,-50%) scale(1.28)',opacity:0}];
+      const anim=n.animate(frames,{duration,easing:'ease-out',fill:'forwards'});
+      await wait(Math.round(duration*.34));impact();await anim.finished.catch(()=>{});battleFxRemove(n);
+    }else impact();
+  }
+  await lunge;
+}
+
+
 function canAct(side){
   const status=sessionStatus(side);
   if(!status)return {ok:true};
@@ -5108,15 +5333,11 @@ async function resolveAnimatedMove(attackerSide,moveId,defenderSide){
     return;
   }
 
-  let feedback=null;
-  await animateAttacker(attackerSide,()=>{
-    feedback=performMove(attackerSide,moveId,defenderSide);
-    if(['hit','super','resist'].includes(feedback?.kind))playBattleHitSound(attackerSide);
-  });
-  if(!feedback){
-    feedback=performMove(attackerSide,moveId,defenderSide);
-    if(['hit','super','resist'].includes(feedback?.kind))playBattleHitSound(attackerSide);
-  }
+  const move=attackOf(moveId);
+  let feedback=performMove(attackerSide,moveId,defenderSide);
+  if(!feedback)return;
+
+  if(feedback.kind!=='status')await playBattleAttackFx(attackerSide,defenderSide,move,feedback);
   await refreshBattleUI();
   await showBattleFeedback(feedback);
   if(feedback?.followup){
@@ -5124,7 +5345,6 @@ async function resolveAnimatedMove(attackerSide,moveId,defenderSide){
     await showBattleFeedback(feedback.followup);
   }
 }
-
 async function resolveStatusTicks(){
   for(const side of ['player','enemy']){
     if(checkBattleEnd())return;
@@ -5615,13 +5835,13 @@ document.getElementById('showEventAdmin').addEventListener('click',()=>showAdmin
 document.getElementById('showExpeditionAdmin').addEventListener('click',()=>showAdminPane('expedition'));
 document.getElementById('showTrialAdmin').addEventListener('click',()=>showAdminPane('trial'));
 
-document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('crossbreedSeason').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
+document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('censusElementMode').addEventListener('change',renderRegistry);document.getElementById('adminBattleFilter').addEventListener('change',renderRegistry);document.getElementById('adminRosterFilter').addEventListener('change',renderRegistry);document.getElementById('adminSpeciesSort').addEventListener('change',renderRegistry);document.getElementById('clearSpeciesFilters').addEventListener('click',()=>{document.getElementById('adminSearch').value='';document.getElementById('adminBattleFilter').value='all';document.getElementById('adminRosterFilter').value='all';document.getElementById('adminSpeciesSort').value='name';adminElementFilter='all';renderRegistry();});document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('crossbreedSeason').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
 document.getElementById('baseArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('basePreview')));document.getElementById('prismaticArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('prismaticPreview')));document.getElementById('eggArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('eggPreview')));
 document.getElementById('exportData').addEventListener('click',exportAdmin);document.getElementById('exportLiveContent').addEventListener('click',exportLiveContent);document.getElementById('importData').addEventListener('change',e=>{if(e.target.files?.[0])importAdminFile(e.target.files[0]);});
 
 document.getElementById('newAttack').addEventListener('click',newAttackForm);document.getElementById('attackForm').addEventListener('submit',saveAttackForm);document.getElementById('deleteAttack').addEventListener('click',deleteCurrentAttack);document.getElementById('attackAdminSearch').addEventListener('input',renderAttackRegistry);
 document.getElementById('spriteAdminSearch').addEventListener('input',renderSpriteRegistry);document.getElementById('spriteForm').addEventListener('submit',saveSpriteForm);document.getElementById('resetSprite').addEventListener('click',resetCurrentSprite);document.getElementById('spriteArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('spriteUploadPreview')));
-['attackName','attackElement','attackStyle','attackPower','attackAccuracy','attackStatus','attackStatusChance','attackStatusDuration','attackLifeSteal','attackEvadeNext','attackDescription'].forEach(id=>document.getElementById(id).addEventListener('input',updateAttackPreview));document.getElementById('scrollEnabled').addEventListener('change',()=>{updateAttackConditional();updateAttackPreview();});
+['attackName','attackElement','attackStyle','attackFxStyle','attackPower','attackAccuracy','attackStatus','attackStatusChance','attackStatusDuration','attackLifeSteal','attackEvadeNext','attackDescription'].forEach(id=>document.getElementById(id).addEventListener('input',updateAttackPreview));document.getElementById('scrollEnabled').addEventListener('change',()=>{updateAttackConditional();updateAttackPreview();});
 
 
 
@@ -5672,7 +5892,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.34 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.37 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,

@@ -1,4 +1,28 @@
-PRISMWILD PROTOTYPE v0.15.34
+PRISMWILD PROTOTYPE v0.15.37
+
+V0.15.37 — BATTLE ATTACK VISUAL FX
+- Added reusable combat FX families: Bite, Slash, Slam, Projectile, Burst, Beam, and Wave.
+- Attack Workshop now includes a Visual FX selector with Auto inference or explicit family overrides.
+- All existing built-in attacks and the current published custom attacks have hand-tuned automatic FX family mappings.
+- Light / Standard / Heavy attack styles now affect visual scale and impact weight.
+- Elements use distinct effect palettes and particle shapes rather than simple one-color recolors.
+- Heavy successful attacks add a small battlefield kick; misses visibly whiff or veer away.
+- Attack Registry and live preview display the resolved FX family.
+- Custom Visual FX selections are preserved through normal Live Content export/import.
+- Current authored prismwild-content.js remains byte-for-byte unchanged from Dell's supplied file.
+
+
+V0.15.36 — MONSTER CENSUS + ADMIN ROSTER FILTERS
+- Monster Workshop now includes a live Monster Census for the entire registered roster.
+- Census shows Total, Custom, Crossbreed, and Mythic counts.
+- Element counts can switch between Primary only and Contains element, so Crossbreed secondary Elements can be included in roster planning.
+- Clicking an Element count filters the registry to that Element; click it again to clear it.
+- Added Battle Type filters for Speed, Brute, and Defender.
+- Added roster filters for Base Monsters, Crossbreeds, Built-in, Custom, Published Custom, Draft Custom, and Mythic.
+- Added sorting by Name, Element, Battle Type, and P1 BST ascending/descending.
+- Registry search now also matches Element, secondary Element, Battle Type, and role/description.
+- Clear button resets registry filters/search while leaving the chosen census counting mode available for planning.
+- Current authored prismwild-content.js was preserved exactly from Dell's supplied current content file.
 
 
 V0.15.18 — LEGACY ADMIN SAVE + INLINE EXPLORE FINDS
