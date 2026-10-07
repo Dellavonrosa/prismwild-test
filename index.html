@@ -3,14 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.41</title>
+<title>Prismwild Prototype v0.15.46</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
+  <div id="zoneBackdropA" class="zone-backdrop-image"></div>
+  <div id="zoneBackdropB" class="zone-backdrop-image"></div>
+  <div class="zone-backdrop-scrim"></div>
+</div>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.41</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.46</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -57,6 +62,7 @@
       <button class="tab silverwind-tab nav-menu-trigger" data-tab="silverwind" type="button">Silverwind <span class="nav-caret">▾</span></button>
       <div class="nav-dropdown">
         <button class="nav-link" data-route="silverwind-desk" type="button">Keeper's Desk</button>
+        <button class="nav-link" data-route="silverwind-reference" type="button">Reference Guide</button>
         <button class="nav-link" data-route="silverwind-archive" type="button">Monster Archive</button>
         <button class="nav-link" data-route="silverwind-attacks" type="button">Attack Index</button>
       </div>
@@ -192,7 +198,7 @@
         <div>
           <div class="eyebrow">BACKPACK / STORAGE</div>
           <h2>Inventory</h2>
-          <p>Attack Scrolls live here until you teach them to a monster. Field Finds can be sold directly from this tab.</p>
+          <p>Click any item to inspect it, see whether it is consumable, and sell any excess quantity you do not need.</p>
         </div>
         <div id="inventoryBalance" class="inventory-balance"></div>
       </div>
@@ -347,11 +353,12 @@
       <div class="page-heading">
         <div class="eyebrow">RESIDENT RESEARCHER • REFERENCE DESK</div>
         <h2>Silverwind's Desk</h2>
-        <p>Check in, browse the Monster Archive, or look up registered attacks from one little research corner of Prismwild.</p>
+        <p>Check in, browse Silvy's searchable field guide, study the Monster Archive, or look up registered attacks from one little research corner of Prismwild.</p>
       </div>
 
       <div class="admin-switch silverwind-reference-switch">
         <button id="showSilverwindDesk" class="subtab active" type="button">Keeper's Desk</button>
+        <button id="showSilverwindReference" class="subtab" type="button">Reference Guide</button>
         <button id="showSilverwindArchive" class="subtab" type="button">Monster Archive</button>
         <button id="showSilverwindAttacks" class="subtab" type="button">Attack Index</button>
       </div>
@@ -372,6 +379,26 @@
             <div class="eyebrow">TODAY'S NOTES</div>
             <h3>Desk Notes</h3>
             <div id="silverwindObservations" class="silverwind-observations"></div>
+          </section>
+        </div>
+      </div>
+
+      <div id="silverwindReferencePane" class="silverwind-pane hidden">
+        <div class="silverwind-reference-heading">
+          <div class="eyebrow">SILVY'S FIELD GUIDE</div>
+          <h3>Prismwild Reference Guide</h3>
+          <p>Search mechanics, systems, items, fieldwork, and monster care. The guide reads the current game registries where it can, so it grows with the workshop.</p>
+        </div>
+        <div class="silverwind-guide-layout">
+          <section class="silverwind-guide-library">
+            <div class="filters silverwind-guide-filters">
+              <input id="silverwindReferenceSearch" type="search" placeholder="Search the guide...">
+              <select id="silverwindReferenceCategory"><option value="all">All topics</option></select>
+            </div>
+            <div id="silverwindReferenceList" class="silverwind-reference-list"></div>
+          </section>
+          <section id="silverwindReferenceDetail" class="silverwind-reference-detail">
+            <div class="empty-card">Pick a topic from Silvy's notebook.</div>
           </section>
         </div>
       </div>
@@ -963,6 +990,41 @@
   </div>
 </dialog>
 
+<dialog id="inventoryDetailModal" class="shop-detail-modal inventory-detail-modal">
+  <button id="closeInventoryDetail" class="close" type="button">×</button>
+  <div class="shop-detail-layout">
+    <div id="inventoryDetailVisual" class="shop-detail-visual"></div>
+    <div class="shop-detail-copy">
+      <div id="inventoryDetailCategory" class="eyebrow">INVENTORY ITEM</div>
+      <h2 id="inventoryDetailName"></h2>
+      <p id="inventoryDetailDescription" class="shop-detail-description"></p>
+      <div id="inventoryDetailMeta" class="chips shop-detail-meta"></div>
+      <div class="shop-detail-price">
+        <span>Sell value</span>
+        <strong id="inventoryDetailSellValue"></strong>
+      </div>
+      <p id="inventoryDetailOwned" class="shop-detail-owned"></p>
+
+      <div id="inventoryDetailActions" class="shop-detail-actions">
+        <button id="inventorySellButton" class="primary" type="button">Sell</button>
+      </div>
+
+      <div id="inventorySellPanel" class="shop-purchase-confirm hidden">
+        <div class="eyebrow">SELL ITEMS</div>
+        <h3 id="inventorySellTitle">Choose quantity</h3>
+        <label class="inventory-sell-quantity">Quantity
+          <input id="inventorySellQuantity" type="number" min="1" step="1" value="1">
+        </label>
+        <div class="inventory-sell-summary"><span>Total</span><strong id="inventorySellTotal"></strong></div>
+        <div class="shop-confirm-buttons">
+          <button id="inventoryCancelSell" class="ghost" type="button">Cancel</button>
+          <button id="inventoryConfirmSell" class="primary" type="button">Confirm Sale</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="incubatorDetailModal" class="shop-detail-modal incubator-detail-modal">
   <button id="closeIncubatorDetail" class="close" type="button">×</button>
   <div class="shop-detail-layout">
@@ -989,73 +1051,79 @@
   </div>
 </dialog>
 
-<dialog id="detailModal">
-  <button id="closeModal" class="close">×</button>
-  <div class="detail-layout">
-    <div class="detail-art-wrap"><img id="detailArt" alt=""></div>
-    <div class="detail-copy">
-      <div class="eyebrow">INDIVIDUAL MONSTER</div>
-      <h2 id="detailName"></h2>
-      <p id="detailSpecies" class="species-line"></p>
-      <p id="detailRole" class="detail-role"></p>
+<dialog id="detailModal" class="monster-profile-dialog">
+  <button id="closeModal" class="close" type="button">×</button>
+  <div class="monster-profile">
+    <div class="monster-profile-pen">
+      <span>Collection Pen</span>
+      <button id="detailPenButton" class="monster-pen-pill" type="button"><strong id="detailPenTopLabel">Pen 1</strong><span>▾</span></button>
+      <div id="detailPenMenu" class="monster-pen-menu hidden">
+        <p id="detailPenStatus" class="move-note"></p>
+        <div class="collection-move-actions"><select id="detailPenSelect"></select><button id="moveMonsterPen" class="ghost small" type="button">Move</button></div>
+      </div>
+    </div>
 
-      <div class="rename-box">
+    <div class="detail-art-wrap monster-profile-art"><img id="detailArt" alt=""></div>
+
+    <div class="monster-profile-identity">
+      <div id="detailSpecies" class="eyebrow species-line"></div>
+      <div class="monster-profile-name-row"><h2 id="detailName"></h2><button id="renameToggle" class="icon-button" type="button" aria-label="Rename monster" title="Rename">✎</button></div>
+      <div class="monster-profile-level"><strong>Lv.<span id="detailLevel"></span></strong><span id="detailRole"></span></div>
+      <div id="renameBox" class="rename-box compact-rename hidden">
         <label for="renameInput">Nickname</label>
-        <div class="rename-row"><input id="renameInput" maxlength="20" placeholder="Give this monster a name"><button id="saveRename" class="primary">Save Name</button></div>
+        <div class="rename-row"><input id="renameInput" maxlength="20" placeholder="Give this monster a name"><button id="saveRename" class="primary" type="button">Save</button></div>
       </div>
+    </div>
 
-      <div class="active-control">
-        <button id="setActiveMonster" class="primary">Set Active Monster</button>
-        <span id="detailXP"></span>
-      </div>
+    <div class="monster-profile-tabs" role="tablist" aria-label="Monster details">
+      <button class="monster-profile-tab active" type="button" data-monster-pane="info">Info</button>
+      <button class="monster-profile-tab" type="button" data-monster-pane="items">Use Item</button>
+      <button class="monster-profile-tab" type="button" data-monster-pane="lineage">Lineage</button>
+    </div>
 
-      <div id="detailFaintBox" class="faint-detail hidden">
-        <div>
-          <strong>FAINTED</strong>
-          <span id="detailFaintStatus"></span>
-        </div>
-        <button id="useReviveGem" class="ghost" type="button">Use Revive Gem</button>
-      </div>
-
-      <div class="stats identity-stats">
-        <div><span>Level</span><strong id="detailLevel"></strong></div>
+    <section id="detailPaneInfo" class="monster-profile-pane active">
+      <div class="stats identity-stats monster-identity-stats">
         <div><span>Gender</span><strong id="detailGender"></strong></div>
         <div><span>Potential</span><strong id="detailPotential"></strong></div>
-        <div><span>Trait</span><strong id="detailTrait"></strong></div>
+        <div class="monster-trait-stat"><span>Trait</span><strong id="detailTrait"></strong></div>
       </div>
-
       <div class="battle-stats"><h3>Battle Stats</h3><div class="stat-grid">
         <div><span>Vitality</span><strong id="statHP"></strong></div><div><span>Attack</span><strong id="statAttack"></strong></div>
         <div><span>Armor</span><strong id="statArmor"></strong></div><div><span>Speed</span><strong id="statSpeed"></strong></div>
         <div class="element-stat"><span>Element</span><strong id="statElement"></strong></div>
       </div></div>
-
-      <div class="monster-item-tools">
-        <div class="move-heading"><h3>Monster Items</h3><span id="monsterItemToolStatus" class="move-note"></span></div>
-        <p class="move-note">Nature Discs reroll this individual’s Trait once per day. A monster may receive exactly one DNA Splicer in its lifetime.</p>
-        <div id="monsterItemTools" class="monster-item-tool-grid"></div>
+      <div class="active-control">
+        <button id="setActiveMonster" class="primary" type="button">Set Active Monster</button>
+        <span id="detailXP"></span>
       </div>
-
-      <div class="move-section">
-        <div class="move-heading"><h3>Attacks</h3><button id="swapAttacks" class="ghost small">Swap Slots</button></div>
+      <div id="detailFaintBox" class="faint-detail hidden">
+        <div><strong>FAINTED</strong><span id="detailFaintStatus"></span></div>
+        <button id="useReviveGem" class="ghost" type="button">Use Revive Gem</button>
+      </div>
+      <div class="move-section profile-attack-section">
+        <div class="move-heading"><h3>Attacks</h3><button id="swapAttacks" class="ghost small" type="button">Swap Slots</button></div>
         <p class="move-note">Attack Slot 1 is the move this monster passes through breeding.</p>
         <div id="detailMoves" class="move-slots"></div>
-
-        <div id="teachScrollBox" class="teach-box">
-          <label>Teach from owned scroll<select id="teachAttackSelect"></select></label>
-          <label>Target slot<select id="teachSlotSelect"><option value="0">Slot 1</option><option value="1">Slot 2</option></select></label>
-          <button id="teachAttackButton" class="primary">Use Scroll</button>
-        </div>
       </div>
-
-      <div class="collection-move-control">
-        <div><h3>Collection Pen</h3><p id="detailPenStatus" class="move-note"></p></div>
-        <div class="collection-move-actions"><select id="detailPenSelect"></select><button id="moveMonsterPen" class="ghost small" type="button">Move to Pen</button></div>
-      </div>
-
-      <div class="lineage"><h3>Lineage</h3><p id="detailLineage"></p></div>
       <div class="release-control"><button id="releaseMonster" class="danger small" type="button">Release Monster</button><span id="releaseMonsterHint" class="move-note">Permanently remove this individual from your Collection.</span></div>
-    </div>
+    </section>
+
+    <section id="detailPaneItems" class="monster-profile-pane hidden">
+      <div class="monster-item-tools profile-item-tools">
+        <div class="move-heading"><h3>Use Item</h3><span id="monsterItemToolStatus" class="move-note"></span></div>
+        <p class="move-note">Attack Scrolls teach moves. Potential Injectors raise Potential. Nature Discs reroll Traits once per day. DNA Splicers permanently add +15 to one stat and may only be used once per monster.</p>
+        <div id="monsterItemTools" class="monster-item-tool-grid"></div>
+      </div>
+      <div id="teachScrollBox" class="teach-box profile-scroll-box">
+        <label>Attack Scroll<select id="teachAttackSelect"></select></label>
+        <label>Target slot<select id="teachSlotSelect"><option value="0">Slot 1</option><option value="1">Slot 2</option></select></label>
+        <button id="teachAttackButton" class="primary" type="button">Use Scroll</button>
+      </div>
+    </section>
+
+    <section id="detailPaneLineage" class="monster-profile-pane hidden">
+      <div class="lineage profile-lineage"><h3>Lineage</h3><p class="move-note">A simplified view of this monster’s recorded parents.</p><div id="detailLineageTree" class="lineage-tree"></div><p id="detailLineage" class="hidden"></p></div>
+    </section>
   </div>
 </dialog>
 
@@ -1222,6 +1290,76 @@ const ZONES = {
 
 const ZONE_WEEKDAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
+// Fixed daily world wallpapers. These are deliberately separate from page content so
+// the interface can scroll while the current region stays anchored behind it.
+const ZONE_BACKDROPS = {
+  Monday:{key:"blaze",image:"assets/backgrounds/blaze_lands.png"},
+  Tuesday:{key:"flat",image:"assets/backgrounds/flat_lands.png"},
+  Wednesday:{key:"shadow",image:"assets/backgrounds/shadow_plains.png"},
+  Thursday:{key:"bright",image:"assets/backgrounds/bright_temple.png"},
+  Friday:{key:"permafrost",image:"assets/backgrounds/permafrost_peaks.png"},
+  Saturday:{key:"wasteland",image:"assets/backgrounds/wastelands.png"},
+  Sunday:{key:"chaos",image:"assets/backgrounds/chaos_wastes.png"}
+};
+let zoneBackdropDay=null;
+let zoneBackdropLayer=0;
+let zoneBackdropMidnightTimer=null;
+
+function commitZoneBackdrop(day,cfg,instant=false){
+  const wrap=document.getElementById('zoneBackdrop');
+  const layers=[document.getElementById('zoneBackdropA'),document.getElementById('zoneBackdropB')];
+  if(!wrap||layers.some(x=>!x))return;
+  const first=zoneBackdropDay===null;
+  const nextIndex=first?0:1-zoneBackdropLayer;
+  const next=layers[nextIndex],prev=layers[zoneBackdropLayer];
+  next.style.backgroundImage=`url("${cfg.image}")`;
+  wrap.dataset.zone=cfg.key;
+  if(instant||first){
+    next.classList.add('is-visible');
+    if(prev!==next)prev.classList.remove('is-visible');
+  }else{
+    // The new image is already preloaded when this executes, so the two fixed
+    // layers can crossfade without exposing the page background between them.
+    next.classList.add('is-visible');
+    prev.classList.remove('is-visible');
+  }
+  zoneBackdropDay=day;
+  zoneBackdropLayer=nextIndex;
+}
+
+function applyZoneBackdrop(day=currentDayName(),{instant=false,force=false}={}){
+  if(!force&&day===zoneBackdropDay)return;
+  const cfg=ZONE_BACKDROPS[day]||ZONE_BACKDROPS.Monday;
+  const probe=new Image();
+  probe.onload=()=>commitZoneBackdrop(day,cfg,instant);
+  probe.onerror=()=>commitZoneBackdrop(day,cfg,instant);
+  probe.src=cfg.image;
+}
+
+function scheduleZoneBackdropMidnight(){
+  if(zoneBackdropMidnightTimer)clearTimeout(zoneBackdropMidnightTimer);
+  const now=new Date();
+  const next=new Date(now);
+  next.setHours(24,0,0,60);
+  zoneBackdropMidnightTimer=setTimeout(()=>{
+    applyZoneBackdrop(currentDayName());
+    scheduleZoneBackdropMidnight();
+  },Math.max(1000,next.getTime()-now.getTime()));
+}
+
+function initZoneBackdrop(){
+  applyZoneBackdrop(currentDayName(),{instant:true,force:true});
+  scheduleZoneBackdropMidnight();
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden){
+      applyZoneBackdrop(currentDayName());
+      scheduleZoneBackdropMidnight();
+    }
+  });
+  window.addEventListener('focus',()=>applyZoneBackdrop(currentDayName()));
+}
+
+
 
 
 const TYPE_WEIGHTS = {
@@ -1333,11 +1471,12 @@ function fieldFindIds(){return Object.keys(TRADE_GOODS).filter(id=>TRADE_GOODS[i
 function itemInfoForInventoryId(id){
   if(id.startsWith('scroll:')){
     const attack=attackOf(id.slice(7));
-    return attack?{name:`${attack.name} Scroll`,category:'Attack Scroll',desc:attackSummary(attack),icon:'attack_scroll'}:null;
+    const price=Number(attack?.scrollPrice||5000);
+    return attack?{id,name:`${attack.name} Scroll`,category:'Attack Scroll',desc:attackSummary(attack),icon:'attack_scroll',isConsumable:true,shopPrice:price,sellValue:Math.floor(price*.05)}:null;
   }
-  if(TRADE_GOODS[id])return {...TRADE_GOODS[id],id,isTradeGood:true};
+  if(TRADE_GOODS[id])return {...TRADE_GOODS[id],id,isTradeGood:true,isConsumable:false};
   const item=ITEM_SHOP.find(x=>x.id===id);
-  return item?{name:item.name,category:item.category,desc:item.desc,icon:item.icon||'mystery_capsule',spriteKey:item.spriteKey||null,iconImage:item.iconImage||null}:null;
+  return item?{id,name:item.name,category:item.category,desc:item.desc,icon:item.icon||'mystery_capsule',spriteKey:item.spriteKey||null,iconImage:item.iconImage||null,isConsumable:item.consumable!==false,shopPrice:Number(item.price||0),sellValue:Math.floor(Number(item.price||0)*.05)}:null;
 }
 function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
   if(info?.spriteKey)return imageSpriteMarkup(info.spriteKey,info.iconImage||SPRITE_DEFS[info.spriteKey]?.fallback||'',`field-find-icon ${className}`,'');
@@ -1443,28 +1582,62 @@ const BUILTIN_SILVERWIND_DIALOGUE={
     {text:`Everything's logged. Pens, eggs, monsters, suspiciously shiny rocks. The paperwork beast has been temporarily defeated.`,eventGift:false},
     {text:`I checked the breeding locks twice. Refresh all you want; those parents are staying exactly where we put them.`,eventGift:false},
     {text:`The wilds are being suspiciously quiet today. That usually means they're planning something.`,eventGift:false},
-    {text:`If you bring home another strange egg, I am absolutely going to pretend I'm not excited before immediately cataloging it.`,eventGift:false}
+    {text:`If you bring home another strange egg, I am absolutely going to pretend I'm not excited before immediately cataloging it.`,eventGift:false},
+    {text:`I reorganized the Reference Guide again. It was already organized. This is different. This is emotionally organized.`,eventGift:false},
+    {text:`Some Keepers collect trophies. I collect field notes. Mine are heavier and significantly less impressive on a mantle.`,eventGift:false},
+    {text:`Potential, Traits, levels, DNA tweaks... there are a lot of ways for two monsters of the same species to become very different little problems. I love that.`,eventGift:false},
+    {text:`If a system ever feels confusing, check the Reference Guide. I wrote it specifically so you don't have to decipher my loose paper pile.`,eventGift:false},
+    {text:`Tiny reminder from your resident researcher: a monster being strong on paper does not mean it is the right monster for every fight. Matchups love ruining tidy plans.`,eventGift:false},
+    {text:`I keep telling myself the Archive is a scientific institution. Then somebody gives a monster a ridiculous nickname and I have to catalogue that too.`,eventGift:false},
+    {text:`There is a very specific sound an incubator makes right before I stop pretending I'm not watching it.`,eventGift:false},
+    {text:`The Chaos Wastes changed again. Of course they did. I have crossed out today's notes in three different colors and am choosing serenity.`,eventGift:false},
+    {text:`I like Crossbreeds. They're proof the wilds looked at taxonomy, considered the rules, and politely wandered somewhere more interesting.`,eventGift:false},
+    {text:`If you see me staring at a Prismatic for too long, I am studying refractive mutation patterns. This is serious research. The sparkles are incidental.`,eventGift:false},
+    {text:`Roswyn and I disagree on notebook organization. She says observations should stay chronological. I say tabs exist for a reason. This scholarly feud may never end.`,eventGift:false},
+    {text:`Razzik sent back one of my Trial notes with 'TOO MANY ADJECTIVES' written across the top. I have preserved it for historical evidence of his crimes.`,eventGift:false}
   ],
   monsters:{
     frostmaw:[{text:`Frostmaw keeps leaving tiny frost prints near my desk. I have decided this is charming instead of a maintenance problem.`,eventGift:false}],
     guttergore:[{text:`Guttergore has been staring at my filing cabinet again. I don't know what it wants in there, and I am choosing not to ask.`,eventGift:false}],
     shardback:[{text:`Shardback's ice plating catches the light beautifully. Very elegant. Very sharp. I am observing from a respectful distance.`,eventGift:false}],
-    hexolith:[{text:`Hexolith can stand perfectly still for so long that I forget it's there, right up until the floor gives one enormous thump.`,eventGift:false}]
+    hexolith:[{text:`Hexolith can stand perfectly still for so long that I forget it's there, right up until the floor gives one enormous thump.`,eventGift:false}],
+    aeralith:[
+      {text:`Aeralith moves through the air with almost no wasted motion. I tried sketching the wing rhythm and produced six pages of increasingly offended arrows.`,eventGift:false},
+      {text:`Aeralith has the kind of silhouette that makes field researchers forget to write for a few seconds. Extremely inconvenient. Beautiful, though.`,eventGift:false}
+    ],
+    cirrulong:[
+      {text:`Cirrulong's pearl catches cloudlight in a way I still can't properly describe. My notes currently say 'softly impossible,' which is not useful science but is accurate.`,eventGift:false},
+      {text:`Cirrulong always looks composed. I do not trust anything that can float through a storm and somehow still look dignified.`,eventGift:false}
+    ],
+    flamecoil:[
+      {text:`Flamecoil is what happens when a furnace learns aerodynamics. Please admire it from whichever side has fewer sparks.`,eventGift:false},
+      {text:`The shell vents on Flamecoil are fascinating. Also hot. Fascinating first, hot immediately afterward.`,eventGift:false}
+    ],
+    grievwing:[{text:`Grievwing's wingbeats sound wrong in enclosed spaces. The Haunted Maze somehow makes that worse. Useful observation. Terrible atmosphere.`,eventGift:false}],
+    diamadon:[{text:`Diamadon's armor has that wonderful problem where I want to inspect every plate and also value having unflattened toes.`,eventGift:false}],
+    frosmink:[{text:`Frosmink has figured out exactly which corner of the archive stays coolest. I respect the research methodology.`,eventGift:false}],
+    thungress:[{text:`Thungress carries static into the room before she arrives. Very helpful warning system. Less helpful for my loose paper.`,eventGift:false}],
+    stormink:[{text:`Stormink is a lovely reminder that combining Ice and Lightning produces something elegant, dangerous, and extremely bad for nearby hair.`,eventGift:false}],
+    nebuloss:[{text:`Nebuloss makes depth perception feel optional. I keep trying to map the empty spaces between its bones and then remembering Void creatures do not care about my diagrams.`,eventGift:false}],
+    gillsire:[{text:`Gillsire has the patient expression of a creature that knows exactly how loud it can croak and is saving that knowledge for later.`,eventGift:false}]
   },
   events:{
     spooky_halloween_2026:[
       {text:`The Haunted Maze is back in town. I keep hearing things scrape along the walls in there, so maybe don't follow any whispers that know your name.`,eventGift:false},
       {text:`I found candle wax on the edge of my desk this morning. Either the Haunted Maze is getting bolder, or somebody owes me an explanation.`,eventGift:false},
+      {text:`The Maze roster changes with whatever monsters have been tagged for it now. Which is wonderfully flexible and deeply unhelpful to my nerves.`,eventGift:false},
+      {text:`Grievwing has been reported in the Maze. If you hear wingbeats where there is absolutely no room for wings, maybe take the other corridor.`,eventGift:false},
       {text:`Did you hear the Haunted Maze is back in town? Here, take five Fangs. I heard they're good-luck charms or something like that, and I'm choosing to believe it.`,eventGift:true},
       {text:`Before you head into the Haunted Maze, take these five Fangs. Consider them emergency spooky-pocket money.`,eventGift:true}
     ],
     winter_event_2026:[
       {text:`The winter air has that strange Prismwild sparkle to it. I'm keeping a warm drink near the archive before the frost starts filing paperwork too.`,eventGift:false},
+      {text:`The Winter Memory board is adorable right up until it locks you out for three misses. Then it becomes a tiny square-shaped rival.`,eventGift:false},
       {text:`Winter event day! Take five Snowflakes from me. I refuse to let you face seasonal shopping with empty pockets.`,eventGift:true}
     ],
     spring_event_2027:[
       {text:`Something new is sprouting all over the wilds. Some of it is probably harmless. The word probably is doing important work there.`,eventGift:false},
-      {text:`Here, five event tokens for the spring festivities. If anything blooms teeth, please write that down for me.`,eventGift:true}
+      {text:`Here, five event tokens for the spring festivities. Try not to let the flowers steal your field notes. Long story.`,eventGift:true}
     ]
   }
 };
@@ -1509,8 +1682,10 @@ const DAILY_BOARD_BONUS_XP=50;
 const GAUNTLET_MAX_STAGE=5;
 
 const ITEM_SHOP = [
-  {id:'heal_gel',name:'Recovery Gel',category:'Consumable',price:120,icon:'recovery_gel',desc:'Restores 35% of maximum Vitality during battle.'},
-  {id:'revive_gem',name:'Revive Gem',category:'Recovery',price:500,icon:'prismatic_shard',desc:'Immediately revives a fainted monster and clears its recovery timer.'},
+  {id:'heal_gel',name:'Recovery Gel',category:'Consumable',price:120,icon:'recovery_gel',consumable:true,desc:'Restores 35% of maximum Vitality during battle.'},
+  {id:'medium_heal_gel',name:'Medium Healing Gel',category:'Consumable',price:650,icon:'super_recovery_gel',consumable:true,desc:'Restores 50% of maximum Vitality during battle.'},
+  {id:'life_crystal',name:'Life Crystal',category:'Consumable',price:2500,icon:'prismatic_shard',consumable:true,desc:'Fully restores a monster’s Vitality during battle.'},
+  {id:'revive_gem',name:'Revive Gem',category:'Recovery',price:500,icon:'prismatic_shard',consumable:true,desc:'Immediately revives a fainted monster and clears its recovery timer.'},
   {id:'incu_catalyst',name:'Incubation Catalyst',category:'Consumable',price:300,icon:'incubation_catalyst',desc:'Use once on an incubating egg to reduce its remaining hatch time by 30 minutes.'},
   {id:'hormone_catalyst',name:'Hormone Catalyst',category:'Breeding Consumable',price:750,spriteKey:'hormone_catalyst',iconImage:'assets/icons/basic_sprites/hormone_catalyst.png',desc:'Use once on an active breeding pen to reduce its remaining breeding time by 30 minutes.'},
   {id:'refresh_juice',name:'Refresh Juice',category:'Event Consumable',price:1000,icon:'recovery_gel',desc:'Usable once per hour. Halloween: instantly restores 5 Haunted Maze Steps. Winter: immediately clears a failed-match Memory lockout. It cannot clear the one-hour completion cooldown.'},
@@ -1527,6 +1702,165 @@ const ITEM_SHOP = [
     desc:`Raises a monster to P${p} when injector use is activated.`
   }))
 ];
+
+
+// ---------- Silverwind Reference Guide ----------
+let silverwindReferenceTopicId='getting-started';
+const SILVERWIND_REFERENCE_CATEGORIES=['Getting Started','Monsters','Battle','Fieldwork','Progression','Events & Trials','Items & Economy'];
+function referencePercent(value){return `${Math.round(Number(value||0)*10000)/100}%`;}
+function referenceList(items){return `<ul class="silverwind-reference-bullets">${items.map(x=>`<li>${x}</li>`).join('')}</ul>`;}
+function referenceActions(items){return `<div class="silverwind-reference-actions">${items.map(([route,label])=>`<button class="ghost small" type="button" data-reference-route="${route}">${label}</button>`).join('')}</div>`;}
+function silverwindReferenceTopics(){
+  const currentChaos=zoneElementsFor('Sunday');
+  const zones=DAY_NAMES.slice(1).concat('Sunday').map(day=>{const z=ZONES[day],els=day==='Sunday'?currentChaos:(z.elements||[]);return `<div class="reference-row"><strong>${day} • ${z.name}</strong><span>${els.join(' • ')}</span></div>`;}).join('');
+  const traitRows=Object.entries(TRAITS).map(([name,t])=>`<div class="reference-row"><strong>${name}</strong><span>${t.note}</span></div>`).join('');
+  const typeRows=ELEMENTS.map(el=>{const t=TYPE_CHART[el];return `<div class="reference-row"><strong>${el}</strong><span>Strong into: ${t.strong.join(', ')} • Resisted by: ${t.weak.join(', ')}</span></div>`;}).join('');
+  const battleRows=Object.entries(TYPE_WEIGHTS).map(([name,w])=>{const g=TYPE_GROWTH[name];return `<div class="reference-row"><strong>${name}</strong><span>P1 emphasis: ${name==='Speed'?'Speed + Attack':name==='Brute'?'Attack + Armor':'Armor + Vitality'} • Potential growth/rank: VIT +${g.hp}, ATK +${g.attack}, ARM +${g.armor}, SPD +${g.speed}</span></div>`;}).join('');
+  const trialRows=Object.entries(state.trials||{}).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||'')).map(([id,t])=>`<div class="reference-row"><strong>${t.name} • ${t.captainName}</strong><span>${t.element} • ${t.trialPhilosophy||'Trial'} • Normal Lv.${t.normalRequirement} / Hard Lv.${t.hardRequirement}</span></div>`).join('')||'<div class="empty-card">No Trials are registered right now.</div>';
+  const itemRows=ITEM_SHOP.map(item=>`<div class="reference-row"><strong>${item.name}</strong><span>${item.category} • ${money(item.price)} • ${item.desc}</span></div>`).join('');
+  const statusText=STATUSES.filter(x=>x!=='None').join(', ');
+  return [
+    {id:'getting-started',category:'Getting Started',title:'New Keeper Basics',summary:'Where to begin and what the main loops are.',keywords:'starter active monster home hideout first steps',note:`Prismwild looks like a lot of little systems because it is. You only need one thread at a time. Pick a monster, wander somewhere interesting, and the rest starts attaching itself naturally.`,body:()=>referenceList([
+      `Your <strong>Active Monster</strong> is the monster used for normal Explore and most direct field activity.`,
+      `Use <strong>Explore</strong> for discovery, Field Finds, currency, items, eggs, and wild battles.`,
+      `Use <strong>My Hideout</strong> for your Collection, eggs/incubators, breeding, inventory, and profile.`,
+      `The <strong>Request Board</strong> gives daily jobs and Account XP. Silvy's daily check-in is one fixed request.`,
+      `The <strong>Monster Archive</strong> reveals species information after you obtain that species at least once.`
+    ])+referenceActions([['battle','Open Explore'],['collection','Open Collection'],['requests','Open Requests']])},
+
+    {id:'elements',category:'Battle',title:'Elements & Matchups',summary:'All Elements and the current strong/resisted relationships.',keywords:'type chart weakness resistance strong weak elemental damage',note:`Element matchups are one of the easiest ways to make a modest monster punch above its paperwork. I recommend checking this before blaming your monster for a bad afternoon.`,body:()=>`<p>Element advantage deals <strong>${TYPE_STRONG_MULTIPLIER}×</strong> damage. Resistance uses <strong>${TYPE_RESIST_MULTIPLIER.toFixed(2)}×</strong>. Dual-element defenders combine their matchup modifiers, clamped between ${TYPE_MIN_MULTIPLIER}× and ${TYPE_MAX_MULTIPLIER}×.</p><div class="silverwind-reference-rows">${typeRows}</div>`},
+
+    {id:'battle-types',category:'Battle',title:'Battle Types & Stat Shape',summary:'How Speed, Brute, and Defender species distribute their stats.',keywords:'speed brute defender stats vitality attack armor growth',note:`Battle Type is not a rock-paper-scissors matchup. It is the monster's statistical posture: where its body wants the numbers to live as Potential rises.`,body:()=>`<div class="silverwind-reference-rows">${battleRows}</div><p>Battle Type also selects the creature's hit-sound family in combat. Individual species may carry custom P1 stat weights while still using their Battle Type growth pattern.</p>`},
+
+    {id:'combat',category:'Battle',title:'Combat, Levels & Fainting',summary:'Turn order, growth, rewards, and what happens after a defeat.',keywords:'battle turns speed tie level 100 faint revive recovery xp',note:`Fast does not mean invincible, sturdy does not mean harmless, and a tie in Speed means the universe flips a tiny invisible coin.`,body:()=>referenceList([
+      `Speed determines turn order. Equal Speed breaks the tie at random.`,
+      `Monsters level from <strong>1 to 100</strong>. Each level adds combat-stat growth on top of species Potential and Trait modifiers.`,
+      `A fainted monster recovers after <strong>${Math.round(FAINT_DURATION_MS/60000)} minutes</strong>. A Revive Gem clears that timer immediately.`,
+      `Heavy successful attacks can produce a stronger battlefield kick, while missed visual effects visibly whiff or veer away.`,
+      `Combat logic does not depend on audio or visual effects successfully playing.`
+    ])+referenceActions([['battle','Open Battle Hub']])},
+
+    {id:'attacks',category:'Battle',title:'Attacks, Styles & Statuses',summary:'Power, accuracy, attack weight, visual families, and status effects.',keywords:'moves signature attack scroll light standard heavy power accuracy status fx',note:`An attack is more than its Power number. Accuracy, status utility, Life Steal, and the monster using it can turn a quieter move into the right answer.`,body:()=>referenceList([
+      `Attack styles are <strong>${ATTACK_STYLES.join(', ')}</strong>. Style controls visual weight and helps describe how hard a move is meant to land.`,
+      `Current reusable status effects: <strong>${statusText}</strong>.`,
+      `Visual FX families are ${ATTACK_FX_STYLES.filter(x=>x!=='Auto').join(', ')}. Auto chooses a family from the attack's name/description.`,
+      `Base species normally have a Signature Attack. Attack Scrolls can teach compatible registered attacks through the monster detail tools.`,
+      `Some moves carry extra effects such as Life Steal or a next-attack dodge effect.`
+    ])+referenceActions([['silverwind-attacks','Open Attack Index']])},
+
+    {id:'potential',category:'Monsters',title:'Potential P1–P12',summary:'Species BST growth, inheritance, injectors, and breeding improvement.',keywords:'p1 p12 bst potential injector breeding plus one stats',note:`Potential is the ceiling built into an individual monster, not its level. Levels train what is there; Potential decides how much species-stat structure the monster started with.`,body:()=>referenceList([
+      `Potential ranges from <strong>P1 to P12</strong>.`,
+      `Each Potential rank adds exactly <strong>+10 BST</strong>. P12 is therefore P1 +110 BST.`,
+      `The extra 10 points per rank are distributed using the species' Battle Type growth pattern.`,
+      `Breeding snapshots the mother-role parent's Potential and has a <strong>5% chance</strong> to improve the egg by +1 Potential, capped at P12.`,
+      `Potential Injectors can raise a monster to the listed target rank when used.`
+    ])},
+
+    {id:'traits',category:'Monsters',title:'Traits',summary:'Personality modifiers applied to individual monsters.',keywords:'personality pristine legendary awful stat modifier nature disc reroll',note:`Traits are tiny personality-shaped stat arguments. Most trade one strength for another. A few are simply unusual.`,body:()=>`<p>Traits are assigned to individuals and modify their battle stats. Nature Discs can reroll one monster's Trait once per local calendar day.</p><div class="silverwind-reference-rows">${traitRows}</div>`},
+
+    {id:'prismatics',category:'Monsters',title:'Prismatic Monsters',summary:'Rare mutated forms, breeding odds, and the Pristine Trait.',keywords:'shiny prismatic mutation pristine chance rare breeding',note:`Prismatics are not supposed to feel like somebody poured rainbow paint over a normal monster. In-world, I think of them as rare material mutations: the same creature, transformed in the way its body knows how to transform.`,body:()=>referenceList([
+      `Base Prismatic breeding chance: <strong>${referencePercent(PRISMATIC_BASE_CHANCE)}</strong>.`,
+      `With one Pristine parent: <strong>${referencePercent(PRISMATIC_ONE_PRISTINE_CHANCE)}</strong>.`,
+      `With two Pristine parents: <strong>${referencePercent(PRISMATIC_TWO_PRISTINE_CHANCE)}</strong>.`,
+      `Two Prismatic parents do <strong>not</strong> guarantee a Prismatic egg.`,
+      `Prismatic state stays hidden while an egg is incubating and is revealed at hatch.`
+    ])},
+
+    {id:'breeding',category:'Monsters',title:'Breeding',summary:'Pens, parent roles, timers, inheritance, and catalysts.',keywords:'mother father pen hormone catalyst egg pending timer inherit',note:`The pens are where biology, probability, and paperwork form a small conspiracy against me. Fortunately, the rules themselves are tidy.`,body:()=>referenceList([
+      `You begin with <strong>1 free Breeding Pen</strong> and can unlock up to ${BREEDING_PEN_COSTS.length}.`,
+      `Parent order is role-based. Intersex monsters may be assigned to either breeding role.`,
+      `The exact parents and pending egg are saved when breeding begins, so refreshing cannot reroll the result.`,
+      `A Hormone Catalyst can be used once per active pairing to reduce the remaining timer by <strong>${Math.round(HORMONE_CATALYST_REDUCTION_MS/60000)} minutes</strong>.`,
+      `Breeding checks species-specific timers, Potential inheritance, Prismatic odds, and any eligible Crossbreed recipe.`
+    ])+referenceActions([['breed','Open Breeding Pens']])},
+
+    {id:'crossbreeds',category:'Monsters',title:'Crossbreeds',summary:'Special dual-element offspring found only through specific parent pairs.',keywords:'hybrid dual element parents recipe seasonal chance breeding only',note:`Crossbreeds are one of my favorite entries to file because they make the family tree look like it developed opinions.`,body:()=>referenceList([
+      `Crossbreeds are marked <strong>Breeding Only</strong> and use a specific parent pair.`,
+      `Parent lookup is orderless for the recipe itself.`,
+      `Each Crossbreed has its own success chance and can carry two Elements.`,
+      `Seasonal recipes only work while their matching event family is active.`,
+      `A failed Crossbreed roll still produces the normal species result from breeding rather than deleting the egg.`
+    ])+referenceActions([['silverwind-archive','Browse Crossbreeds in Archive']])},
+
+    {id:'eggs',category:'Monsters',title:'Eggs & Incubators',summary:'Loose eggs, incubation slots, catalysts, and hatching.',keywords:'egg incubator hatch incubation catalyst sell loose',note:`Every egg is a sealed envelope written in genetics. This metaphor becomes less charming when there are twelve of them on my desk.`,body:()=>referenceList([
+      `You begin with <strong>1 free Incubator</strong> and can unlock up to ${INCUBATOR_COSTS.length}.`,
+      `Loose eggs wait in your Egg inventory until placed into an Incubator.`,
+      `An Incubation Catalyst can be used once per egg to reduce remaining hatch time by <strong>30 minutes</strong>.`,
+      `Prismatic state is hidden until hatch.`,
+      `Loose eggs may be sold with confirmation, and collection-capacity checks protect completed hatches.`
+    ])+referenceActions([['eggs','Open Eggs & Incubators']])},
+
+    {id:'collection',category:'Monsters',title:'Collection & Active Monster',summary:'Collection Pens, active field duty, nicknames, moves, and tuning.',keywords:'collection pen active nickname release attack scroll dna splicer nature disc',note:`The Collection is the part of monster research where every clean spreadsheet eventually becomes 'please stop climbing that shelf.'`,body:()=>referenceList([
+      `Each Collection Pen holds up to <strong>${COLLECTION_PEN_CAPACITY}</strong> monsters, with up to ${MAX_COLLECTION_PENS} pens available.`,
+      `Set one eligible monster as your Active Monster for field exploration.`,
+      `Monster detail tools cover nicknames, active assignment, revival, move management, Nature Discs, and DNA Splicers.`,
+      `Each individual can receive only <strong>one DNA Splicer</strong> in its lifetime, permanently adding +${DNA_SPLICE_BONUS} to the chosen stat.`,
+      `Monsters currently breeding, away on Expeditions, or fainted may be restricted from conflicting actions.`
+    ])+referenceActions([['collection','Open Collection']])},
+
+    {id:'explore-zones',category:'Fieldwork',title:'Explore & Weekday Zones',summary:'Endless map exploration and the Element rotation by day.',keywords:'map maze weekday monday tuesday zone chaos wastes wild encounters',note:`The weekday zones are predictable right up until Sunday, when the Chaos Wastes throw my filing system out a window.`,body:()=>`<p>Normal Explore uses a connected <strong>7×7</strong> fog-covered map. Each successful move resolves one Explore roll. Fully reveal a map and a fresh layout is generated so the run can continue.</p><div class="silverwind-reference-rows">${zones}</div><p>Wild zone eligibility is driven by a species' primary Element. Sunday chooses three Elements for the week and keeps them stable until the next weekly roll.</p>`+referenceActions([['battle','Open Explore']])},
+
+    {id:'capture',category:'Fieldwork',title:'Wild Recruitment & Capture Pods',summary:'How defeated wild monsters can join your collection.',keywords:'capture recruit reward wild monster chance pod 15 20',note:`Winning a wild battle does not mean the monster immediately moves into your spare room. Sometimes it does, though. Keepers are strange.`,body:()=>referenceList([
+      `Defeated capturable wild monsters have a base <strong>${referencePercent(WILD_MONSTER_REWARD_CHANCE)}</strong> recruitment chance.`,
+      `A Capture Pod lasts <strong>${Math.round(CAPTURE_POD_DURATION_MS/60000)} minutes</strong> and adds <strong>${Math.round(CAPTURE_POD_BONUS*100)} percentage points</strong> to that chance.`,
+      `The current maximum with that field bonus is <strong>${referencePercent(Math.min(1,WILD_MONSTER_REWARD_CHANCE+CAPTURE_POD_BONUS))}</strong>.`,
+      `Event encounter reward rules may use their own event-specific logic.`
+    ])},
+
+    {id:'expeditions',category:'Fieldwork',title:'Daily Expeditions',summary:'Send teams away on timed contracts for larger reward bundles.',keywords:'1 hour 5 hour 12 hour team away mission contract rewards',note:`Expeditions are useful when you want monsters doing something productive while you are elsewhere. I support this principle strongly and would like the paperwork to learn it.`,body:()=>referenceList(EXPEDITION_DURATION_ORDER.map(key=>{const d=EXPEDITION_DURATIONS[key];return `<strong>${d.label}</strong>: ${d.hours} hour${d.hours===1?'':'s'}.`;}).concat([
+      `Assign <strong>1 to 5</strong> eligible monsters to a contract.`,
+      `Away monsters are locked from actions that would conflict with the Expedition.`,
+      `Unstarted contracts reroll daily. Active timers persist.`,
+      `Longer missions generally offer stronger reward ranks and access to more valuable expedition treasure.`
+    ]))+referenceActions([['expeditions','Open Expeditions']])},
+
+    {id:'requests-xp',category:'Progression',title:'Requests & Account XP',summary:'Daily jobs, Silvy check-in, completion bonus, and Keeper progression.',keywords:'request board daily xp account level silverwind check in bonus',note:`The Request Board is my preferred form of organized chaos: three rotating jobs, one predictable check-in, and enough rewards to make the clipboard worth respecting.`,body:()=>referenceList([
+      `Each day provides three rotating Requests plus the fixed <strong>Silverwind Keeper Check-In</strong>.`,
+      `Requests grant currency and Account XP when claimed.`,
+      `Silvy's first check-in each day grants one useful item and <strong>+${SILVERWIND_DAILY_XP} Account XP</strong>.`,
+      `Complete all rotating Requests plus the check-in to unlock the daily completion bonus: <strong>+${DAILY_BOARD_BONUS_XP} Account XP</strong> and one useful item.`,
+      `Requests persist for the day instead of rerolling when the page refreshes.`
+    ])+referenceActions([['requests','Open Request Board']])},
+
+    {id:'trials',category:'Events & Trials',title:'Element Trials',summary:'Captain challenges, Normal/Hard requirements, lineups, badges, and rewards.',keywords:'trial captain ros wyn razzik normal hard badge challenge',note:`A good Trial is not just three monsters standing in a hallway. The Captain is testing an idea about battling. Learn the idea and the lineup starts making more sense.`,body:()=>`<div class="silverwind-reference-rows">${trialRows}</div><p>Trials can carry unique Captain dialogue, Normal and Hard introductions, victory/defeat lines, lore, philosophy, art, badge art, level requirements, and three-monster lineups.</p>`+referenceActions([['trials','Open Trials']])},
+
+    {id:'events',category:'Events & Trials',title:'Seasonal Events',summary:'Limited activities, currencies, shops, monsters, and breeding rules.',keywords:'halloween winter spring haunted maze snowflake fang calendar memory seasonal',note:`Events are when the wilds become festive, dangerous, collectible, and somehow more administratively complicated at the same time.`,body:()=>referenceList([
+      `<strong>Spooky Halloween:</strong> Haunted Maze, Fangs, event encounters, maze finds, and event shop rewards. The Maze reads eligible monsters from their current Obtain Method tags.`,
+      `<strong>Winter:</strong> Snowflakes, a 25-day Gift Calendar, 4×4 Memory game, Winter Mystery Egg rewards, and seasonal breeding content.`,
+      `Seasonal Crossbreed recipes only activate during their matching event family.`,
+      `Refresh Juice has event-specific uses and a ${Math.round(REFRESH_JUICE_COOLDOWN_MS/3600000)}-hour cooldown.`
+    ])+referenceActions([['event','Open Event']])},
+
+    {id:'items',category:'Items & Economy',title:'Useful Items & Consumables',summary:'Current shop consumables, tuning items, and permanent upgrades.',keywords:'shop recovery gel revive catalyst capture pod nature disc dna injector prices inventory',note:`Consumables are the little levers that let a Keeper trade money for time, safety, or slightly fewer dramatic noises from the breeding wing.`,body:()=>`<div class="silverwind-reference-rows reference-item-rows">${itemRows}</div>`+referenceActions([['shop','Open Shop'],['inventory','Open Inventory']])},
+
+    {id:'archive',category:'Getting Started',title:'Monster Archive & Attack Index',summary:'Where to look up species discoveries and registered moves.',keywords:'encyclopedia archive index discovered species moves lookup',note:`This is the part of my desk I will defend with frightening intensity. The Archive records what you have discovered; the Attack Index records what the game currently knows how to throw at something.`,body:()=>referenceList([
+      `The <strong>Monster Archive</strong> separates Base Monsters and Crossbreeds. Undiscovered species stay hidden behind silhouettes and ???? fields.`,
+      `Once discovered, a species entry shows Element, role, Battle Type, P1/P12 BST, Signature Attack, obtain method, and relevant Crossbreed details.`,
+      `The <strong>Attack Index</strong> is registry-driven and includes built-in plus published custom attacks.`,
+      `Attack Index filters support text search and Element filtering.`
+    ])+referenceActions([['silverwind-archive','Open Monster Archive'],['silverwind-attacks','Open Attack Index']])},
+
+    {id:'economy',category:'Items & Economy',title:'Field Finds, Shop & Black Market',summary:'Selling junk, buying supplies, and daily monster requests.',keywords:'currency sell shiny rocks scale herbs black market trade field finds',note:`Not everything you drag home needs to become a treasured heirloom. Sometimes a shiny rock is a shiny rock, and somebody will give us currency for it.`,body:()=>referenceList([
+      `Normal Explore can return Field Finds such as Shiny Rocks, Monster Scales, and Herbs. These can be sold from Inventory.`,
+      `The Shop sells recovery supplies, catalysts, field consumables, tuning items, DNA Splicers, and Potential Injectors.`,
+      `The Black Market posts daily monster requests and pays for matching monsters.`,
+      `Rare Black Market requests may specifically ask for a Prismatic when the required conditions are met.`
+    ])+referenceActions([['inventory','Open Inventory'],['shop','Open Shop']])}
+  ];
+}
+function renderSilverwindReferenceGuide(){
+  const list=document.getElementById('silverwindReferenceList'),detail=document.getElementById('silverwindReferenceDetail'),search=document.getElementById('silverwindReferenceSearch'),category=document.getElementById('silverwindReferenceCategory');
+  if(!list||!detail||!search||!category)return;
+  if(category.options.length<=1){category.innerHTML='<option value="all">All topics</option>'+SILVERWIND_REFERENCE_CATEGORIES.map(x=>`<option value="${x}">${x}</option>`).join('');}
+  const topics=silverwindReferenceTopics(),q=search.value.trim().toLowerCase(),cat=category.value||'all';
+  const filtered=topics.filter(t=>(cat==='all'||t.category===cat)&&`${t.title} ${t.summary} ${t.keywords||''} ${t.category}`.toLowerCase().includes(q));
+  list.innerHTML='';
+  if(!filtered.length){list.innerHTML='<div class="empty-card">No notebook entry matches that search.</div>';detail.innerHTML='<div class="empty-card">Try another word or category. I promise the filing system is only mostly haunted.</div>';return;}
+  if(!filtered.some(t=>t.id===silverwindReferenceTopicId))silverwindReferenceTopicId=filtered[0].id;
+  for(const topic of filtered){const b=document.createElement('button');b.type='button';b.className='silverwind-reference-topic'+(topic.id===silverwindReferenceTopicId?' active':'');b.innerHTML=`<span>${topic.category}</span><strong>${topic.title}</strong><small>${topic.summary}</small>`;b.onclick=()=>{silverwindReferenceTopicId=topic.id;renderSilverwindReferenceGuide();};list.appendChild(b);}
+  const topic=topics.find(t=>t.id===silverwindReferenceTopicId)||filtered[0];
+  detail.innerHTML=`<div class="eyebrow">${topic.category.toUpperCase()}</div><h3>${topic.title}</h3><p class="silverwind-reference-summary">${topic.summary}</p><div class="silverwind-reference-note"><strong>Silvy's note</strong><span>${topic.note}</span></div><div class="silverwind-reference-body">${topic.body()}</div>`;
+}
 
 const DB_NAME='monsterGameAssets_v05', DB_VERSION=1, STORE='assets';
 let assetDB=null, assetUrlCache={}, liveAssetRefs={}, selectedMonsterId=null, selectedSpriteKey='currency';
@@ -2946,11 +3280,12 @@ function clearResolvedBattleSession(){
   return true;
 }
 function showSilverwindPane(name='desk'){
-  const panes={desk:'silverwindDeskPane',archive:'silverwindArchivePane',attacks:'silverwindAttacksPane'};
-  const buttons={desk:'showSilverwindDesk',archive:'showSilverwindArchive',attacks:'showSilverwindAttacks'};
+  const panes={desk:'silverwindDeskPane',reference:'silverwindReferencePane',archive:'silverwindArchivePane',attacks:'silverwindAttacksPane'};
+  const buttons={desk:'showSilverwindDesk',reference:'showSilverwindReference',archive:'showSilverwindArchive',attacks:'showSilverwindAttacks'};
   if(!panes[name])name='desk';
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
+  if(name==='reference')renderSilverwindReferenceGuide();
 }
 let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle',currentSilverwindPane='desk';
 function showAdventurePane(name='battle'){
@@ -2976,7 +3311,7 @@ function switchTab(name){
   // Internal destinations route straight into their hub homes.
   const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory',profile:'profile'};
   const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials'};
-  const silverwindRoutes={'silverwind-desk':'desk','silverwind-archive':'archive','silverwind-attacks':'attacks'};
+  const silverwindRoutes={'silverwind-desk':'desk','silverwind-reference':'reference','silverwind-archive':'archive','silverwind-attacks':'attacks'};
   const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null,silverwindPane=silverwindRoutes[name]||null;
   const mainName=hideoutPane?'hideout':adventurePane?'adventure':silverwindPane?'silverwind':name;
   clearResolvedBattleSession();
@@ -3033,8 +3368,9 @@ function renderCollection(){
   else if(!shown.length)grid.innerHTML='<div class="empty-card collection-empty-card">No monsters in this Pen match those filters.</div>';
 }
 function renderMonsterPenMoveControl(mon){
-  const select=document.getElementById('detailPenSelect'),status=document.getElementById('detailPenStatus'),button=document.getElementById('moveMonsterPen');if(!select||!status||!button)return;
+  const select=document.getElementById('detailPenSelect'),status=document.getElementById('detailPenStatus'),button=document.getElementById('moveMonsterPen'),topLabel=document.getElementById('detailPenTopLabel');if(!select||!status||!button)return;
   const current=collectionPenIndexForMonster(mon.id);
+  if(topLabel)topLabel.textContent=current>=0?`Pen ${current+1}`:'Unassigned';
   status.textContent=current>=0?`${displayName(mon)} is currently stored in Pen ${current+1}.`:'This monster is not assigned to a Collection Pen.';
   select.innerHTML='';
   for(let i=0;i<state.unlockedCollectionPens;i++){
@@ -3049,12 +3385,73 @@ function moveSelectedMonsterPen(){
   const mon=state.monsters.find(m=>m.id===selectedMonsterId);if(!mon)return;
   const target=Number(document.getElementById('detailPenSelect').value);
   if(!moveMonsterToCollectionPen(mon.id,target)){alert('That Collection Pen is full or unavailable.');return;}
-  currentCollectionPen=target;save();renderAll();openDetail(mon.id);
+  currentCollectionPen=target;save();renderAll();document.getElementById('detailPenMenu')?.classList.add('hidden');openDetail(mon.id);
+}
+
+let currentMonsterDetailPane='info';
+function showMonsterDetailPane(name='info'){
+  const valid=['info','items','lineage'];currentMonsterDetailPane=valid.includes(name)?name:'info';
+  document.querySelectorAll('[data-monster-pane]').forEach(btn=>btn.classList.toggle('active',btn.dataset.monsterPane===currentMonsterDetailPane));
+  const panes={info:'detailPaneInfo',items:'detailPaneItems',lineage:'detailPaneLineage'};
+  Object.entries(panes).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('hidden',key!==currentMonsterDetailPane);});
+}
+function monsterLineageLabel(ref){
+  if(!ref)return {name:'Unknown',meta:'No record'};
+  const found=state.monsters.find(m=>m.id===ref);
+  if(found){const sp=speciesOf(found);return {name:displayName(found),meta:`${sp?.name||'Unknown species'} • ${found.id}`};}
+  return {name:String(ref),meta:'Not currently in Collection'};
+}
+function renderMonsterLineage(mon){
+  const tree=document.getElementById('detailLineageTree');if(!tree)return;
+  if(!mon.parents){tree.innerHTML='<div class="lineage-origin"><strong>Wild / Starter Individual</strong><span>No recorded parents.</span></div>';document.getElementById('detailLineage').textContent='Wild / starter individual';return;}
+  const mother=monsterLineageLabel(mon.parents.mother),father=monsterLineageLabel(mon.parents.father),sp=speciesOf(mon);
+  tree.innerHTML=`<div class="lineage-parents"><div class="lineage-node parent"><span>Mother</span><strong>${mother.name}</strong><small>${mother.meta}</small></div><div class="lineage-node parent"><span>Father</span><strong>${father.name}</strong><small>${father.meta}</small></div></div><div class="lineage-connector"><i></i></div><div class="lineage-node child"><span>Offspring</span><strong>${displayName(mon)}</strong><small>${sp?.name||mon.slug} • ${mon.id}</small></div>`;
+  document.getElementById('detailLineage').textContent=`Mother: ${mon.parents.mother||'Unknown'} • Father: ${mon.parents.father||'Unknown'}`;
+}
+function ownedMonsterTargetItems(){
+  return ITEM_SHOP.filter(item=>item.id==='nature_disc'||item.id.startsWith('dna_splicer_')||item.id.startsWith('injector_p')).filter(item=>Number(state.inventory[item.id]||0)>0);
+}
+function monsterItemEligibility(mon,item){
+  const qty=Number(state.inventory[item.id]||0);if(qty<=0)return {ok:false,label:'None owned'};
+  if(item.id==='nature_disc')return mon.natureDiscDate===localDateKey()?{ok:false,label:'Used today'}:{ok:true,label:'Reroll Trait'};
+  if(item.id.startsWith('dna_splicer_'))return mon.dnaSplice?{ok:false,label:'Splicer already used'}:{ok:true,label:`+${DNA_SPLICE_BONUS} ${item.dnaStat==='hp'?'Vitality':item.dnaStat[0].toUpperCase()+item.dnaStat.slice(1)}`};
+  const match=item.id.match(/^injector_p(\d+)$/);if(match){const target=Number(match[1]);return target<=Number(mon.potential||1)?{ok:false,label:`Already P${mon.potential}`}:{ok:true,label:`Raise to P${target}`};}
+  return {ok:false,label:'Unavailable'};
+}
+function renderMonsterItemTools(mon){
+  const box=document.getElementById('monsterItemTools'),status=document.getElementById('monsterItemToolStatus');if(!box||!status)return;
+  const items=ownedMonsterTargetItems();status.textContent=items.length?`${items.length} item type${items.length===1?'':'s'} available`:'No targeted items owned';box.innerHTML='';
+  if(!items.length){box.innerHTML='<div class="empty-card monster-item-empty">No Nature Discs, Injectors, or DNA Splicers are currently in your Inventory.</div>';return;}
+  items.forEach(item=>{const qty=Number(state.inventory[item.id]||0),elig=monsterItemEligibility(mon,item),card=document.createElement('div');card.className='monster-item-card';card.innerHTML=`<div><strong>${item.name}</strong><span>Owned ×${qty}</span><p>${item.desc||''}</p></div><button class="${elig.ok?'primary':'ghost'} small" type="button" data-monster-use-item="${item.id}" ${elig.ok?'':'disabled'}>${elig.label}</button>`;box.appendChild(card);});
+}
+function consumeInventoryItem(id){
+  if(!state.inventory[id])return false;state.inventory[id]--;if(state.inventory[id]<=0)delete state.inventory[id];return true;
+}
+function useMonsterTargetItem(itemId){
+  const mon=state.monsters.find(m=>m.id===selectedMonsterId),item=ITEM_SHOP.find(x=>x.id===itemId);if(!mon||!item||!state.inventory[itemId])return;
+  const elig=monsterItemEligibility(mon,item);if(!elig.ok)return;
+  if(itemId==='nature_disc'){
+    const before=mon.trait;let next=before;for(let i=0;i<20&&next===before;i++)next=rollTrait();
+    if(!confirm(`Use a Nature Disc on ${displayName(mon)}?\n\nCurrent Trait: ${before}\nThe new Trait will be random.`))return;
+    if(!consumeInventoryItem(itemId))return;mon.trait=next;mon.natureDiscDate=localDateKey();save();renderAll();openDetail(mon.id);alert(`${displayName(mon)} changed from ${before} to ${next}.`);return;
+  }
+  if(itemId.startsWith('dna_splicer_')){
+    const stat=item.dnaStat,label=stat==='hp'?'Vitality':stat[0].toUpperCase()+stat.slice(1);
+    if(!confirm(`Use ${item.name} on ${displayName(mon)}?\n\nThis permanently adds +${DNA_SPLICE_BONUS} ${label}. Each monster can receive only one DNA Splicer.`))return;
+    if(!consumeInventoryItem(itemId))return;mon.dnaSplice={stat,amount:DNA_SPLICE_BONUS,usedAt:Date.now()};save();renderAll();openDetail(mon.id);return;
+  }
+  const match=itemId.match(/^injector_p(\d+)$/);if(match){
+    const target=Number(match[1]);if(target<=mon.potential)return;
+    if(!confirm(`Use ${item.name} on ${displayName(mon)}?\n\nPotential will increase from P${mon.potential} to P${target}.`))return;
+    if(!consumeInventoryItem(itemId))return;mon.potential=target;save();renderAll();openDetail(mon.id);
+  }
 }
 
 async function openDetail(id){
-  const mon=state.monsters.find(m=>m.id===id),sp=speciesOf(mon);if(!mon||!sp)return;selectedMonsterId=id;await setMonsterImage(document.getElementById('detailArt'),mon.slug,monsterArtKind(mon));
-  document.getElementById('detailName').textContent=`${displayName(mon)} • ${mon.id}`;document.getElementById('detailSpecies').textContent=`Species: ${sp.name}${mon.isPrismatic?' • ✦ PRISMATIC':''}${sp.rarity==='Mythic'?' • MYTHIC':''}`;
+  const mon=state.monsters.find(m=>m.id===id),sp=speciesOf(mon);if(!mon||!sp)return;
+  const sameMonster=selectedMonsterId===id;selectedMonsterId=id;if(!sameMonster)currentMonsterDetailPane='info';
+  await setMonsterImage(document.getElementById('detailArt'),mon.slug,monsterArtKind(mon));
+  document.getElementById('detailName').textContent=displayName(mon);document.getElementById('detailSpecies').textContent=`${sp.name}${mon.isPrismatic?' • ✦ PRISMATIC':''}${sp.rarity==='Mythic'?' • MYTHIC':''}`;
   document.getElementById('detailRole').textContent=`${sp.role||sp.battleType} • ${sp.battleType}`;document.getElementById('detailLevel').textContent=mon.level;
   document.getElementById('detailGender').textContent=mon.gender;document.getElementById('detailPotential').textContent=`P${mon.potential}`;
   document.getElementById('detailTrait').textContent=`${mon.trait} • ${traitSummary(mon.trait)}`;
@@ -3062,31 +3459,15 @@ async function openDetail(id){
   const activeBtn=document.getElementById('setActiveMonster'),fainted=isMonsterFainted(mon),awayExpedition=expeditionForMonster(mon.id);
   activeBtn.textContent=awayExpedition?'On Expedition':fainted?'Fainted • Recovering':(state.activeMonsterId===mon.id?'Active Monster':'Set Active Monster');
   activeBtn.disabled=!!awayExpedition||fainted||state.activeMonsterId===mon.id;
-
-  const faintBox=document.getElementById('detailFaintBox'),reviveBtn=document.getElementById('useReviveGem');
-  faintBox.classList.toggle('hidden',!fainted);
-  if(fainted){
-    document.getElementById('detailFaintStatus').innerHTML=`Recovery: <span data-faint-countdown="${mon.id}">${fmtTime(faintRemaining(mon))}</span>`;
-    const gems=state.inventory.revive_gem||0;
-    reviveBtn.textContent=`Use Revive Gem ×${gems}`;
-    reviveBtn.disabled=gems<=0;
-  }
-
+  const faintBox=document.getElementById('detailFaintBox'),reviveBtn=document.getElementById('useReviveGem');faintBox.classList.toggle('hidden',!fainted);
+  if(fainted){document.getElementById('detailFaintStatus').innerHTML=`Recovery: <span data-faint-countdown="${mon.id}">${fmtTime(faintRemaining(mon))}</span>`;const gems=state.inventory.revive_gem||0;reviveBtn.textContent=`Use Revive Gem ×${gems}`;reviveBtn.disabled=gems<=0;}
   document.getElementById('detailXP').textContent=mon.level>=100?'MAX LEVEL':`${mon.xp||0} / ${xpToNext(mon.level)} XP`;
-  document.getElementById('detailLineage').textContent=mon.parents?`Mother: ${mon.parents.mother||'Shop / unknown'} • Father: ${mon.parents.father||'Shop / unknown'}`:'Wild / starter individual';
-  renderMonsterPenMoveControl(mon);
-  document.getElementById('renameInput').value=mon.nickname||'';
-  const releaseBtn=document.getElementById('releaseMonster'),releaseHint=document.getElementById('releaseMonsterHint');
-  const inBreed=isMonsterBreeding(mon.id);
-  let releaseReason='';
-  if(state.monsters.length<=1)releaseReason='You must keep at least one monster.';
-  else if(state.activeMonsterId===mon.id)releaseReason='Switch to a different Active Monster before releasing this one.';
-  else if(inBreed)releaseReason='This monster is currently part of an active breeding job.';
-  else if(awayExpedition)releaseReason='This monster is currently away on an expedition.';
-  else if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)releaseReason='This monster is currently in battle.';
-  releaseBtn.disabled=!!releaseReason;
-  releaseHint.textContent=releaseReason||'Permanently remove this individual from your Collection. Archive discovery stays unlocked.';
-  renderMonsterMoves(mon);renderTeachScrolls(mon);renderMonsterItemTools(mon);document.getElementById('detailModal').showModal();if(mon.isPrismatic)setTimeout(()=>playPrismaticShine(document.querySelector('.detail-art-wrap')),50);
+  renderMonsterLineage(mon);renderMonsterPenMoveControl(mon);document.getElementById('renameInput').value=mon.nickname||'';document.getElementById('renameBox').classList.add('hidden');document.getElementById('detailPenMenu').classList.add('hidden');
+  const releaseBtn=document.getElementById('releaseMonster'),releaseHint=document.getElementById('releaseMonsterHint');const inBreed=isMonsterBreeding(mon.id);let releaseReason='';
+  if(state.monsters.length<=1)releaseReason='You must keep at least one monster.';else if(state.activeMonsterId===mon.id)releaseReason='Switch to a different Active Monster before releasing this one.';else if(inBreed)releaseReason='This monster is currently part of an active breeding job.';else if(awayExpedition)releaseReason='This monster is currently away on an expedition.';else if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)releaseReason='This monster is currently in battle.';
+  releaseBtn.disabled=!!releaseReason;releaseHint.textContent=releaseReason||'Permanently remove this individual from your Collection. Archive discovery stays unlocked.';
+  renderMonsterMoves(mon);renderTeachScrolls(mon);renderMonsterItemTools(mon);showMonsterDetailPane(currentMonsterDetailPane);
+  const dlg=document.getElementById('detailModal');if(!dlg.open)dlg.showModal();if(mon.isPrismatic)setTimeout(()=>playPrismaticShine(document.querySelector('.monster-profile-art')),50);
 }
 function renderMonsterMoves(mon){
   const box=document.getElementById('detailMoves');box.innerHTML='';const arr=[...(mon.attacks||[])].slice(0,2);
@@ -3739,18 +4120,25 @@ function buyItem(id){const item=ITEM_SHOP.find(x=>x.id===id);if(!item||state.cur
 function buyIncubator(){const idx=state.unlockedIncubators;if(idx>=5)return;const cost=INCUBATOR_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedIncubators++;save();renderAll();}
 function buyBreedingPen(){const idx=state.unlockedBreedingPens;if(idx>=5)return;const cost=BREEDING_PEN_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedBreedingPens++;save();renderAll();}
 function buyCollectionPen(){const idx=state.unlockedCollectionPens;if(idx>=MAX_COLLECTION_PENS)return;const cost=COLLECTION_PEN_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedCollectionPens++;save();renderAll();}
-function sellTradeGood(id,qty){
-  const info=TRADE_GOODS[id],owned=Number(state.inventory[id]||0);
-  if(!info||owned<=0)return;
-  const amount=qty==='all'?owned:Math.max(1,Math.min(owned,Number(qty||1)));
-  if(qty==='all'&&!confirm(`Sell ${owned} ${info.name} for ${money(owned*info.sellValue)}?`))return;
+let inventorySelection=null;
+function inventorySellValue(info){
+  if(!info)return 0;
+  if(info.isTradeGood)return Math.max(0,Math.floor(Number(info.sellValue||0)));
+  return Math.max(0,Math.floor(Number(info.sellValue||0)));
+}
+function sellInventoryItem(id,qty){
+  const info=itemInfoForInventoryId(id),owned=Number(state.inventory[id]||0);
+  if(!info||owned<=0)return false;
+  const amount=Math.max(1,Math.min(owned,Math.floor(Number(qty||1))));
+  const each=inventorySellValue(info),saleValue=amount*each;
+  if(each<=0)return false;
   state.inventory[id]-=amount;
   if(state.inventory[id]<=0)delete state.inventory[id];
-  const saleValue=amount*info.sellValue;
   state.currency+=saleValue;
-  updateRequestProgress('sell_value',saleValue);
+  if(info.isTradeGood)updateRequestProgress('sell_value',saleValue);
   save();
   renderAll();
+  return true;
 }
 function formatShortCooldown(ms){ms=Math.max(0,Number(ms||0));const min=Math.floor(ms/60000),sec=Math.floor((ms%60000)/1000);return `${min}:${String(sec).padStart(2,'0')}`;}
 function refreshJuiceRemaining(){return Math.max(0,Number(state.itemCooldowns?.refreshJuiceUntil||0)-Date.now());}
@@ -3775,31 +4163,66 @@ function useCapturePod(){
   if(capturePodActive()){alert(`A Capture Pod signal is already active for ${formatShortCooldown(capturePodRemaining())}.`);return;}
   state.inventory.capture_pod--;if(state.inventory.capture_pod<=0)delete state.inventory.capture_pod;state.buffs.capturePodUntil=Date.now()+CAPTURE_POD_DURATION_MS;save();renderAll();
 }
-function rerollDifferentTrait(current){for(let i=0;i<30;i++){const next=rollTrait();if(next!==current)return next;}return current==='Boring'?'Aggressive':'Boring';}
-function useNatureDiscOnMonster(monId){
-  const mon=state.monsters.find(m=>m.id===monId);if(!mon||!(state.inventory.nature_disc>0))return;const today=localDateKey();if(mon.natureDiscDate===today){alert(`${displayName(mon)} has already used a Nature Disc today.`);return;}const old=mon.trait;if(!confirm(`Use a Nature Disc on ${displayName(mon)}?
-
-Current Trait: ${old}
-This individual cannot use another Nature Disc until tomorrow.`))return;mon.trait=rerollDifferentTrait(old);mon.natureDiscDate=today;state.inventory.nature_disc--;if(state.inventory.nature_disc<=0)delete state.inventory.nature_disc;save();renderAll();openDetail(mon.id);
-}
-function dnaStatLabel(stat){return ({hp:'Vitality',attack:'Attack',armor:'Armor',speed:'Speed'})[stat]||stat;}
-function useDnaSplicerOnMonster(monId,itemId){
-  const mon=state.monsters.find(m=>m.id===monId),item=ITEM_SHOP.find(x=>x.id===itemId),stat=item?.dnaStat;if(!mon||!item||!stat||!(state.inventory[itemId]>0))return;if(mon.dnaSplice){alert(`${displayName(mon)} has already been DNA-spliced for ${dnaStatLabel(mon.dnaSplice.stat)} +${DNA_SPLICE_BONUS}. A monster can only receive one DNA Splicer.`);return;}if(!confirm(`Use ${item.name} on ${displayName(mon)}?
-
-This permanently adds +${DNA_SPLICE_BONUS} ${dnaStatLabel(stat)}. This monster can NEVER receive another DNA Splicer.`))return;mon.dnaSplice={stat,amount:DNA_SPLICE_BONUS,usedAt:Date.now()};state.inventory[itemId]--;if(state.inventory[itemId]<=0)delete state.inventory[itemId];save();renderAll();openDetail(mon.id);
-}
-function renderMonsterItemTools(mon){
-  const box=document.getElementById('monsterItemTools'),status=document.getElementById('monsterItemToolStatus');if(!box||!status||!mon)return;const today=localDateKey(),natureQty=Number(state.inventory.nature_disc||0),natureUsed=mon.natureDiscDate===today;const spliced=mon.dnaSplice;
-  status.textContent=spliced?`DNA: ${dnaStatLabel(spliced.stat)} +${DNA_SPLICE_BONUS}`:'DNA: unused';
-  const nature=`<button class="ghost monster-tool-button" type="button" data-use-nature-disc="${mon.id}" ${natureQty<=0||natureUsed?'disabled':''}><strong>Nature Disc ×${natureQty}</strong><span>${natureUsed?'Used today • available tomorrow':'Reroll Trait • once per monster per day'}</span></button>`;
-  const dnaItems=ITEM_SHOP.filter(x=>x.dnaStat).map(item=>{const qty=Number(state.inventory[item.id]||0),label=dnaStatLabel(item.dnaStat);return `<button class="ghost monster-tool-button" type="button" data-use-dna-splicer="${item.id}" ${qty<=0||!!spliced?'disabled':''}><strong>${label} Splicer ×${qty}</strong><span>${spliced?`Already spliced: ${dnaStatLabel(spliced.stat)} +${DNA_SPLICE_BONUS}`:`Permanently +${DNA_SPLICE_BONUS} ${label}`}</span></button>`;}).join('');
-  box.innerHTML=nature+dnaItems;const nb=box.querySelector('[data-use-nature-disc]');if(nb)nb.onclick=()=>useNatureDiscOnMonster(mon.id);box.querySelectorAll('[data-use-dna-splicer]').forEach(btn=>btn.onclick=()=>useDnaSplicerOnMonster(mon.id,btn.dataset.useDnaSplicer));
-}
 function inventoryConsumableAction(id){
   if(id==='refresh_juice'){const remain=refreshJuiceRemaining();return `<div class="trade-actions"><button class="ghost small" type="button" data-use-inventory-item="refresh_juice" ${remain>0?'disabled':''}>${remain>0?`Ready in <span data-refresh-juice-timer>${formatShortCooldown(remain)}</span>`:'Use Refresh Juice'}</button></div>`;}
   if(id==='capture_pod'){const remain=capturePodRemaining();return `<div class="trade-actions"><button class="ghost small" type="button" data-use-inventory-item="capture_pod" ${remain>0?'disabled':''}>${remain>0?`Capture Boost • <span data-capture-pod-timer>${formatShortCooldown(remain)}</span>`:'Activate • 20 min'}</button></div>`;}
   if(id==='nature_disc'||id.startsWith('dna_splicer_'))return '<div class="trade-good-meta"><span>Use</span><strong>Choose a monster in Collection</strong></div>';
   return '';
+}
+async function openInventoryDetail(id){
+  const info=itemInfoForInventoryId(id),owned=Number(state.inventory[id]||0);
+  if(!info||owned<=0)return;
+  const each=inventorySellValue(info);
+  inventorySelection={id,info,owned,each};
+  const modal=document.getElementById('inventoryDetailModal');
+  document.getElementById('inventoryDetailVisual').innerHTML=inventoryIconMarkup(info,'sheet-icon icon-shop-detail');
+  document.getElementById('inventoryDetailCategory').textContent=info.category.toUpperCase();
+  document.getElementById('inventoryDetailName').textContent=info.name;
+  document.getElementById('inventoryDetailDescription').textContent=info.desc||'';
+  const meta=[];
+  meta.push(info.isConsumable?'Consumable':'Not Consumable');
+  if(info.isTradeGood)meta.push('Trade Good');
+  else if(info.shopPrice>0)meta.push(`Shop value ${money(info.shopPrice)}`);
+  document.getElementById('inventoryDetailMeta').innerHTML=meta.map(x=>`<span>${x}</span>`).join('');
+  document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
+  document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood?' • Resale rate: 5% of shop value':''}`;
+  const sell=document.getElementById('inventorySellButton');
+  sell.disabled=each<=0;
+  sell.textContent=each>0?'Sell':'Cannot Sell';
+  resetInventorySellPanel();
+  await hydrateSprites(modal);
+  if(!modal.open)modal.showModal();
+}
+function resetInventorySellPanel(){
+  document.getElementById('inventorySellPanel').classList.add('hidden');
+  document.getElementById('inventoryDetailActions').classList.remove('hidden');
+}
+function requestInventorySell(){
+  if(!inventorySelection||inventorySelection.each<=0)return;
+  const {owned,info}=inventorySelection;
+  document.getElementById('inventoryDetailActions').classList.add('hidden');
+  document.getElementById('inventorySellPanel').classList.remove('hidden');
+  document.getElementById('inventorySellTitle').textContent=`Sell ${info.name}`;
+  const input=document.getElementById('inventorySellQuantity');
+  input.min='1';input.max=String(owned);input.value='1';
+  updateInventorySellPreview();
+  input.focus();input.select();
+}
+function updateInventorySellPreview(){
+  if(!inventorySelection)return;
+  const input=document.getElementById('inventorySellQuantity');
+  const qty=Math.max(1,Math.min(inventorySelection.owned,Math.floor(Number(input.value||1))));
+  if(String(qty)!==input.value)input.value=String(qty);
+  document.getElementById('inventorySellTotal').innerHTML=currencyMarkup(qty*inventorySelection.each,'currency-inline shop-modal-price');
+}
+function confirmInventorySale(){
+  if(!inventorySelection)return;
+  const input=document.getElementById('inventorySellQuantity');
+  const qty=Math.max(1,Math.min(inventorySelection.owned,Math.floor(Number(input.value||1))));
+  const sold=sellInventoryItem(inventorySelection.id,qty);
+  if(!sold)return;
+  document.getElementById('inventoryDetailModal').close();
+  inventorySelection=null;
 }
 function renderInventory(){
   const box=document.getElementById('inventoryGrid');
@@ -3817,18 +4240,12 @@ function renderInventory(){
   entries.forEach(([id,qty])=>{
     const info=itemInfoForInventoryId(id);
     if(!info)return;
-    const card=document.createElement('div');
-    card.className='inventory-card'+(info.isTradeGood?' trade-good-card':'');
-    const sale=info.isTradeGood?`<div class="trade-good-meta"><span>Sell value</span><strong>${money(info.sellValue)} each</strong></div>
-      <div class="trade-actions"><button class="ghost small sell-one" type="button">Sell 1 • ${money(info.sellValue)}</button><button class="ghost small sell-all" type="button">Sell All • ${money(info.sellValue*qty)}</button></div>`:inventoryConsumableAction(id);
-    card.innerHTML=`<div class="shop-icon-art">${inventoryIconMarkup(info,'sheet-icon icon-lg')}</div>
-      <div><span class="shop-category">${info.category}</span><h4>${info.name}</h4><p>${info.desc}</p>${sale}</div>
-      <strong class="qty">×${qty}</strong>`;
-    if(info.isTradeGood){
-      card.querySelector('.sell-one').onclick=()=>sellTradeGood(id,1);
-      card.querySelector('.sell-all').onclick=()=>sellTradeGood(id,'all');
-    }else{const use=card.querySelector('[data-use-inventory-item]');if(use)use.onclick=()=>use.dataset.useInventoryItem==='refresh_juice'?useRefreshJuice():useCapturePod();}
-    box.appendChild(card);
+    const tile=document.createElement('button');
+    tile.className='shop-tile inventory-tile'+(info.isTradeGood?' trade-good-card':'');
+    tile.type='button';
+    tile.innerHTML=`<span class="inventory-tile-qty">×${qty}</span><span class="shop-tile-visual">${inventoryIconMarkup(info,'sheet-icon icon-shop-tile')}</span><span class="shop-tile-name">${info.name}</span><span class="shop-tile-category">${info.category}</span>`;
+    tile.onclick=()=>openInventoryDetail(id);
+    box.appendChild(tile);
   });
 }
 
@@ -4294,7 +4711,7 @@ async function applyLiveContent(data){
 }
 async function exportAdmin(){
   const pack=await buildContentPack({publishedOnly:false});
-  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01541.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01542.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function importAdminFile(file){
   try{
@@ -4502,7 +4919,7 @@ async function renderTrialDetail(){
     <div class="trial-lineup-preview">${trial.lineup.map((slot,i)=>`<div><strong>${i+1}. ${state.species[slot.slug]?.name||slot.slug}</strong><span>Normal Lv.${trialModeLevel(slot,'normal')} • Hard Lv.${trialModeLevel(slot,'hard')}</span></div>`).join('')}</div>
     <div class="trial-mode-grid"><div class="trial-mode-card"><span>NORMAL</span><h3>Lv.${normalReq}+</h3><p>Clear all three opponents to earn <strong>${trial.badgeName||`${trial.element} Badge`}</strong>.</p><button id="startTrialNormal" class="primary" type="button" ${normalDisabled?'disabled':''}>${battleBusy?'Battle in Progress':prog.normal?'Challenge Again':'Start Normal Trial'}</button><small>${prog.normal?'Badge earned ✓':active?`Active: ${displayName(active)} Lv.${active.level}`:'Choose an Active Monster'}</small></div>
     <div class="trial-mode-card hard"><span>HARD</span><h3>Lv.${hardReq}+</h3><p>First clear awards the exclusive move <strong>${reward}</strong>.</p><button id="startTrialHard" class="primary" type="button" ${hardDisabled?'disabled':''}>${battleBusy?'Battle in Progress':prog.hard?'Challenge Again':'Start Hard Trial'}</button><small>${prog.hard?'Hard reward earned ✓':active?`Active: ${displayName(active)} Lv.${active.level}`:'Choose an Active Monster'}</small></div></div>
-    <div class="trial-rules"><span>3 consecutive battles</span><span>Vitality carries between fights</span><span>Status clears between opponents</span><span>Recovery Gels allowed</span><span>No fleeing</span></div>`;
+    <div class="trial-rules"><span>3 consecutive battles</span><span>Vitality carries between fights</span><span>Status clears between opponents</span><span>Healing items allowed</span><span>No fleeing</span></div>`;
   await setTrialImage(document.getElementById('trialCaptainFocusArt'),id,'captain');
   document.getElementById('trialCaptainTalk').onclick=()=>{document.getElementById('trialCaptainLine').textContent=trial.captainDialogue||`Welcome to the ${trial.name}.`;};
   const resume=document.getElementById('resumeTrialBattle');if(resume)resume.onclick=async()=>{showBattleSubpage('wildbattle');await renderWildBattle();};
@@ -4714,7 +5131,7 @@ async function renderGauntletPage(){
   activeCard.innerHTML=`<div class="eyebrow">${gauntletSession?'RUN MONSTER':'ACTIVE MONSTER'}</div><div class="gauntlet-monster-row"><img id="gauntletActiveArt" alt="${sp.name}"><div><h3>${displayName(runMon||active)}</h3><p>${speciesOf(runMon||active)?.name||sp.name} • Lv.${(runMon||active).level} • P${(runMon||active).potential}</p><div class="chips"><span>${(runMon||active).trait}</span><span>${speciesElementLabel(speciesOf(runMon||active))}</span></div></div></div>`;
   await setMonsterImage(document.getElementById('gauntletActiveArt'),(runMon||active).slug,'base');
   if(!gauntletSession){
-    runCard.innerHTML=`<div class="eyebrow">READY</div><h3>Begin a five-stage run</h3><p>Each victory adds unclaimed currency and loot. Your Vitality carries forward, but battle statuses clear between rounds.</p><div class="gauntlet-rules"><span>5 battles max</span><span>Recovery Gels allowed</span><span>No fleeing mid-battle</span><span>Cash out after any win</span></div><button id="startGauntletRun" class="primary big" type="button" ${isMonsterFainted(active)?'disabled':''}>${isMonsterFainted(active)?`Fainted • ${fmtTime(faintRemaining(active))}`:'Start Wild Gauntlet'}</button>`;
+    runCard.innerHTML=`<div class="eyebrow">READY</div><h3>Begin a five-stage run</h3><p>Each victory adds unclaimed currency and loot. Your Vitality carries forward, but battle statuses clear between rounds.</p><div class="gauntlet-rules"><span>5 battles max</span><span>Healing items allowed</span><span>No fleeing mid-battle</span><span>Cash out after any win</span></div><button id="startGauntletRun" class="primary big" type="button" ${isMonsterFainted(active)?'disabled':''}>${isMonsterFainted(active)?`Fainted • ${fmtTime(faintRemaining(active))}`:'Start Wild Gauntlet'}</button>`;
     const btn=document.getElementById('startGauntletRun');if(btn&&!btn.disabled)btn.onclick=startGauntletRun;
     return;
   }
@@ -5523,29 +5940,41 @@ function openAttackMenu(){
   box.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>chooseBattleAttack(b.dataset.move));
 }
 
+const BATTLE_HEAL_ITEMS=[
+  {id:'heal_gel',percent:.35,label:'Recovery Gel'},
+  {id:'medium_heal_gel',percent:.50,label:'Medium Healing Gel'},
+  {id:'life_crystal',full:true,label:'Life Crystal'}
+];
 function openItemMenu(){
   if(!battleSession||battleSession.result||battleSession.locked)return;
-  const qty=state.inventory.heal_gel||0,box=document.getElementById('battleSubmenu');
-  box.innerHTML=`<button id="useRecoveryGel" class="move-action" type="button" ${qty<=0?'disabled':''}><strong>Recovery Gel ×${qty}</strong><span>Restore 35% of maximum Vitality.</span></button>`;
+  const mon=sessionMon('player'),max=battleStatsFor(mon).hp,full=battleSession.playerHp>=max,box=document.getElementById('battleSubmenu');
+  box.innerHTML=BATTLE_HEAL_ITEMS.map(def=>{
+    const qty=Number(state.inventory[def.id]||0),disabled=qty<=0||full;
+    const effect=def.full?'Fully restore Vitality.':`Restore ${Math.round(def.percent*100)}% of maximum Vitality.`;
+    return `<button class="move-action" data-heal-item="${def.id}" type="button" ${disabled?'disabled':''}><strong>${def.label} ×${qty}</strong><span>${full?'Vitality is already full.':effect}</span></button>`;
+  }).join('');
   box.classList.remove('hidden');
-  if(qty>0)document.getElementById('useRecoveryGel').onclick=useRecoveryGel;
+  box.querySelectorAll('[data-heal-item]').forEach(btn=>{if(!btn.disabled)btn.onclick=()=>useBattleHealingItem(btn.dataset.healItem);});
 }
 
-async function useRecoveryGel(){
-  if(!battleSession||battleSession.result||battleSession.locked||!(state.inventory.heal_gel>0))return;
+async function useBattleHealingItem(itemId){
+  const def=BATTLE_HEAL_ITEMS.find(x=>x.id===itemId),item=ITEM_SHOP.find(x=>x.id===itemId);
+  if(!def||!item||!battleSession||battleSession.result||battleSession.locked||!(state.inventory[itemId]>0))return;
+  const mon=sessionMon('player'),max=battleStatsFor(mon).hp,before=battleSession.playerHp;
+  if(before>=max)return;
   battleSession.locked=true;
   setBattleControlsLocked(true);
   document.getElementById('battleSubmenu').classList.add('hidden');
 
-  const mon=sessionMon('player'),max=battleStatsFor(mon).hp,heal=Math.max(1,Math.round(max*.35)),before=battleSession.playerHp;
+  const heal=def.full?max:Math.max(1,Math.round(max*def.percent));
   battleSession.playerHp=Math.min(max,battleSession.playerHp+heal);
   const recovered=battleSession.playerHp-before;
-  state.inventory.heal_gel--;if(state.inventory.heal_gel<=0)delete state.inventory.heal_gel;
-  battleSession.log.push(`${displayName(mon)} recovered ${recovered} Vitality with Recovery Gel.`);
+  state.inventory[itemId]--;if(state.inventory[itemId]<=0)delete state.inventory[itemId];
+  battleSession.log.push(`${displayName(mon)} recovered ${recovered} Vitality with ${item.name}.`);
   save();
 
   await refreshBattleUI();
-  await showBattleFeedback({kind:'heal',main:`+${recovered} VITALITY`,sub:'Recovery Gel',targetSide:'player'});
+  await showBattleFeedback({kind:'heal',main:`+${recovered} VITALITY`,sub:item.name,targetSide:'player'});
 
   if(!checkBattleEnd()){
     await wait(220);
@@ -5781,6 +6210,14 @@ function pickSilverwindDialogue(firstToday){
   if(firstToday&&event&&giftLines.length&&Math.random()<.40)return {entry:randomChoice(giftLines),context:'event',event,gift:true};
   if(event&&ambientEvent.length&&Math.random()<.30)return {entry:randomChoice(ambientEvent),context:'event',event,gift:false};
   if(readyPens&&Math.random()<.35)return {entry:{text:readyPens===1?`Hun, one of the breeding pens is ready. Those two have done their part; go collect that egg before I start naming it myself.`:`Hun, ${readyPens} breeding pens are ready. There is an alarming amount of egg-related paperwork happening over here.`,eventGift:false},context:'dynamic'};
+  const readyExpedition=EXPEDITION_DURATION_ORDER.map(k=>state.expeditions?.slots?.[k]).find(c=>c?.status==='ready');
+  if(readyExpedition&&Math.random()<.28){const mission=EXPEDITION_MISSIONS[readyExpedition.missionId];return {entry:{text:`One of your Expedition teams is back${mission?.title?` from ${mission.title}`:''}. I have resisted opening their packs without you. This restraint should be documented.`,eventGift:false},context:'dynamic'};}
+  const prismaticCount=state.monsters.filter(mon=>mon.isPrismatic).length;
+  if(prismaticCount&&Math.random()<.18)return {entry:{text:prismaticCount===1?`I was looking over your Prismatic again. For research. Very serious research. The fact that I keep tilting the page toward the light is unrelated.`:`You have ${prismaticCount} Prismatics now. At this point I need a dedicated refractive-mutation drawer, and possibly stronger desk lamps.`,eventGift:false},context:'dynamic'};
+  const crossbreeds=state.monsters.filter(mon=>state.species[mon.slug]?.isCrossbreed);
+  if(crossbreeds.length&&Math.random()<.18){const mon=randomChoice(crossbreeds),sp=state.species[mon.slug];return {entry:{text:`I keep coming back to ${sp?.name||'that Crossbreed'} in my notes. Crossbreeds make taxonomy feel less like a tree and more like a very enthusiastic knot.`,eventGift:false},context:'dynamic'};}
+  const clearedTrials=Object.entries(state.trialProgress||{}).filter(([,p])=>p?.normal||p?.hard);
+  if(clearedTrials.length&&Math.random()<.16){const [id,p]=randomChoice(clearedTrials),trial=state.trials?.[id];return {entry:{text:p?.hard?`You cleared ${trial?.name||'a Trial'} on Hard. I have upgraded the margin note beside your name from “capable” to “mildly alarming.”`:`That ${trial?.name||'Trial'} clear is still in my notes. Captains notice raw strength, but they remember Keepers who understand what the Trial is actually asking.`,eventGift:false},context:'dynamic'};}
   const ownedDialogueSlugs=[...new Set(state.monsters.map(mon=>mon.slug))].filter(slug=>silverwindDialogueBucket('monster',slug,false).length);
   if(ownedDialogueSlugs.length&&Math.random()<.42){const slug=randomChoice(ownedDialogueSlugs),monsterLines=silverwindDialogueBucket('monster',slug,false);return {entry:randomChoice(monsterLines),context:'monster',target:slug};}
   const general=state.silverwindDialogue.general||[];
@@ -5831,6 +6268,7 @@ async function renderAll(){
   renderBreedSelectors();
   renderBreedJob();
   renderSilverwindDesk();
+  renderSilverwindReferenceGuide();
 
   await renderEggInventory(version);
   if(version!==uiRenderVersion)return;
@@ -5925,15 +6363,21 @@ collectionGrid.addEventListener('contextmenu',e=>{if(collectionDrag?.active)e.pr
 document.getElementById('attackSearch').addEventListener('input',renderAttackIndex);document.getElementById('attackElementFilter').addEventListener('change',renderAttackIndex);
 document.getElementById('silverwindCheckIn').addEventListener('click',silverwindCheckIn);
 document.getElementById('showSilverwindDesk').addEventListener('click',()=>{currentSilverwindPane='desk';showSilverwindPane('desk');});
+document.getElementById('showSilverwindReference').addEventListener('click',()=>{currentSilverwindPane='reference';showSilverwindPane('reference');});
 document.getElementById('showSilverwindArchive').addEventListener('click',()=>{currentSilverwindPane='archive';showSilverwindPane('archive');});
 document.getElementById('showSilverwindAttacks').addEventListener('click',()=>{currentSilverwindPane='attacks';showSilverwindPane('attacks');});
+document.getElementById('silverwindReferenceSearch').addEventListener('input',renderSilverwindReferenceGuide);
+document.getElementById('silverwindReferenceCategory').addEventListener('change',renderSilverwindReferenceGuide);
+document.getElementById('silverwindReferenceDetail').addEventListener('click',e=>{const btn=e.target.closest('[data-reference-route]');if(btn)switchTab(btn.dataset.referenceRoute);});
 document.getElementById('motherSelect').addEventListener('change',renderParentPreviews);document.getElementById('fatherSelect').addEventListener('change',renderParentPreviews);document.getElementById('startBreed').addEventListener('click',startBreeding);
 document.getElementById('breedingPens').addEventListener('click',e=>{const btn=e.target.closest('[data-breed-action]');if(!btn)return;const i=Number(btn.dataset.penIndex);if(!Number.isInteger(i)||i<0||i>=5)return;if(btn.dataset.breedAction==='collect')collectEgg(i);else if(btn.dataset.breedAction==='catalyst')useHormoneCatalyst(i);});
 document.getElementById('showArchiveBase').addEventListener('click',()=>{archiveView='base';renderArchive();});
 document.getElementById('showArchiveCrossbreeds').addEventListener('click',()=>{archiveView='crossbreeds';renderArchive();});
 document.getElementById('saveRename').addEventListener('click',saveRename);document.getElementById('setActiveMonster').addEventListener('click',setSelectedActive);document.getElementById('releaseMonster').addEventListener('click',releaseSelectedMonster);document.getElementById('useReviveGem').addEventListener('click',useReviveGemOnSelected);document.getElementById('swapAttacks').addEventListener('click',swapSelectedAttacks);document.getElementById('teachAttackButton').addEventListener('click',teachSelectedAttack);
-document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('detailModal').close());document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))document.getElementById('detailModal').close();});
+document.getElementById('renameToggle').addEventListener('click',()=>{const box=document.getElementById('renameBox');box.classList.toggle('hidden');if(!box.classList.contains('hidden'))document.getElementById('renameInput').focus();});document.getElementById('detailPenButton').addEventListener('click',()=>document.getElementById('detailPenMenu').classList.toggle('hidden'));document.querySelectorAll('[data-monster-pane]').forEach(btn=>btn.addEventListener('click',()=>showMonsterDetailPane(btn.dataset.monsterPane)));document.getElementById('monsterItemTools').addEventListener('click',e=>{const btn=e.target.closest('[data-monster-use-item]');if(btn)useMonsterTargetItem(btn.dataset.monsterUseItem);});
+document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('detailModal').close());document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))document.getElementById('detailModal').close();});document.getElementById('detailModal').addEventListener('close',()=>{document.getElementById('detailPenMenu')?.classList.add('hidden');document.getElementById('renameBox')?.classList.add('hidden');});
 document.getElementById('closeShopDetail').addEventListener('click',()=>document.getElementById('shopDetailModal').close());document.getElementById('shopDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('shopDetailModal'))document.getElementById('shopDetailModal').close();});document.getElementById('shopPurchaseButton').addEventListener('click',requestShopPurchase);document.getElementById('shopCancelPurchase').addEventListener('click',resetShopPurchaseConfirmation);document.getElementById('shopConfirmPurchase').addEventListener('click',confirmShopPurchase);
+document.getElementById('closeInventoryDetail').addEventListener('click',()=>document.getElementById('inventoryDetailModal').close());document.getElementById('inventoryDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('inventoryDetailModal'))document.getElementById('inventoryDetailModal').close();});document.getElementById('inventorySellButton').addEventListener('click',requestInventorySell);document.getElementById('inventoryCancelSell').addEventListener('click',resetInventorySellPanel);document.getElementById('inventoryConfirmSell').addEventListener('click',confirmInventorySale);document.getElementById('inventorySellQuantity').addEventListener('input',updateInventorySellPreview);
 document.getElementById('closeIncubatorDetail').addEventListener('click',()=>document.getElementById('incubatorDetailModal').close());document.getElementById('incubatorDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('incubatorDetailModal'))document.getElementById('incubatorDetailModal').close();});document.getElementById('incubatorDetailModal').addEventListener('close',()=>{selectedIncubatorIndex=null;});document.getElementById('useIncubatorCatalyst').addEventListener('click',useIncubationCatalyst);document.getElementById('hatchIncubatorEgg').addEventListener('click',hatchSelectedIncubator);
 
 function showAdminPane(name){document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();}
@@ -6003,7 +6447,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.41 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.46 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
@@ -6088,7 +6532,7 @@ function tickLiveTimers(){
 }
 setInterval(tickLiveTimers,500);
 
-(async()=>{await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
+(async()=>{initZoneBackdrop();await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 </body>
 </html>

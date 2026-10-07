@@ -1,5 +1,24 @@
-PRISMWILD PROTOTYPE v0.15.41
+PRISMWILD PROTOTYPE v0.15.44
 
+
+
+V0.15.44 — DAILY ZONE WALLPAPERS
+- Fixed daily region artwork behind the scrolling UI.
+- Zone-specific ambient VFX and local-midnight crossfade.
+- Seven backgrounds cover Monday through Sunday, including Chaos Wastes.
+
+V0.15.43 — INVENTORY SELLING + RECOVERY ITEMS
+- Added Medium Healing Gel (650 currency): restores 50% maximum Vitality in battle.
+- Added Life Crystal (2500 currency): fully restores Vitality in battle.
+- Inventory now uses click-to-inspect item details with consumable status and quantity-based selling.
+- Shop merchandise and Attack Scrolls resell for 5% of shop value, rounded down; Field Finds keep their native trade values.
+- Existing saves remain compatible and Live Content packaging is unchanged.
+
+V0.15.42 — SILVERWIND REFERENCE DESK
+- Added Silverwind's searchable Reference Guide covering core mechanics, monsters, battle, fieldwork, progression, events, Trials, items, and economy.
+- Expanded authored Silverwind dialogue from 16 to 44 lines, including newer monsters and seasonal chatter.
+- Keeper's Desk can now react to ready Expeditions, owned Prismatics, owned Crossbreeds, and cleared Trials.
+- Live Content schema remains v9; published art remains external under assets/live/.
 
 V0.15.41 — GITHUB-SAFE LIVE ASSET PACKAGING
 - Live Content images are stored as normal files under assets/live instead of giant Base64 strings inside prismwild-content.js.

@@ -1,6 +1,6 @@
 
 :root{--bg:#0d1017;--panel:#171c27;--panel2:#202738;--ink:#f3f7ff;--muted:#9ca8be;--line:#303a50;--cyan:#7de4ff;--violet:#a98dff;--gold:#ffd575;--rose:#ff94c8;--danger:#ff778b;--shadow:0 18px 50px rgba(0,0,0,.35)}
-*{box-sizing:border-box}html{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% -10%,rgba(125,228,255,.12),transparent 30rem),radial-gradient(circle at 90% 0,rgba(169,141,255,.12),transparent 28rem),var(--bg)}
+*{box-sizing:border-box}html{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}body{margin:0;min-height:100vh;background:transparent;position:relative;isolation:isolate}
 button,input,select{font:inherit}button{color:inherit}button:disabled{opacity:.42;cursor:not-allowed!important}label{color:var(--ink)}.shell{width:min(1500px,calc(100% - 32px));margin:0 auto;padding:36px 0 72px}
 .topbar{display:flex;gap:28px;justify-content:space-between;align-items:flex-end}.top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.eyebrow{font-size:.72rem;letter-spacing:.18em;font-weight:800;color:var(--cyan)}
 h1{font-size:clamp(2.4rem,6vw,5.4rem);line-height:.9;margin:8px 0 12px;letter-spacing:-.06em}h2{font-size:2rem;margin:.3rem 0}h3,h4{margin-top:0}p,small{color:var(--muted)}.currency{border:1px solid var(--line);background:#111722;border-radius:999px;padding:10px 14px}
@@ -721,3 +721,64 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 @keyframes fxTargetHeavy{0%,100%{filter:none;transform:translate(0,0)}22%{filter:brightness(1.7);transform:translate(-5px,2px)}42%{transform:translate(5px,-2px)}62%{transform:translate(-3px,1px)}}
 @keyframes fxFieldShake{0%,100%{transform:translate(0,0)}18%{transform:translate(-4px,2px)}36%{transform:translate(5px,-2px)}54%{transform:translate(-3px,-1px)}72%{transform:translate(2px,1px)}}
 @media(prefers-reduced-motion:reduce){.battle-fx,.fx-particle,.fx-hit-light,.fx-hit-standard,.fx-hit-heavy,.fx-shake-heavy{animation:none!important}.battle-fx{opacity:.65}.fx-particle{display:none}}
+
+
+/* v0.15.42 Silverwind Reference Guide */
+.silverwind-guide-layout{display:grid;grid-template-columns:minmax(270px,.72fr) minmax(0,1.5fr);gap:18px;align-items:start}
+.silverwind-guide-library,.silverwind-reference-detail{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(91,113,185,.10),rgba(12,17,29,.9));padding:18px}
+.silverwind-guide-library{position:sticky;top:16px}.silverwind-guide-filters{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 14px}.silverwind-guide-filters input,.silverwind-guide-filters select{width:100%}
+.silverwind-reference-list{display:grid;gap:8px;max-height:68vh;overflow:auto;padding-right:3px}.silverwind-reference-topic{display:grid;gap:4px;width:100%;text-align:left;border:1px solid rgba(157,206,255,.12);background:rgba(255,255,255,.035);border-radius:12px;padding:11px 12px;color:var(--text);cursor:pointer}.silverwind-reference-topic:hover{border-color:rgba(157,206,255,.32);background:rgba(109,161,255,.08)}.silverwind-reference-topic.active{border-color:rgba(157,206,255,.58);background:linear-gradient(120deg,rgba(109,161,255,.16),rgba(162,117,255,.09));box-shadow:inset 3px 0 0 rgba(151,211,255,.72)}
+.silverwind-reference-topic span{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:#9dcfff}.silverwind-reference-topic strong{font-size:.9rem}.silverwind-reference-topic small{color:var(--muted);line-height:1.35}
+.silverwind-reference-detail{min-height:480px}.silverwind-reference-detail>h3{font-size:1.55rem;margin:6px 0}.silverwind-reference-summary{color:var(--muted);margin:0 0 16px}.silverwind-reference-note{display:grid;gap:5px;border:1px solid rgba(151,211,255,.22);background:rgba(98,151,213,.09);border-radius:13px;padding:13px 14px;margin:0 0 18px}.silverwind-reference-note strong{color:#ccecff}.silverwind-reference-note span{color:var(--muted);line-height:1.55}
+.silverwind-reference-body{color:var(--muted);line-height:1.6}.silverwind-reference-body p{margin:0 0 14px}.silverwind-reference-bullets{margin:0 0 16px;padding-left:21px;display:grid;gap:9px}.silverwind-reference-bullets li{padding-left:2px}.silverwind-reference-rows{display:grid;gap:8px;margin:10px 0 16px}.reference-row{display:grid;grid-template-columns:minmax(150px,.45fr) minmax(0,1fr);gap:12px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.035)}.reference-row strong{color:var(--text)}.reference-row span{font-size:.78rem;line-height:1.45}.silverwind-reference-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.reference-item-rows{max-height:520px;overflow:auto;padding-right:3px}
+@media(max-width:900px){.silverwind-guide-layout{grid-template-columns:1fr}.silverwind-guide-library{position:static}.silverwind-reference-list{max-height:320px}.reference-row{grid-template-columns:1fr;gap:4px}}
+
+
+/* v0.15.43 — inventory detail selling + healing item expansion */
+.inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:12px}
+.inventory-tile{position:relative}
+.inventory-tile.trade-good-card{border-color:#5a4d2a}
+.inventory-tile-qty{position:absolute;right:8px;top:8px;min-width:28px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;background:#0b1018;color:var(--gold);font-size:.7rem;font-weight:900;line-height:1;text-align:center}
+.inventory-sell-quantity{display:grid;gap:7px;margin:14px 0 12px;font-size:.78rem;font-weight:850;color:var(--muted)}
+.inventory-sell-quantity input{width:100%;font-size:1rem}
+.inventory-sell-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#0d121a}
+.inventory-sell-summary span{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+@media(max-width:680px){.inventory-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}}
+
+
+/* Daily zone wallpaper layer -------------------------------------------------- */
+.zone-backdrop{position:fixed;inset:0;z-index:-1;overflow:hidden;background:#0b0e15;pointer-events:none!important;user-select:none;contain:strict}
+.zone-backdrop,.zone-backdrop *{pointer-events:none!important}
+.zone-backdrop-image{position:absolute;inset:-1.5%;background-position:center;background-repeat:no-repeat;background-size:cover;opacity:0;transform:scale(1.02);transition:opacity 2.6s ease;will-change:opacity}
+.zone-backdrop-image.is-visible{opacity:1}
+.zone-backdrop-scrim{position:absolute;inset:0;pointer-events:none!important;background:linear-gradient(180deg,rgba(5,8,13,.34),rgba(5,8,13,.47) 48%,rgba(5,8,13,.62));box-shadow:inset 0 0 180px rgba(1,3,8,.46)}
+.shell{position:relative;text-shadow:0 1px 3px rgba(0,0,0,.34)}
+@media (prefers-reduced-motion:reduce){.zone-backdrop-image{transition:none}}
+
+/* Monster profile UX --------------------------------------------------------- */
+.monster-profile-dialog{width:min(780px,calc(100% - 22px));max-height:94vh;overflow:auto}
+.monster-profile{padding:18px 26px 28px;display:grid;gap:15px}
+.monster-profile-pen{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;min-height:42px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.monster-pen-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#171e2a;color:var(--ink);border-radius:999px;padding:8px 12px;cursor:pointer}
+.monster-pen-pill strong{font-size:.78rem}.monster-pen-pill span{color:var(--cyan)}
+.monster-pen-menu{position:absolute;z-index:4;top:44px;left:50%;transform:translateX(-50%);width:min(390px,90vw);padding:12px;border:1px solid var(--line);border-radius:14px;background:#101722;box-shadow:var(--shadow)}
+.monster-pen-menu p{margin:0 0 9px;text-align:center}.monster-pen-menu .collection-move-actions{justify-content:center}
+.monster-profile-art{height:min(390px,45vh);min-height:260px;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;background:radial-gradient(circle at 50% 60%,rgba(87,105,160,.16),rgba(8,12,18,.72) 65%);align-content:center;place-items:center}
+.monster-profile-art img{width:100%;height:100%;max-height:360px;object-fit:contain;image-rendering:pixelated}
+.monster-profile-identity{text-align:center;display:grid;justify-items:center}.monster-profile-identity .eyebrow{margin-top:2px}
+.monster-profile-name-row{display:flex;align-items:center;justify-content:center;gap:8px}.monster-profile-name-row h2{margin:4px 0;font-size:2rem}
+.icon-button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#171e2a;color:var(--cyan);cursor:pointer;font-size:1rem}
+.monster-profile-level{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}.monster-profile-level strong{color:var(--gold)}.monster-profile-level span{color:var(--muted);font-size:.82rem}
+.compact-rename{width:min(460px,100%);margin:10px auto 0;text-align:left}
+.monster-profile-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(11,16,24,.7)}
+.monster-profile-tab{border:0;border-radius:10px;background:transparent;color:var(--ink);padding:11px 12px;cursor:pointer;font-weight:800}.monster-profile-tab.active{background:var(--panel2);color:var(--cyan)}
+.monster-profile-pane{border:1px solid var(--line);border-radius:17px;background:rgba(12,17,26,.82);padding:17px}.monster-profile-pane.active{display:block}
+.monster-identity-stats{grid-template-columns:repeat(2,1fr);margin-top:0}.monster-trait-stat{grid-column:1/-1}.monster-trait-stat strong{font-size:.84rem}
+.profile-attack-section{margin-top:18px}.profile-item-tools{margin-top:0;border:0;padding:0;background:transparent}
+.monster-item-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:#0d121a}.monster-item-card strong,.monster-item-card span{display:block}.monster-item-card span{color:var(--gold);font-size:.72rem;margin-top:3px}.monster-item-card p{margin:5px 0 0;font-size:.74rem}.monster-item-card button{min-width:130px}
+.monster-item-empty{padding:14px;box-shadow:none}.profile-scroll-box{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.profile-lineage{border-top:0;margin-top:0;padding-top:0}.lineage-tree{display:grid;justify-items:center;gap:0;margin-top:18px}.lineage-parents{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px}.lineage-node{width:100%;border:1px solid var(--line);border-radius:13px;background:#0d121a;padding:13px;text-align:center}.lineage-node span,.lineage-node small{display:block;color:var(--muted);font-size:.7rem}.lineage-node strong{display:block;margin:5px 0;color:var(--ink)}.lineage-node.child{max-width:320px;border-color:rgba(111,220,255,.38)}
+.lineage-connector{width:55%;height:42px;position:relative}.lineage-connector::before{content:"";position:absolute;left:0;right:0;top:0;border-top:1px solid var(--line)}.lineage-connector::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line)}.lineage-origin{width:min(420px,100%);padding:18px;border:1px dashed var(--line);border-radius:13px;text-align:center}.lineage-origin strong,.lineage-origin span{display:block}.lineage-origin span{margin-top:6px;color:var(--muted);font-size:.8rem}
+.release-control{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px;margin-top:18px}
+@media(max-width:680px){.monster-profile{padding:14px}.monster-profile-art{height:300px;min-height:220px}.monster-profile-tabs{gap:5px}.monster-profile-pane{padding:13px}.monster-item-card{grid-template-columns:1fr}.monster-item-card button{width:100%}.teach-box.profile-scroll-box{grid-template-columns:1fr}.lineage-parents{grid-template-columns:1fr}.lineage-connector{height:28px;width:1px;border-left:1px solid var(--line)}.lineage-connector::before,.lineage-connector::after{display:none}.release-control{align-items:stretch;flex-direction:column}.monster-pen-menu .collection-move-actions{flex-direction:column}}
+
