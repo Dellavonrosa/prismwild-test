@@ -1,0 +1,26 @@
+PRISMWILD v0.15.48 — INVENTORY CONSUMABLE FIX
+Date: 2026-10-07
+
+FIXED
+-----
+- Refresh Juice now has a Use button in the Inventory item-detail window.
+- Capture Pod now has an Activate button in the Inventory item-detail window.
+- Existing cooldown/active-state checks remain intact.
+- Inventory selling remains available.
+
+UNCHANGED
+---------
+- Monster data
+- Live Content
+- Monster/art assets
+- Music system
+- Battle item behavior
+- Incubation Catalyst usage
+- Hormone Catalyst usage
+- Nature Disc / DNA Splicer monster-targeted usage
+
+TECHNICAL NOTE
+--------------
+The item-use functions were still present and functional. The newer Inventory
+detail modal exposed Sell but never wired those two direct-use consumables into
+the modal. v0.15.48 restores that missing UI wiring.

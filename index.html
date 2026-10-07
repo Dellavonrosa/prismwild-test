@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.47</title>
+<title>Prismwild Prototype v0.15.48</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.47</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.48</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -1060,6 +1060,7 @@
       <p id="inventoryDetailOwned" class="shop-detail-owned"></p>
 
       <div id="inventoryDetailActions" class="shop-detail-actions">
+        <button id="inventoryUseButton" class="ghost hidden" type="button">Use</button>
         <button id="inventorySellButton" class="primary" type="button">Sell</button>
       </div>
 
@@ -4240,6 +4241,23 @@ async function openInventoryDetail(id){
   document.getElementById('inventoryDetailMeta').innerHTML=meta.map(x=>`<span>${x}</span>`).join('');
   document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
   document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood?' • Resale rate: 5% of shop value':''}`;
+  const use=document.getElementById('inventoryUseButton');
+  const directUse=id==='refresh_juice'||id==='capture_pod';
+  use.classList.toggle('hidden',!directUse);
+  use.disabled=false;
+  use.removeAttribute('data-refresh-juice-timer');
+  use.removeAttribute('data-capture-pod-timer');
+  if(id==='refresh_juice'){
+    const remain=refreshJuiceRemaining();
+    use.disabled=remain>0;
+    use.textContent=remain>0?`Refresh Juice • ${formatShortCooldown(remain)}`:'Use Refresh Juice';
+  }else if(id==='capture_pod'){
+    const remain=capturePodRemaining();
+    use.disabled=remain>0;
+    use.textContent=remain>0?`Capture Boost • ${formatShortCooldown(remain)}`:'Activate Capture Pod • 20 min';
+  }else{
+    use.textContent='Use';
+  }
   const sell=document.getElementById('inventorySellButton');
   sell.disabled=each<=0;
   sell.textContent=each>0?'Sell':'Cannot Sell';
@@ -4250,6 +4268,20 @@ async function openInventoryDetail(id){
 function resetInventorySellPanel(){
   document.getElementById('inventorySellPanel').classList.add('hidden');
   document.getElementById('inventoryDetailActions').classList.remove('hidden');
+}
+async function useSelectedInventoryItem(){
+  if(!inventorySelection)return;
+  const id=inventorySelection.id;
+  if(id==='refresh_juice')useRefreshJuice();
+  else if(id==='capture_pod')useCapturePod();
+  else return;
+  const owned=Number(state.inventory[id]||0);
+  if(owned<=0){
+    document.getElementById('inventoryDetailModal').close();
+    inventorySelection=null;
+    return;
+  }
+  await openInventoryDetail(id);
 }
 function requestInventorySell(){
   if(!inventorySelection||inventorySelection.each<=0)return;
@@ -6573,7 +6605,7 @@ document.getElementById('saveRename').addEventListener('click',saveRename);docum
 document.getElementById('renameToggle').addEventListener('click',()=>{const box=document.getElementById('renameBox');box.classList.toggle('hidden');if(!box.classList.contains('hidden'))document.getElementById('renameInput').focus();});document.getElementById('detailPenButton').addEventListener('click',()=>document.getElementById('detailPenMenu').classList.toggle('hidden'));document.querySelectorAll('[data-monster-pane]').forEach(btn=>btn.addEventListener('click',()=>showMonsterDetailPane(btn.dataset.monsterPane)));document.getElementById('monsterItemTools').addEventListener('click',e=>{const btn=e.target.closest('[data-monster-use-item]');if(btn)useMonsterTargetItem(btn.dataset.monsterUseItem);});
 document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('detailModal').close());document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))document.getElementById('detailModal').close();});document.getElementById('detailModal').addEventListener('close',()=>{document.getElementById('detailPenMenu')?.classList.add('hidden');document.getElementById('renameBox')?.classList.add('hidden');});
 document.getElementById('closeShopDetail').addEventListener('click',()=>document.getElementById('shopDetailModal').close());document.getElementById('shopDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('shopDetailModal'))document.getElementById('shopDetailModal').close();});document.getElementById('shopPurchaseButton').addEventListener('click',requestShopPurchase);document.getElementById('shopCancelPurchase').addEventListener('click',resetShopPurchaseConfirmation);document.getElementById('shopConfirmPurchase').addEventListener('click',confirmShopPurchase);
-document.getElementById('closeInventoryDetail').addEventListener('click',()=>document.getElementById('inventoryDetailModal').close());document.getElementById('inventoryDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('inventoryDetailModal'))document.getElementById('inventoryDetailModal').close();});document.getElementById('inventorySellButton').addEventListener('click',requestInventorySell);document.getElementById('inventoryCancelSell').addEventListener('click',resetInventorySellPanel);document.getElementById('inventoryConfirmSell').addEventListener('click',confirmInventorySale);document.getElementById('inventorySellQuantity').addEventListener('input',updateInventorySellPreview);
+document.getElementById('closeInventoryDetail').addEventListener('click',()=>document.getElementById('inventoryDetailModal').close());document.getElementById('inventoryDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('inventoryDetailModal'))document.getElementById('inventoryDetailModal').close();});document.getElementById('inventoryUseButton').addEventListener('click',useSelectedInventoryItem);document.getElementById('inventorySellButton').addEventListener('click',requestInventorySell);document.getElementById('inventoryCancelSell').addEventListener('click',resetInventorySellPanel);document.getElementById('inventoryConfirmSell').addEventListener('click',confirmInventorySale);document.getElementById('inventorySellQuantity').addEventListener('input',updateInventorySellPreview);
 document.getElementById('closeIncubatorDetail').addEventListener('click',()=>document.getElementById('incubatorDetailModal').close());document.getElementById('incubatorDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('incubatorDetailModal'))document.getElementById('incubatorDetailModal').close();});document.getElementById('incubatorDetailModal').addEventListener('close',()=>{selectedIncubatorIndex=null;});document.getElementById('useIncubatorCatalyst').addEventListener('click',useIncubationCatalyst);document.getElementById('hatchIncubatorEgg').addEventListener('click',hatchSelectedIncubator);
 
 function showAdminPane(name){document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();}
@@ -6643,7 +6675,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.47 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.48 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
