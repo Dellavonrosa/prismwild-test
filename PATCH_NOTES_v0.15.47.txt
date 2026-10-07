@@ -1,0 +1,26 @@
+Prismwild Prototype v0.15.47
+Date: 2026-10-07
+
+WEEKDAY MUSIC PLAYER
+- Added a compact Music launcher directly under the Keeper name in the top bar.
+- Added one zone theme for every weekday:
+  Monday — Blaze Lands
+  Tuesday — Flat Lands
+  Wednesday — Shadow Plains
+  Thursday — Bright Temple
+  Friday — Permafrost Peaks
+  Saturday — Wastelands
+  Sunday — Chaos Wastes
+- Music playback is user-initiated so browser autoplay restrictions are respected.
+- Added persistent volume control. Default: 70%.
+- Added Loop mode for continuous repeat.
+- Added Ambient Fade mode: 2.5s fade-in, soft fade-out over the final ~6s, then a configurable quiet period before the track returns.
+- Ambient quiet-period choices: 5, 10, 15, 20, 30, 45, or 60 minutes. Default: 10 minutes.
+- Music preferences are stored separately in localStorage under prismwildMusic_v1 and do not alter player/game save data.
+- The player checks for weekday rollover and switches to the appropriate day's theme.
+
+No gameplay balance, monster data, breeding logic, or Live Content publishing behavior was changed.
+
+Integrated content refresh:
+- Bundled the latest Live Content revision from 2026-10-07.
+- Rugaldrin now correctly uses Crag Rend per the supplied Live Content package.

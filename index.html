@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.46</title>
+<title>Prismwild Prototype v0.15.47</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,12 +15,15 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.46</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.47</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
     <div class="top-actions">
-      <button id="accountIdentity" class="account-identity ghost small" type="button" title="Open Keeper Profile"><span id="accountKeeperName">New Keeper</span><strong id="accountRoleBadge" class="role-badge player">PLAYER</strong></button>
+      <div class="account-music-stack">
+        <button id="accountIdentity" class="account-identity ghost small" type="button" title="Open Keeper Profile"><span id="accountKeeperName">New Keeper</span><strong id="accountRoleBadge" class="role-badge player">PLAYER</strong></button>
+        <button id="musicPlayerLauncher" class="music-player-launcher" type="button" title="Open Music Player" aria-label="Open Music Player"><span id="musicPlayerLauncherIcon">▶</span><span>Music</span></button>
+      </div>
       <div class="account-top-chip" title="Account progression">
         <div class="account-top-copy"><span>Account Lv.</span><strong id="accountLevelTop">1</strong></div>
         <div class="account-top-xp"><div id="accountXpTopFill" class="account-top-xp-fill"></div></div>
@@ -921,6 +924,57 @@
   </main>
 </div>
 
+
+
+<dialog id="musicPlayerModal" class="music-player-modal">
+  <div class="music-player-dialog">
+    <button id="closeMusicPlayer" class="modal-x" type="button" aria-label="Close">×</button>
+    <div class="eyebrow">PRISMWILD SOUNDTRACK</div>
+    <h2>Today's Music</h2>
+    <p class="music-player-intro">Each weekday follows the music of its active wild zone. Your settings stay on this browser.</p>
+
+    <div class="music-now-card">
+      <div class="music-now-icon" aria-hidden="true">♫</div>
+      <div>
+        <span id="musicDayLabel" class="music-day-label">Today</span>
+        <strong id="musicTrackTitle">Zone Music</strong>
+        <small id="musicTrackMeta">Ready</small>
+      </div>
+    </div>
+
+    <button id="musicToggle" class="primary big music-main-toggle" type="button">▶ Play Today's Music</button>
+
+    <div class="music-control-grid">
+      <label class="music-volume-control">
+        <span><strong>Volume</strong><output id="musicVolumeValue">70%</output></span>
+        <input id="musicVolume" type="range" min="0" max="100" step="1" value="70">
+      </label>
+
+      <div class="music-mode-control">
+        <strong>Playback Style</strong>
+        <div class="music-mode-buttons">
+          <button id="musicModeLoop" class="ghost" type="button">↻ Loop</button>
+          <button id="musicModeAmbient" class="ghost active" type="button">⌁ Ambient Fade</button>
+        </div>
+      </div>
+
+      <label id="musicAmbientIntervalWrap" class="music-ambient-control">
+        <span><strong>Quiet time between plays</strong><small>Starts after the song fades out.</small></span>
+        <select id="musicAmbientInterval">
+          <option value="5">5 minutes</option>
+          <option value="10" selected>10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="musicPlayerStatus" class="music-player-status">Music is off.</div>
+  </div>
+</dialog>
 
 <dialog id="newcomerModal" class="newcomer-modal">
   <div class="newcomer-dialog">
@@ -5509,6 +5563,148 @@ function sessionNextDodge(side){return Math.max(0,Number(side==='player'?battleS
 function setSessionNextDodge(side,val){if(side==='player')battleSession.playerNextDodge=Math.max(0,Number(val)||0);else battleSession.enemyNextDodge=Math.max(0,Number(val)||0);}
 function sideLabel(side){if(side==='player')return displayName(sessionMon('player'));const name=speciesOf(sessionMon('enemy'))?.name||'Opponent';return battleSession?.mode==='trial'?`Trial ${name}`:battleSession?.mode==='gauntlet'?`Gauntlet ${name}`:battleSession?.mode==='event'?`Event ${name}`:`Wild ${name}`;}
 
+
+// v0.15.47 weekday soundtrack player
+const MUSIC_DAY_TRACKS={
+  0:{day:'Sunday',zone:'Chaos Wastes',src:'assets/audio/music/chaos_wastes.mp3'},
+  1:{day:'Monday',zone:'Blaze Lands',src:'assets/audio/music/blaze_lands.mp3'},
+  2:{day:'Tuesday',zone:'Flat Lands',src:'assets/audio/music/flat_lands.mp3'},
+  3:{day:'Wednesday',zone:'Shadow Plains',src:'assets/audio/music/shadow_plains.mp3'},
+  4:{day:'Thursday',zone:'Bright Temple',src:'assets/audio/music/bright_temple.mp3'},
+  5:{day:'Friday',zone:'Permafrost Peaks',src:'assets/audio/music/permafrost_peaks.mp3'},
+  6:{day:'Saturday',zone:'Wastelands',src:'assets/audio/music/wastelands.mp3'}
+};
+const MUSIC_SETTINGS_KEY='prismwildMusic_v1';
+const musicAudio=new Audio();
+musicAudio.preload='metadata';
+let musicSettings=loadMusicSettings();
+let musicCurrentDay=-1;
+let musicFadeTimer=null;
+let musicAmbientTimer=null;
+let musicFadeGain=1;
+let musicFadingOut=false;
+let musicUserGesture=false;
+let musicNextPlayAt=0;
+
+function musicClamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function loadMusicSettings(){
+  const base={enabled:false,volume:.70,mode:'ambient',ambientMinutes:10};
+  try{
+    const saved=JSON.parse(localStorage.getItem(MUSIC_SETTINGS_KEY)||'{}');
+    const minutes=[5,10,15,20,30,45,60].includes(Number(saved.ambientMinutes))?Number(saved.ambientMinutes):10;
+    return {...base,...saved,enabled:!!saved.enabled,volume:musicClamp(Number(saved.volume??.70),0,1),mode:saved.mode==='loop'?'loop':'ambient',ambientMinutes:minutes};
+  }catch(e){return base;}
+}
+function saveMusicSettings(){localStorage.setItem(MUSIC_SETTINGS_KEY,JSON.stringify(musicSettings));}
+function todayMusic(){return MUSIC_DAY_TRACKS[new Date().getDay()]||MUSIC_DAY_TRACKS[1];}
+function clearMusicFade(){if(musicFadeTimer){clearInterval(musicFadeTimer);musicFadeTimer=null;}}
+function clearAmbientWake(){if(musicAmbientTimer){clearTimeout(musicAmbientTimer);musicAmbientTimer=null;}musicNextPlayAt=0;}
+function applyMusicVolume(){musicAudio.volume=musicClamp(musicSettings.volume*musicFadeGain,0,1);}
+function fadeMusicGain(target,duration=0,onDone=null){
+  clearMusicFade();
+  const start=musicFadeGain,targetGain=musicClamp(target,0,1);
+  if(duration<=0){musicFadeGain=targetGain;applyMusicVolume();if(onDone)onDone();return;}
+  const begun=performance.now();
+  musicFadeTimer=setInterval(()=>{
+    const t=musicClamp((performance.now()-begun)/duration,0,1);
+    musicFadeGain=start+(targetGain-start)*t;applyMusicVolume();
+    if(t>=1){clearMusicFade();if(onDone)onDone();}
+  },50);
+}
+function configureTodayMusic(force=false){
+  const day=new Date().getDay(),track=MUSIC_DAY_TRACKS[day]||MUSIC_DAY_TRACKS[1];
+  if(!force&&musicCurrentDay===day&&musicAudio.src)return false;
+  const wasPlaying=!musicAudio.paused;
+  musicAudio.pause();clearMusicFade();clearAmbientWake();
+  musicCurrentDay=day;musicAudio.src=track.src;musicAudio.loop=musicSettings.mode==='loop';musicAudio.currentTime=0;musicFadeGain=1;musicFadingOut=false;applyMusicVolume();
+  if(wasPlaying&&musicSettings.enabled&&musicUserGesture)startTodayMusic(true);
+  renderMusicPlayer();
+  return true;
+}
+async function startTodayMusic(restart=false){
+  musicUserGesture=true;
+  configureTodayMusic();clearAmbientWake();
+  if(restart||musicAudio.ended||(Number.isFinite(musicAudio.duration)&&musicAudio.currentTime>=musicAudio.duration-.05))musicAudio.currentTime=0;
+  musicSettings.enabled=true;saveMusicSettings();musicAudio.loop=musicSettings.mode==='loop';musicFadingOut=false;
+  if(musicSettings.mode==='ambient'){musicFadeGain=0;applyMusicVolume();}
+  else{musicFadeGain=1;applyMusicVolume();}
+  try{
+    await musicAudio.play();
+    if(musicSettings.mode==='ambient')fadeMusicGain(1,2500);
+  }catch(e){
+    musicSettings.enabled=false;saveMusicSettings();
+    console.warn('Prismwild music playback could not start:',e);
+  }
+  renderMusicPlayer();
+}
+function pauseTodayMusic(){
+  musicAudio.pause();clearMusicFade();clearAmbientWake();musicSettings.enabled=false;saveMusicSettings();musicFadingOut=false;musicFadeGain=1;applyMusicVolume();renderMusicPlayer();
+}
+function scheduleAmbientReplay(){
+  clearAmbientWake();
+  if(!musicSettings.enabled||musicSettings.mode!=='ambient')return;
+  const wait=Math.max(1,Number(musicSettings.ambientMinutes||10))*60000;
+  musicNextPlayAt=Date.now()+wait;
+  musicAmbientTimer=setTimeout(()=>{musicAmbientTimer=null;musicNextPlayAt=0;if(musicSettings.enabled&&musicSettings.mode==='ambient'&&musicUserGesture)startTodayMusic(true);},wait);
+  renderMusicPlayer();
+}
+function setMusicMode(mode){
+  musicSettings.mode=mode==='loop'?'loop':'ambient';saveMusicSettings();clearAmbientWake();clearMusicFade();musicFadingOut=false;musicFadeGain=1;applyMusicVolume();
+  musicAudio.loop=musicSettings.mode==='loop';
+  if(musicSettings.enabled&&musicUserGesture&&musicAudio.paused)startTodayMusic(false);
+  renderMusicPlayer();
+}
+function setMusicVolume(value){musicSettings.volume=musicClamp(Number(value)/100,0,1);saveMusicSettings();applyMusicVolume();renderMusicPlayer();}
+function musicStatusText(){
+  const track=todayMusic();
+  if(!musicSettings.enabled)return 'Music is off.';
+  if(musicNextPlayAt){const ms=Math.max(0,musicNextPlayAt-Date.now()),mins=Math.floor(ms/60000),secs=Math.floor((ms%60000)/1000);return `${track.zone} returns in ${mins}:${String(secs).padStart(2,'0')}.`;}
+  if(!musicUserGesture&&musicAudio.paused)return `Ready for ${track.zone}. Open the player and press Play.`;
+  if(!musicAudio.paused)return musicSettings.mode==='loop'?`${track.zone} is playing on loop.`:`${track.zone} is playing. It will fade out at the end.`;
+  return `Paused on ${track.zone}.`;
+}
+function renderMusicPlayer(){
+  const track=todayMusic();
+  const day=document.getElementById('musicDayLabel'),title=document.getElementById('musicTrackTitle'),meta=document.getElementById('musicTrackMeta');
+  if(day)day.textContent=track.day;if(title)title.textContent=track.zone;if(meta)meta.textContent=musicSettings.mode==='loop'?'Continuous loop':'Ambient fade';
+  const volume=document.getElementById('musicVolume'),volumeValue=document.getElementById('musicVolumeValue');
+  if(volume)volume.value=Math.round(musicSettings.volume*100);if(volumeValue)volumeValue.textContent=`${Math.round(musicSettings.volume*100)}%`;
+  const select=document.getElementById('musicAmbientInterval');if(select)select.value=String(musicSettings.ambientMinutes);
+  const ambientWrap=document.getElementById('musicAmbientIntervalWrap');if(ambientWrap)ambientWrap.classList.toggle('hidden',musicSettings.mode==='loop');
+  const loop=document.getElementById('musicModeLoop'),ambient=document.getElementById('musicModeAmbient');if(loop)loop.classList.toggle('active',musicSettings.mode==='loop');if(ambient)ambient.classList.toggle('active',musicSettings.mode==='ambient');
+  const toggle=document.getElementById('musicToggle');if(toggle)toggle.textContent=musicSettings.enabled?'❚❚ Turn Music Off':'▶ Play Today\'s Music';
+  const status=document.getElementById('musicPlayerStatus');if(status)status.textContent=musicStatusText();
+  const icon=document.getElementById('musicPlayerLauncherIcon');if(icon)icon.textContent=musicSettings.enabled&&!musicAudio.paused?'♫':'▶';
+  const launcher=document.getElementById('musicPlayerLauncher');if(launcher)launcher.classList.toggle('playing',musicSettings.enabled&&!musicAudio.paused);
+}
+function openMusicPlayer(){musicUserGesture=true;configureTodayMusic();document.getElementById('musicPlayerModal')?.showModal();if(musicSettings.enabled&&musicAudio.paused)startTodayMusic(false);else renderMusicPlayer();}
+function checkMusicDay(){const day=new Date().getDay();if(day!==musicCurrentDay)configureTodayMusic(true);renderMusicPlayer();}
+
+musicAudio.addEventListener('timeupdate',()=>{
+  if(musicSettings.mode!=='ambient'||musicAudio.paused||!Number.isFinite(musicAudio.duration)||musicFadingOut)return;
+  const remaining=musicAudio.duration-musicAudio.currentTime;
+  if(remaining<=6.5&&remaining>0){musicFadingOut=true;fadeMusicGain(0,Math.min(6000,remaining*1000));}
+});
+musicAudio.addEventListener('ended',()=>{
+  if(musicSettings.mode==='ambient'&&musicSettings.enabled){musicFadingOut=false;musicFadeGain=0;applyMusicVolume();scheduleAmbientReplay();}
+  renderMusicPlayer();
+});
+musicAudio.addEventListener('play',renderMusicPlayer);
+musicAudio.addEventListener('pause',renderMusicPlayer);
+musicAudio.addEventListener('loadedmetadata',renderMusicPlayer);
+
+document.getElementById('musicPlayerLauncher').addEventListener('click',openMusicPlayer);
+document.getElementById('closeMusicPlayer').addEventListener('click',()=>document.getElementById('musicPlayerModal').close());
+document.getElementById('musicToggle').addEventListener('click',()=>{musicUserGesture=true;if(musicSettings.enabled)pauseTodayMusic();else startTodayMusic(false);});
+document.getElementById('musicVolume').addEventListener('input',e=>setMusicVolume(e.target.value));
+document.getElementById('musicModeLoop').addEventListener('click',()=>setMusicMode('loop'));
+document.getElementById('musicModeAmbient').addEventListener('click',()=>setMusicMode('ambient'));
+document.getElementById('musicAmbientInterval').addEventListener('change',e=>{musicSettings.ambientMinutes=Number(e.target.value)||10;saveMusicSettings();if(musicNextPlayAt)scheduleAmbientReplay();renderMusicPlayer();});
+document.getElementById('musicPlayerModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+configureTodayMusic(true);
+setInterval(checkMusicDay,60000);
+setInterval(()=>{if(document.getElementById('musicPlayerModal')?.open||musicNextPlayAt)renderMusicPlayer();},1000);
+
 const BATTLE_HIT_AUDIO={
   Brute:new Audio('assets/audio/brute_hit.wav'),
   Defender:new Audio('assets/audio/defender_hit.wav'),
@@ -6447,7 +6643,7 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.46 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.47 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
