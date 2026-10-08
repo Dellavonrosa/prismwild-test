@@ -281,11 +281,11 @@
       <div class="page-heading">
         <div class="eyebrow">KEEPER EXPEDITION BOARD</div>
         <h2>Daily Expeditions</h2>
-        <p>Send one to five available monsters on timed jobs across Prismwild. Longer expeditions bring home larger hauls and better rare-reward chances.</p>
+        <p>Send one to five available monsters on timed jobs across Prismwild. Longer expeditions bring home larger hauls, better rare-reward chances, and XP for each participating monster.</p>
       </div>
       <div class="expedition-rules-card">
         <div><strong>Three contracts each day</strong><span>Short • 1 hour</span><span>Extended • 5 hours</span><span>Long • 12 hours</span></div>
-        <p>Monsters on an active expedition cannot battle, breed, or leave on another expedition. Bigger and stronger teams improve the chance of bringing home bonus loot. Started jobs survive the daily refresh.</p>
+        <p>Monsters on an active expedition cannot battle, breed, or leave on another expedition. Every team member earns full training XP when you collect the return haul (1h: 50 XP, 5h: 300 XP, 12h: 850 XP). Bigger and stronger teams improve the chance of bonus loot. Started jobs survive the daily refresh.</p>
       </div>
       <div id="expeditionGrid" class="expedition-grid"></div>
       <p id="expeditionMessage" class="expedition-message"></p>
@@ -574,6 +574,12 @@
               <div class="form-grid two">
                 <label>Obtain method<select id="obtainMethod"></select></label>
                 <label id="shopPriceWrap"><span id="shopPriceLabel">Shop egg price</span><input id="shopPrice" type="number" min="0" step="1" value="1000"><small id="shopPriceHelp">Price in normal currency.</small></label>
+              </div>
+
+              <div class="form-section" id="mythicTempleAdminSection">
+                <div class="section-title"><span>🏛</span><div><h3>Mythic Temple</h3><p>Rare special encounters inside the regular Explore maze.</p></div></div>
+                <label class="check-row"><input id="mythicTempleOnly" type="checkbox"><span><strong>Mythic Temple Only</strong> — this monster can only appear as a Temple Mythic encounter</span></label>
+                <p class="form-note" id="mythicTempleAdminHelp">Requires Mythic rarity and a non-Crossbreed species. Enabling this removes the monster from normal wild encounters and wild egg pools. Published Temple Mythics are available across all zones.</p>
               </div>
 
               <div id="encounterDaysWrap" class="encounter-days-block">
@@ -869,11 +875,11 @@
         <div class="maze-play-layout explore-maze-layout">
           <div>
             <div id="exploreMazeGrid"></div>
-            <div class="maze-legend"><span><b>◆</b> You</span><span><b>S</b> Start</span><span>Fog hides unexplored paths</span></div>
+            <div class="maze-legend"><span><b>◆</b> You</span><span><b>S</b> Start</span><span><b>🏛</b> Mythic Temple</span><span>Fog hides unexplored paths</span></div>
           </div>
           <div class="maze-side">
             <div id="exploreMazeControls" class="maze-control-pad"></div>
-            <div class="maze-status"><strong id="exploreMazeStatus">Explore freely.</strong><p id="exploreMazeMessage">Pick a direction and see what the wilds are hiding.</p></div>
+            <div class="maze-status"><strong id="exploreMazeStatus">Explore freely.</strong><p id="exploreMazeMessage">Pick a direction and see what the wilds are hiding.</p><small id="exploreTempleChance">Mythic Temple chance: 1%</small></div>
             <button id="leaveExplore" class="ghost small" type="button">End Expedition</button>
           </div>
         </div>
@@ -1030,6 +1036,15 @@
     <div id="expeditionTeamPicker" class="expedition-team-picker"></div>
     <p id="expeditionTeamMessage" class="expedition-team-message"></p>
     <div class="expedition-team-actions"><button id="startSelectedExpedition" class="primary big" type="button" disabled>Begin Expedition</button><button id="cancelExpeditionTeam" class="ghost" type="button">Cancel</button></div>
+  </div>
+</dialog>
+<dialog id="expeditionRewardModal" class="expedition-team-modal">
+  <div class="expedition-team-dialog">
+    <button id="closeExpeditionReward" class="modal-x" type="button" aria-label="Close expedition rewards">×</button>
+    <div class="eyebrow">EXPEDITION COMPLETE</div>
+    <h2 id="expeditionRewardTitle">Your Team Returned!</h2>
+    <div id="expeditionRewardContents"></div>
+    <div class="expedition-team-actions"><button id="confirmExpeditionReward" class="primary big" type="button">Continue</button></div>
   </div>
 </dialog>
 
@@ -1270,7 +1285,7 @@ const TYPE_STRONG_MULTIPLIER=1.5;
 const TYPE_RESIST_MULTIPLIER=2/3;
 const TYPE_MIN_MULTIPLIER=.5;
 const TYPE_MAX_MULTIPLIER=2;
-const OBTAIN_METHODS = ["Random Battle Reward", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Admin / Test"];
+const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Admin / Test"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
 const ATTACK_FX_STYLES = ["Auto","Bite","Slash","Slam","Projectile","Burst","Beam","Wave"];
@@ -1597,6 +1612,7 @@ const EXPLORE_RATES={battle:.60,field:.19,currency:.08,item:.08,egg:.05};
 
 // ---------- Daily Expeditions ----------
 const EXPEDITION_DURATION_ORDER=['short','extended','long'];
+const EXPEDITION_XP_REWARDS={short:50,extended:300,long:850}; // Full XP goes to every participating monster, not split across the team.
 const EXPEDITION_DURATIONS={
   short:{label:'Short Expedition',hours:1,ms:60*60*1000,rewardRank:1},
   extended:{label:'Extended Expedition',hours:5,ms:5*60*60*1000,rewardRank:3},
@@ -1941,7 +1957,8 @@ function silverwindReferenceTopics(){
       `Assign <strong>1 to 5</strong> eligible monsters to a contract.`,
       `Away monsters are locked from actions that would conflict with the Expedition.`,
       `Unstarted contracts reroll daily. Active timers persist.`,
-      `Longer missions generally offer stronger reward ranks and access to more valuable expedition treasure.`
+      `Longer missions generally offer stronger reward ranks and access to more valuable expedition treasure.`,
+      `Every assigned monster earns the full training XP when the Keeper collects the return: <strong>1h: 50 XP</strong>, <strong>5h: 300 XP</strong>, <strong>12h: 850 XP</strong>. XP is never split among team members.`
     ]))+referenceActions([['expeditions','Open Expeditions']])},
 
     {id:'requests-xp',category:'Progression',title:'Requests & Account XP',summary:'Daily jobs, Silvy check-in, completion bonus, and Keeper progression.',keywords:'request board daily xp account level silverwind check in bonus',note:`The Request Board is my preferred form of organized chaos: three rotating jobs, one predictable check-in, and enough rewards to make the clipboard worth respecting.`,body:()=>referenceList([
@@ -2253,6 +2270,10 @@ function normalizeState(){
     if(sp.seasonalEventFamily&&!['spooky_halloween','winter_event'].includes(sp.seasonalEventFamily))sp.seasonalEventFamily='';
     if(sp.isCrossbreed && sp.secondaryElement===sp.element)sp.secondaryElement='';
     if(sp.isCrossbreed)sp.obtain='Breeding Only';
+    // The obtain method and the Admin toggle describe the same exclusive encounter pool.
+    // Legacy records default to false, without changing older Mythic obtain settings.
+    sp.mythicTempleOnly=!sp.isCrossbreed&&(sp.obtain==='Mythic Temple Only'||sp.mythicTempleOnly===true);
+    if(sp.mythicTempleOnly){sp.rarity='Mythic';sp.isMythic=true;sp.obtain='Mythic Temple Only';}
     sp.nativeFacing=sp.nativeFacing==='left'?'left':'right';
     if(!sp.builtin)sp.published=!!sp.published;
   }
@@ -3009,6 +3030,7 @@ function normalizeExpeditionState(){
     c.status=['available','active','ready','claimed'].includes(c.status)?c.status:'available';
     c.monsterIds=Array.isArray(c.monsterIds)?c.monsterIds.filter(id=>monsterIds.has(id)).slice(0,5):[];
     c.startedAt=Number(c.startedAt||0);c.finishAt=Number(c.finishAt||0);c.bonusChance=clamp(Number(c.bonusChance||0),0,.35);
+    c.xpResults=Array.isArray(c.xpResults)?c.xpResults:[];
     if(c.status==='active'&&c.finishAt&&Date.now()>=c.finishAt)c.status='ready';
     if((c.status==='active'||c.status==='ready')&&!c.monsterIds.length)c.status='available';
   }
@@ -3016,7 +3038,7 @@ function normalizeExpeditionState(){
 function generateExpeditionContract(durationKey,dateKey=localDateKey(),excludedMissionIds=[]){
   const pool=Object.keys(EXPEDITION_MISSIONS).filter(id=>!excludedMissionIds.includes(id));
   const missionId=randomChoice(pool.length?pool:Object.keys(EXPEDITION_MISSIONS));
-  return {id:`${dateKey}:${durationKey}:${missionId}`,dateKey,durationKey,missionId,status:'available',monsterIds:[],startedAt:0,finishAt:0,bonusChance:0,rewardSummary:''};
+  return {id:`${dateKey}:${durationKey}:${missionId}`,dateKey,durationKey,missionId,status:'available',monsterIds:[],startedAt:0,finishAt:0,bonusChance:0,rewardSummary:'',xpResults:[]};
 }
 function ensureDailyExpeditions(){
   if(!state.expeditions||!state.expeditions.slots)normalizeExpeditionState();
@@ -3121,6 +3143,35 @@ function applyExpeditionReward(reward){
   for(const [id,qty] of Object.entries(reward.inventory||{}))state.inventory[id]=(state.inventory[id]||0)+Number(qty||0);
   for(const egg of reward.eggs||[])state.eggs.push(egg);
 }
+function grantExpeditionTeamXP(contract){
+  const amount=EXPEDITION_XP_REWARDS[contract?.durationKey]||0;
+  const uniqueIds=[...new Set(contract?.monsterIds||[])].slice(0,5);
+  return uniqueIds.map(id=>{
+    const mon=state.monsters.find(m=>m.id===id);
+    if(!mon)return null; // A removed monster cannot receive training.
+    const before=mon.level,wasMax=before>=100;
+    const levels=grantXP(mon,amount); // Reuse battle leveling and the Lv.100 cap.
+    return {monsterId:id,name:displayName(mon),xp:wasMax?0:amount,levels,levelBefore:before,levelAfter:mon.level,atMax:wasMax};
+  }).filter(Boolean);
+}
+function expeditionTrainingLine(entry){
+  if(entry.atMax)return `${entry.name} • MAX LEVEL`;
+  return `${entry.name} • +${entry.xp} XP${entry.levels?` • Lv.${entry.levelBefore} → ${entry.levelAfter}!`:''}`;
+}
+function showExpeditionRewardModal(contract){
+  const modal=document.getElementById('expeditionRewardModal'),container=document.getElementById('expeditionRewardContents');
+  if(!modal||!container)return;
+  document.getElementById('expeditionRewardTitle').textContent=`${EXPEDITION_MISSIONS[contract.missionId]?.title||'Expedition'} Complete!`;
+  container.replaceChildren();
+  const loot=document.createElement('p');loot.textContent=contract.rewardSummary||'Your team returned.';container.appendChild(loot);
+  if(contract.xpResults?.length){
+    const heading=document.createElement('h3');heading.textContent='Monster Training';container.appendChild(heading);
+    const list=document.createElement('ul');
+    for(const entry of contract.xpResults){const li=document.createElement('li');li.textContent=expeditionTrainingLine(entry);list.appendChild(li);}
+    container.appendChild(list);
+  }
+  if(!modal.open)modal.showModal();
+}
 let selectedExpeditionSlot=null,expeditionTeamDraft=[];
 function openExpeditionTeam(slotKey){
   ensureDailyExpeditions();const contract=state.expeditions.slots[slotKey],duration=EXPEDITION_DURATIONS[slotKey],mission=EXPEDITION_MISSIONS[contract?.missionId];
@@ -3150,14 +3201,22 @@ function startSelectedExpedition(){
   ensureDailyExpeditions();const slotKey=selectedExpeditionSlot,contract=state.expeditions.slots[slotKey],duration=EXPEDITION_DURATIONS[slotKey];
   const team=expeditionTeamDraft.map(id=>state.monsters.find(m=>m.id===id)).filter(m=>m&&!expeditionUnavailableReason(m));
   if(!contract||contract.status!=='available'||!duration||team.length<1||team.length>5){document.getElementById('expeditionTeamMessage').textContent='That team is no longer available. Please choose again.';renderExpeditionTeamPicker();return;}
-  const now=Date.now();contract.status='active';contract.monsterIds=team.map(m=>m.id);contract.startedAt=now;contract.finishAt=now+duration.ms;contract.bonusChance=expeditionTeamBonus(team);contract.rewardSummary='';state.expeditions.lastMessage=`${EXPEDITION_MISSIONS[contract.missionId].title} departed with ${team.length} monster${team.length===1?'':'s'}.`;
+  const now=Date.now();contract.status='active';contract.monsterIds=team.map(m=>m.id);contract.startedAt=now;contract.finishAt=now+duration.ms;contract.bonusChance=expeditionTeamBonus(team);contract.rewardSummary='';contract.xpResults=[];state.expeditions.lastMessage=`${EXPEDITION_MISSIONS[contract.missionId].title} departed with ${team.length} monster${team.length===1?'':'s'}.`;
   save();document.getElementById('expeditionTeamModal').close();selectedExpeditionSlot=null;expeditionTeamDraft=[];renderAll();
 }
 function collectExpedition(slotKey){
   ensureDailyExpeditions();const contract=state.expeditions.slots[slotKey];if(!contract)return;
   if(contract.status==='active'&&Date.now()>=Number(contract.finishAt||0))contract.status='ready';
   if(contract.status!=='ready')return;
-  const mission=EXPEDITION_MISSIONS[contract.missionId],reward=rollExpeditionReward(contract);applyExpeditionReward(reward);contract.status='claimed';contract.rewardSummary=expeditionRewardSummary(reward);contract.claimedAt=Date.now();state.expeditions.lastMessage=`${mission?.title||'Expedition'} returned: ${contract.rewardSummary}`;updateNewKeeperTask('expedition');save();ensureDailyExpeditions();save();renderAll();
+  const mission=EXPEDITION_MISSIONS[contract.missionId],reward=rollExpeditionReward(contract);
+  applyExpeditionReward(reward);
+  contract.xpResults=grantExpeditionTeamXP(contract); // Only called on the first successful claim.
+  contract.status='claimed';
+  const xp=EXPEDITION_XP_REWARDS[contract.durationKey]||0;
+  const training=contract.xpResults.length?` • Training: ${xp} XP per monster (${contract.xpResults.length} trained)`:'';
+  contract.rewardSummary=expeditionRewardSummary(reward)+training;
+  contract.claimedAt=Date.now();state.expeditions.lastMessage=`${mission?.title||'Expedition'} returned: ${contract.rewardSummary}`;
+  updateNewKeeperTask('expedition');save();ensureDailyExpeditions();save();renderAll();showExpeditionRewardModal(contract);
 }
 function rerollUnstartedExpeditions(){
   normalizeExpeditionState();const today=localDateKey(),used=[];
@@ -3182,8 +3241,14 @@ async function renderExpeditions(){
     else if(c.status==='active')action=`<div class="expedition-timer" data-expedition-timer="${key}">${fmtExpeditionTime(expeditionRemaining(c))}</div><small>Returns when the timer reaches zero.</small>`;
     else if(c.status==='ready')action=`<div class="expedition-ready">TEAM RETURNED</div><button class="primary expedition-collect" type="button" data-expedition-collect="${key}">Collect Rewards</button>`;
     else action=`<div class="expedition-claimed">COMPLETED TODAY</div>${c.rewardSummary?`<p class="expedition-previous-reward">${c.rewardSummary}</p>`:''}`;
-    card.innerHTML=`<div class="expedition-card-top"><span class="expedition-mission-icon">${mission.icon}</span><div><div class="eyebrow">${duration.label.toUpperCase()} • ${duration.hours}H</div><h3>${mission.title}</h3></div></div><p class="expedition-description">${mission.description}</p><div class="expedition-reward-hint"><strong>Expected haul</strong><span>${mission.rewardHint}</span></div>${team.length?`<div class="expedition-team-strip"><div class="expedition-team-strip-label"><strong>Assigned Team</strong><span>${team.length}/5 • ${Math.round(Number(c.bonusChance||0)*100)}% bonus loot chance</span></div><div class="expedition-team-faces">${team.map(m=>`<div class="expedition-team-face" title="${displayName(m)}"><img data-expedition-face="${m.id}" alt="${displayName(m)}"><span>Lv.${m.level}</span></div>`).join('')}</div></div>`:''}<div class="expedition-card-action">${action}</div>`;
+    card.innerHTML=`<div class="expedition-card-top"><span class="expedition-mission-icon">${mission.icon}</span><div><div class="eyebrow">${duration.label.toUpperCase()} • ${duration.hours}H</div><h3>${mission.title}</h3></div></div><p class="expedition-description">${mission.description}</p><div class="expedition-reward-hint"><strong>Expected haul</strong><span>${mission.rewardHint} • ${EXPEDITION_XP_REWARDS[key]} XP / monster</span></div>${team.length?`<div class="expedition-team-strip"><div class="expedition-team-strip-label"><strong>Assigned Team</strong><span>${team.length}/5 • ${Math.round(Number(c.bonusChance||0)*100)}% bonus loot chance</span></div><div class="expedition-team-faces">${team.map(m=>`<div class="expedition-team-face" title="${displayName(m)}"><img data-expedition-face="${m.id}" alt="${displayName(m)}"><span>Lv.${m.level}</span></div>`).join('')}</div></div>`:''}<div class="expedition-card-action">${action}</div>`;
     grid.appendChild(card);
+    if(c.status==='claimed'&&c.xpResults?.length){
+      const details=document.createElement('details'),heading=document.createElement('summary'),items=document.createElement('ul');
+      details.className='expedition-training-result';heading.textContent='Monster XP & level-ups';details.appendChild(heading);
+      for(const entry of c.xpResults){const li=document.createElement('li');li.textContent=expeditionTrainingLine(entry);items.appendChild(li);}
+      details.appendChild(items);card.appendChild(details);
+    }
     for(const m of team){const img=card.querySelector(`[data-expedition-face="${m.id}"]`);if(img)await setMonsterImage(img,m.slug,monsterArtKind(m));}
   }
   const badge=document.getElementById('expeditionBadge');if(badge)badge.textContent=String(readyCount);document.querySelectorAll('.expedition-inline-badge').forEach(el=>el.textContent=String(readyCount));
@@ -4685,19 +4750,19 @@ function renderRegistry(){
     filterSummary.textContent=`Showing ${entries.length} of ${Object.keys(state.species).length}${bits.length?` • ${bits.join(' • ')}`:''}`;
   }
   if(!entries.length){box.innerHTML='<div class="registry-empty">No monsters match these filters.</div>';return;}
-  entries.forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?' • BUILT-IN':` • ${sp.published?'PUBLISHED':'DRAFT'}`}${sp.rarity==='Mythic'||sp.isMythic?' • MYTHIC':''}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
+  entries.forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?' • BUILT-IN':` • ${sp.published?'PUBLISHED':'DRAFT'}`}${sp.rarity==='Mythic'||sp.isMythic?' • MYTHIC':''}${sp.mythicTempleOnly?' • 🏛 TEMPLE ONLY':''}</span>`;b.onclick=()=>loadSpeciesIntoForm(slug);box.appendChild(b);});
 }
 function populateParentDropdowns(excludeSlug=''){
   const opts=Object.entries(state.species).filter(([slug])=>slug!==excludeSlug).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
   document.getElementById('parentA').innerHTML=opts;document.getElementById('parentB').innerHTML=opts;
 }
 function newSpeciesForm(){
-  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
+  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('mythicTempleOnly').checked=false;document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
   speciesSignatureDraft='';
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
   for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();
@@ -4715,13 +4780,21 @@ function updateAutoZonePreview(){
 
 function updateAdminConditional(){
   const cross=document.getElementById('isCrossbreed').checked;
+  const templeCheck=document.getElementById('mythicTempleOnly');
+  const mythic=document.getElementById('speciesRarity').value==='Mythic';
+  const templeAllowed=!cross&&mythic;
+  if(!templeAllowed)templeCheck.checked=false;
+  templeCheck.disabled=!templeAllowed;
+  document.getElementById('mythicTempleAdminHelp').textContent=!templeAllowed?'Set Rarity to Mythic and leave Crossbreed unchecked to enable Temple-only encounters.':'Temple-only monsters cannot appear in standard Explore battles or wild eggs. Published species are chosen regardless of zone.';
   const obtainSelect=document.getElementById('obtainMethod');
+  if(templeCheck.checked)obtainSelect.value='Mythic Temple Only';
+  else if(obtainSelect.value==='Mythic Temple Only')obtainSelect.value='Random Battle Reward';
   if(cross){
     obtainSelect.value='Breeding Only';
     const primary=document.getElementById('speciesElement').value,secondary=document.getElementById('speciesElement2');
     if(secondary.value===primary)secondary.value=ELEMENTS.find(x=>x!==primary)||ELEMENTS[0];
   }
-  obtainSelect.disabled=cross;
+  obtainSelect.disabled=cross||templeCheck.checked;
   const normalShop=!cross&&obtainSelect.value==='Shop Egg';
   const halloweenShop=!cross&&obtainSelect.value==='Halloween Event Shop Egg';
   const winterShop=!cross&&obtainSelect.value==='Winter Event Shop Egg';
@@ -4757,7 +4830,9 @@ async function saveSpeciesForm(e){
   if(isCross&&(!pa||!pb||pa===pb)){document.getElementById('adminMessage').textContent='Crossbreeds need two different parent species.';return;}
   if(isCross&&(!secondaryElement||secondaryElement===primaryElement)){document.getElementById('adminMessage').textContent='Crossbreeds need two different Elements.';return;}
   const rarity=document.getElementById('speciesRarity').value||'Standard',minCrossChance=rarity==='Mythic'?1:10;if(isCross&&(crossChance<minCrossChance||crossChance>20)){document.getElementById('adminMessage').textContent=`${rarity==='Mythic'?'Mythic':'Standard'} Crossbreed chance must be between ${minCrossChance}% and 20%.`;return;}
-  const obtain=isCross?'Breeding Only':document.getElementById('obtainMethod').value;
+  const templeOnly=document.getElementById('mythicTempleOnly').checked;
+  if(templeOnly&&(isCross||rarity!=='Mythic')){document.getElementById('adminMessage').textContent='Mythic Temple Only requires Mythic rarity and a non-Crossbreed monster.';return;}
+  const obtain=isCross?'Breeding Only':templeOnly?'Mythic Temple Only':document.getElementById('obtainMethod').value;
   const prev=state.species[slug]||{};
   // The visible selector is authoritative at Save time. The draft only protects the
   // choice across redraws; it must never override a newer selection in the form.
@@ -4765,7 +4840,7 @@ async function saveSpeciesForm(e){
   const selectedSignature=(visibleSignature&&state.attacks[visibleSignature])?visibleSignature:((speciesSignatureDraft&&state.attacks[speciesSignatureDraft])?speciesSignatureDraft:'');
   if(!confirm(oldSlug?`Save changes to monster "${name}"?`:`Create new monster "${name}"?`))return;
   const {encounterDays:_legacyEncounterDays,signatureAttack:_legacySignatureAttack,...cleanPrev}=prev;
-  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
+  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',mythicTempleOnly:templeOnly,element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
   save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Package when you are ready to publish it.':' It remains a draft.'}`;renderAll();loadSpeciesIntoForm(slug);
@@ -5306,7 +5381,45 @@ let exploreEvent=null;
 let exploreMaze=null;
 let exploreExpeditionActive=false;
 let exploreMazeMessage='';
+// This streak deliberately lives in memory: a refresh or leaving Explore resets it.
+let exploreTempleClears=0;
+const MYTHIC_TEMPLE_START_PCT=1;
+const MYTHIC_TEMPLE_PER_CLEAR_PCT=3;
 const EXPLORE_MAZE_SIZE=7;
+function mythicTempleChance(){return Math.min(100,MYTHIC_TEMPLE_START_PCT+exploreTempleClears*MYTHIC_TEMPLE_PER_CLEAR_PCT);}
+function mythicTemplePool(){
+  return Object.entries(state.species||{}).filter(([,sp])=>sp&&!sp.isCrossbreed&&(sp.rarity==='Mythic'||sp.isMythic)
+    &&(sp.mythicTempleOnly===true||sp.obtain==='Mythic Temple Only')&&(sp.builtin||sp.published!==false));
+}
+function createExploreMaze(){
+  const maze=generateMaze(EXPLORE_MAZE_SIZE);
+  maze.mythicTempleCell=null;
+  maze.mythicTempleUsed=false;
+  maze.mythicTempleChance=mythicTempleChance();
+  // Exactly one generation roll and, on success, exactly one reachable tile.
+  if(mythicTemplePool().length&&Math.random()*100<maze.mythicTempleChance){
+    const candidates=maze.cells.map((_,i)=>i).filter(i=>i!==0);
+    maze.mythicTempleCell=randomChoice(candidates);
+  }
+  return maze;
+}
+function completeExploreMaze(){
+  // If the temple was activated, the following maze starts back at 1%.
+  exploreTempleClears=exploreMaze?.mythicTempleUsed?0:exploreTempleClears+1;
+  exploreMaze=createExploreMaze();
+  exploreMazeMessage='Area fully explored. Venturing deeper into a fresh stretch of wilds...';
+}
+function prepareMythicTempleBattle(){
+  const pool=mythicTemplePool();
+  if(!pool.length)return false;
+  const [slug]=randomChoice(pool);
+  prepareWildBattle(slug);
+  if(!battleSession)return false;
+  battleSession.mode='mythic-temple';
+  battleSession.log=[`🏛 The Ancient Temple stirs! Mythic ${state.species[slug].name} Lv.${battleSession.enemy.level} has awakened!`];
+  battleSession.started=true;
+  return true;
+}
 let battleSession=null;
 let gauntletSession=null;
 let gauntletMessageText='';
@@ -5316,7 +5429,7 @@ function currentZone(){return ZONES[currentDayName()];}
 function eligibleWildSpecies(){
   const allowed=zoneElementsFor(currentDayName());
   return Object.entries(state.species).filter(([,sp])=>
-    sp.obtain==='Random Battle Reward' && allowed.includes(sp.element)
+    sp.obtain==='Random Battle Reward' && !sp.mythicTempleOnly && allowed.includes(sp.element)
   );
 }
 function activeMonster(){return state.monsters.find(m=>m.id===state.activeMonsterId)||null;}
@@ -5372,7 +5485,7 @@ async function renderBattleHub(){
 }
 
 function allGauntletSpecies(){
-  return Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward');
+  return Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.mythicTempleOnly);
 }
 function emptyGauntletRewards(){return {currency:0,inventory:{},eggSlugs:[]};}
 function mergeGauntletReward(target,reward){
@@ -5499,7 +5612,7 @@ async function openExplorePage(){
 
   if(!exploreExpeditionActive){
     exploreExpeditionActive=true;
-    exploreMaze=generateMaze(EXPLORE_MAZE_SIZE);
+    exploreMaze=createExploreMaze();
     exploreMazeMessage='A fresh stretch of wilds opens ahead. Pick a direction.';
   }
   showBattleSubpage('explore');
@@ -5510,6 +5623,7 @@ function endExploreExpedition(){
   exploreExpeditionActive=false;
   exploreMaze=null;
   exploreMazeMessage='';
+  exploreTempleClears=0;
   exploreEvent=null;
 }
 function returnToBattleHub(){
@@ -5587,7 +5701,7 @@ async function renderExplorePage(){
 }
 
 function ensureExploreMaze(){
-  if(!exploreMaze)exploreMaze=generateMaze(EXPLORE_MAZE_SIZE);
+  if(!exploreMaze)exploreMaze=createExploreMaze();
   return exploreMaze;
 }
 function renderExploreMazeGrid(maze){
@@ -5595,7 +5709,7 @@ function renderExploreMazeGrid(maze){
   return `<div class="haunted-maze explore-maze" style="--maze-size:${maze.size}">${maze.cells.map((mask,i)=>{
     const show=revealed.has(i),classes=['maze-cell',show?'revealed':'fog',visited.has(i)?'visited':'',i===maze.pos?'player':''].filter(Boolean).join(' ');
     const wallStyle=show?`border-top-color:${mask&bits.N?'transparent':'var(--maze-wall)'};border-right-color:${mask&bits.E?'transparent':'var(--maze-wall)'};border-bottom-color:${mask&bits.S?'transparent':'var(--maze-wall)'};border-left-color:${mask&bits.W?'transparent':'var(--maze-wall)'}`:'';
-    let mark='';if(i===maze.pos)mark='<span class="maze-player">◆</span>';else if(i===0&&show)mark='<span class="maze-start">S</span>';
+    let mark='';if(i===maze.pos)mark='<span class="maze-player">◆</span>';else if(show&&i===maze.mythicTempleCell&&!maze.mythicTempleUsed)mark='<span class="maze-exit" title="Mythic Temple">🏛</span>';else if(i===0&&show)mark='<span class="maze-start">S</span>';
     return `<div class="${classes}" style="${wallStyle}">${mark}</div>`;
   }).join('')}</div>`;
 }
@@ -5609,6 +5723,8 @@ function renderExploreMaze(){
   controls.querySelectorAll('[data-explore-move]').forEach(btn=>btn.addEventListener('click',()=>moveExploreMaze(btn.dataset.exploreMove)));
   progress.textContent=`${(maze.revealed||[]).length} / ${maze.size*maze.size}`;
   status.textContent=healthy?'Explore freely.':'Healthy Active Monster required.';
+  const templeChanceLabel=document.getElementById('exploreTempleChance');
+  if(templeChanceLabel)templeChanceLabel.textContent=`Mythic Temple chance on the next maze: ${maze.mythicTempleUsed?MYTHIC_TEMPLE_START_PCT:Math.min(100,MYTHIC_TEMPLE_START_PCT+(exploreTempleClears+1)*MYTHIC_TEMPLE_PER_CLEAR_PCT)}% • Current maze: ${maze.mythicTempleChance||1}%`;
   message.textContent=exploreMazeMessage||'Pick a direction and see what the wilds are hiding.';
 }
 function trailEventWeights(sign=null){
@@ -5627,10 +5743,24 @@ async function moveExploreMaze(dir){
   updateRequestProgress('explore',1);
   updateNewKeeperTask('explore',1);
   save();
+  const enteredTemple=maze.mythicTempleCell===maze.pos&&!maze.mythicTempleUsed;
+  // An unvisited, revealed temple must not disappear on map completion.
   const cleared=maze.revealed.length>=maze.size*maze.size;
-  if(cleared){
-    exploreMaze=generateMaze(EXPLORE_MAZE_SIZE);
-    exploreMazeMessage='Area fully explored. Venturing deeper into a fresh stretch of wilds...';
+  if(enteredTemple){
+    maze.mythicTempleUsed=true; // consumed before starting combat, including flee/defeat
+    // The following maze rolls at 1%, regardless of this maze's completion state.
+    exploreTempleClears=0;
+    const started=prepareMythicTempleBattle();
+    if(cleared)completeExploreMaze();
+    else exploreMazeMessage='An ancient Mythic Temple has been awakened!';
+    if(started){showBattleSubpage('wildbattle');await renderWildBattle();return;}
+    exploreMazeMessage='The temple is silent. No published Temple-only Mythic is available.';
+    await renderExplorePage();return;
+  }
+  if(cleared&&(maze.mythicTempleCell===null||maze.mythicTempleUsed)){
+    completeExploreMaze();
+  }else if(cleared){
+    exploreMazeMessage='The map is revealed, but an ancient Mythic Temple remains. Step onto 🏛 before moving deeper.';
   }else{
     exploreMazeMessage='The trail opens a little farther ahead.';
   }
@@ -5737,7 +5867,8 @@ async function resolveExploreTrail(sign=null){
   const routeTitle=sign?.title||'Wild Trail';
   const inlineWalkMessage=text=>{
     const cleared=(exploreMazeMessage||'').startsWith('Area fully explored.');
-    exploreMazeMessage=(cleared?'Area fully explored. Venturing deeper into a fresh stretch of wilds. ':'')+text;
+    const waitingTemple=exploreMaze?.mythicTempleCell!==null&&!exploreMaze?.mythicTempleUsed&&exploreMaze?.revealed?.length>=exploreMaze?.size*exploreMaze?.size;
+    exploreMazeMessage=(cleared?'Area fully explored. Venturing deeper into a fresh stretch of wilds. ':waitingTemple?'An ancient Mythic Temple remains. Step onto 🏛 before moving deeper. ':'')+text;
   };
 
   // Normal Explore now mirrors the Haunted Maze for lightweight discoveries:
@@ -5842,7 +5973,7 @@ function sessionHP(side){return side==='player'?battleSession.playerHp:battleSes
 function setSessionHP(side,val){if(side==='player')battleSession.playerHp=val;else battleSession.enemyHp=val;}
 function sessionNextDodge(side){return Math.max(0,Number(side==='player'?battleSession.playerNextDodge:battleSession.enemyNextDodge)||0);}
 function setSessionNextDodge(side,val){if(side==='player')battleSession.playerNextDodge=Math.max(0,Number(val)||0);else battleSession.enemyNextDodge=Math.max(0,Number(val)||0);}
-function sideLabel(side){if(side==='player')return displayName(sessionMon('player'));const name=speciesOf(sessionMon('enemy'))?.name||'Opponent';return battleSession?.mode==='trial'?`Trial ${name}`:battleSession?.mode==='gauntlet'?`Gauntlet ${name}`:battleSession?.mode==='event'?`Event ${name}`:`Wild ${name}`;}
+function sideLabel(side){if(side==='player')return displayName(sessionMon('player'));const name=speciesOf(sessionMon('enemy'))?.name||'Opponent';return battleSession?.mode==='trial'?`Trial ${name}`:battleSession?.mode==='gauntlet'?`Gauntlet ${name}`:battleSession?.mode==='event'?`Event ${name}`:battleSession?.mode==='mythic-temple'?`Mythic ${name}`:`Wild ${name}`;}
 
 
 // v0.15.47 weekday soundtrack player
@@ -6587,7 +6718,7 @@ function finishVictory(){
 
   updateNewKeeperTask('battle');
   save();
-  battleSession.result={type:'victory',title:'Victory!',text:`${displayName(player)} defeated Wild ${enemySp.name} Lv.${enemy.level}.`,xp:rewards.xp,currency:rewards.currency,levels,monsterReward};
+  battleSession.result={type:'victory',title:battleSession.mode==='mythic-temple'?'Mythic Temple Cleared!':'Victory!',text:`${displayName(player)} defeated ${battleSession.mode==='mythic-temple'?'Temple Mythic':'Wild'} ${enemySp.name} Lv.${enemy.level}.`,xp:rewards.xp,currency:rewards.currency,levels,monsterReward};
   if(levels)battleSession.log.push(`${displayName(player)} gained ${levels} level${levels===1?'':'s'}!`);
 }
 async function refreshBattleUI(){
@@ -6595,10 +6726,10 @@ async function refreshBattleUI(){
 
   const player=sessionMon('player'),enemy=sessionMon('enemy'),ps=battleStatsFor(player),es=battleStatsFor(enemy),isGauntlet=battleSession.mode==='gauntlet',isEvent=battleSession.mode==='event',isTrial=battleSession.mode==='trial';
   const screenLabel=document.getElementById('battleScreenLabel'),enemyLabel=document.getElementById('battleEnemyLabel');
-  if(screenLabel)screenLabel.textContent=isTrial?`${state.trials?.[battleSession.trialId]?.name||'Trial'} • ${battleSession.trialMode==='hard'?'Hard':'Normal'} • ${Number(battleSession.trialIndex||0)+1}/3`:isGauntlet?`Wild Gauntlet • Stage ${battleSession.gauntletStage}`:isEvent?'Spooky Halloween • Maze Encounter':'Wild Encounter';
-  if(enemyLabel)enemyLabel.textContent=isTrial?'TRIAL':isGauntlet?'GAUNTLET':isEvent?'EVENT':'WILD';
+  if(screenLabel)screenLabel.textContent=isTrial?`${state.trials?.[battleSession.trialId]?.name||'Trial'} • ${battleSession.trialMode==='hard'?'Hard':'Normal'} • ${Number(battleSession.trialIndex||0)+1}/3`:isGauntlet?`Wild Gauntlet • Stage ${battleSession.gauntletStage}`:isEvent?'Spooky Halloween • Maze Encounter':battleSession.mode==='mythic-temple'?'Ancient Mythic Temple':'Wild Encounter';
+  if(enemyLabel)enemyLabel.textContent=isTrial?'TRIAL':isGauntlet?'GAUNTLET':isEvent?'EVENT':battleSession.mode==='mythic-temple'?'MYTHIC':'WILD';
   document.getElementById('battlePlayerName').textContent=`${player.isPrismatic?'✦ ':''}${displayName(player)}`;
-  document.getElementById('battleEnemyName').textContent=`${enemy.isPrismatic?'✦ Prismatic ':''}${isTrial?speciesOf(enemy).name:isGauntlet?speciesOf(enemy).name:isEvent?`Event ${speciesOf(enemy).name}`:`Wild ${speciesOf(enemy).name}`}`;
+  document.getElementById('battleEnemyName').textContent=`${enemy.isPrismatic?'✦ Prismatic ':''}${isTrial?speciesOf(enemy).name:isGauntlet?speciesOf(enemy).name:isEvent?`Event ${speciesOf(enemy).name}`:battleSession.mode==='mythic-temple'?`Mythic ${speciesOf(enemy).name}`:`Wild ${speciesOf(enemy).name}`}`;
   document.getElementById('battlePlayerMeta').textContent=`Lv.${player.level} • P${player.potential} • ${player.trait} • ${speciesElementLabel(speciesOf(player))}`;
   document.getElementById('battleEnemyMeta').textContent=`Lv.${enemy.level} • P${enemy.potential} • ${enemy.trait} • ${speciesElementLabel(speciesOf(enemy))}`;
 
@@ -6805,6 +6936,9 @@ document.getElementById('startSelectedExpedition').addEventListener('click',star
 document.getElementById('closeExpeditionTeam').addEventListener('click',()=>document.getElementById('expeditionTeamModal').close());
 document.getElementById('cancelExpeditionTeam').addEventListener('click',()=>document.getElementById('expeditionTeamModal').close());
 document.getElementById('expeditionTeamModal').addEventListener('click',e=>{if(e.target===document.getElementById('expeditionTeamModal'))document.getElementById('expeditionTeamModal').close();});
+document.getElementById('closeExpeditionReward').addEventListener('click',()=>document.getElementById('expeditionRewardModal').close());
+document.getElementById('confirmExpeditionReward').addEventListener('click',()=>document.getElementById('expeditionRewardModal').close());
+document.getElementById('expeditionRewardModal').addEventListener('click',e=>{if(e.target===document.getElementById('expeditionRewardModal'))document.getElementById('expeditionRewardModal').close();});
 document.getElementById('expeditionFinishActive').addEventListener('click',finishActiveExpeditionsForTest);
 document.getElementById('expeditionRerollDaily').addEventListener('click',()=>{rerollUnstartedExpeditions();document.getElementById('expeditionAdminMessage').textContent='Unstarted daily expedition contracts rerolled.';});
 
@@ -6882,7 +7016,7 @@ document.getElementById('showEventAdmin').addEventListener('click',()=>showAdmin
 document.getElementById('showExpeditionAdmin').addEventListener('click',()=>showAdminPane('expedition'));
 document.getElementById('showTrialAdmin').addEventListener('click',()=>showAdminPane('trial'));
 
-document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('censusElementMode').addEventListener('change',renderRegistry);document.getElementById('adminBattleFilter').addEventListener('change',renderRegistry);document.getElementById('adminRosterFilter').addEventListener('change',renderRegistry);document.getElementById('adminSpeciesSort').addEventListener('change',renderRegistry);document.getElementById('clearSpeciesFilters').addEventListener('click',()=>{document.getElementById('adminSearch').value='';document.getElementById('adminBattleFilter').value='all';document.getElementById('adminRosterFilter').value='all';document.getElementById('adminSpeciesSort').value='name';adminElementFilter='all';renderRegistry();});document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('crossbreedSeason').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
+document.getElementById('newSpecies').addEventListener('click',newSpeciesForm);document.getElementById('speciesForm').addEventListener('submit',saveSpeciesForm);document.getElementById('grantTest').addEventListener('click',grantTestCopy);document.getElementById('grantPrismaticTest').addEventListener('click',grantPrismaticTestCopy);document.getElementById('deleteSpecies').addEventListener('click',deleteCurrentSpecies);document.getElementById('adminSearch').addEventListener('input',renderRegistry);document.getElementById('censusElementMode').addEventListener('change',renderRegistry);document.getElementById('adminBattleFilter').addEventListener('change',renderRegistry);document.getElementById('adminRosterFilter').addEventListener('change',renderRegistry);document.getElementById('adminSpeciesSort').addEventListener('change',renderRegistry);document.getElementById('clearSpeciesFilters').addEventListener('click',()=>{document.getElementById('adminSearch').value='';document.getElementById('adminBattleFilter').value='all';document.getElementById('adminRosterFilter').value='all';document.getElementById('adminSpeciesSort').value='name';adminElementFilter='all';renderRegistry();});document.getElementById('isCrossbreed').addEventListener('change',updateAdminConditional);document.getElementById('speciesRarity').addEventListener('change',updateAdminConditional);document.getElementById('mythicTempleOnly').addEventListener('change',updateAdminConditional);document.getElementById('obtainMethod').addEventListener('change',updateAdminConditional);document.getElementById('crossbreedSeason').addEventListener('change',updateAdminConditional);document.getElementById('breedTimer').addEventListener('input',updateAdminConditional);document.getElementById('hatchTimer').addEventListener('input',updateAdminConditional);document.getElementById('p1bst').addEventListener('input',updateCurve);document.getElementById('battleType').addEventListener('change',updateCurve);document.getElementById('speciesElement').addEventListener('change',updateAdminConditional);document.getElementById('speciesElement2').addEventListener('change',updateAdminConditional);document.getElementById('signatureAttack').addEventListener('change',e=>{speciesSignatureDraft=e.target.value;renderSignaturePreview();});
 document.getElementById('baseArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('basePreview')));document.getElementById('prismaticArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('prismaticPreview')));document.getElementById('eggArt').addEventListener('change',e=>previewFile(e.target,document.getElementById('eggPreview')));
 document.getElementById('exportData').addEventListener('click',exportAdmin);document.getElementById('exportLiveContent').addEventListener('click',exportLiveContent);document.getElementById('importData').addEventListener('change',e=>{if(e.target.files?.[0])importAdminFile(e.target.files[0]);});
 
