@@ -611,11 +611,30 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .explore-map-progress{min-width:116px;padding:10px 13px;border-radius:12px;background:rgba(255,255,255,.045);display:grid;text-align:right}
 .explore-map-progress span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .explore-map-progress strong{font-size:1.08rem}
-.explore-maze{--maze-wall:#527a76;background:#08100f}
-.explore-maze .maze-cell.revealed{background:linear-gradient(145deg,#152321,#111b1c)}
-.explore-maze .maze-cell.visited{background:linear-gradient(145deg,#19302a,#13201f)}
-.explore-maze .maze-cell.player{background:radial-gradient(circle,rgba(91,209,175,.28),rgba(20,39,35,.92))}
-.explore-maze .maze-player{color:#8ff0d0;text-shadow:0 0 8px rgba(95,224,188,.55)}
+.explore-map-progress .maze-streak-label{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+/* v0.15.56: Regular Explore maze themes. Keep fog and event mazes unaffected. */
+.explore-maze{
+  --maze-wall:#a6d6ad;
+  --explore-ground:#111e17;
+  --explore-floor-a:#284332;--explore-floor-b:#1b3025;
+  --explore-visited-a:#36563e;--explore-visited-b:#24392b;
+  --explore-player-glow:rgba(166,214,173,.42);
+  --explore-player-dark:#26382d;
+  --explore-ink:#d1f6d5;
+  background:var(--explore-ground);
+}
+.explore-maze.theme-soft-red{--maze-wall:#e5a0a5;--explore-ground:#1c1016;--explore-floor-a:#432830;--explore-floor-b:#2d1c25;--explore-visited-a:#5a3640;--explore-visited-b:#39242d;--explore-player-glow:rgba(229,160,165,.47);--explore-player-dark:#351e29;--explore-ink:#ffd3d7}
+.explore-maze.theme-soft-green{--maze-wall:#a6d6ad;--explore-ground:#101a14;--explore-floor-a:#284332;--explore-floor-b:#1b3025;--explore-visited-a:#36563e;--explore-visited-b:#24392b;--explore-player-glow:rgba(166,214,173,.42);--explore-player-dark:#26382d;--explore-ink:#d1f6d5}
+.explore-maze.theme-lavender{--maze-wall:#c8aae8;--explore-ground:#171323;--explore-floor-a:#352a4c;--explore-floor-b:#241e35;--explore-visited-a:#48365c;--explore-visited-b:#30253f;--explore-player-glow:rgba(200,170,232,.46);--explore-player-dark:#28213a;--explore-ink:#e8d9ff}
+.explore-maze.theme-cream{--maze-wall:#f1e4c7;--explore-ground:#1b1a17;--explore-floor-a:#454034;--explore-floor-b:#2f2b25;--explore-visited-a:#5a5140;--explore-visited-b:#3e382c;--explore-player-glow:rgba(241,228,199,.46);--explore-player-dark:#373126;--explore-ink:#fff4db}
+.explore-maze.theme-icy-blue{--maze-wall:#a8dcf4;--explore-ground:#101c27;--explore-floor-a:#254457;--explore-floor-b:#193041;--explore-visited-a:#34586c;--explore-visited-b:#224051;--explore-player-glow:rgba(168,220,244,.44);--explore-player-dark:#1f374c;--explore-ink:#d2f1ff}
+.explore-maze.theme-toxic-yellow{--maze-wall:#d9e99e;--explore-ground:#191d12;--explore-floor-a:#3b4628;--explore-floor-b:#2b3420;--explore-visited-a:#4c5b30;--explore-visited-b:#374226;--explore-player-glow:rgba(217,233,158,.46);--explore-player-dark:#323c22;--explore-ink:#edfac0}
+.explore-maze.theme-peach{--maze-wall:#efba9b;--explore-ground:#211712;--explore-floor-a:#4a3228;--explore-floor-b:#34241e;--explore-visited-a:#604031;--explore-visited-b:#412d25;--explore-player-glow:rgba(239,186,155,.46);--explore-player-dark:#38261f;--explore-ink:#ffe2cb}
+.explore-maze.theme-rose{--maze-wall:#e9b0d1;--explore-ground:#201521;--explore-floor-a:#4a2e49;--explore-floor-b:#352336;--explore-visited-a:#5c3a59;--explore-visited-b:#432b42;--explore-player-glow:rgba(233,176,209,.46);--explore-player-dark:#38253a;--explore-ink:#ffe0f4}
+.explore-maze .maze-cell.revealed{background:linear-gradient(145deg,var(--explore-floor-a),var(--explore-floor-b))}
+.explore-maze .maze-cell.visited{background:linear-gradient(145deg,var(--explore-visited-a),var(--explore-visited-b))}
+.explore-maze .maze-cell.player{background:radial-gradient(circle,var(--explore-player-glow),var(--explore-player-dark))}
+.explore-maze .maze-player{color:var(--explore-ink);text-shadow:0 0 8px var(--explore-player-glow)}
 .explore-map-card .maze-legend b{color:#8ff0d0}
 @media(max-width:720px){.explore-map-heading{flex-direction:column}.explore-map-progress{width:100%;text-align:left}}
 
@@ -817,3 +836,222 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .lottery-coin-toast.visible{opacity:1;transform:translate(-50%,0)}
 @media(max-width:780px){.lottery-layout,.lottery-admin-grid{grid-template-columns:1fr}.lottery-stage,.lottery-odds{padding:17px}.lottery-wheel-frame{width:min(85vw,320px)}}
 @media(prefers-reduced-motion:reduce){.lottery-wheel{will-change:auto}.lottery-coin-toast{transition:none}}
+
+/* v0.15.57 • quick, readable, GBA-inspired battle-entry shutter. */
+.battle-transition{
+  position:fixed;inset:0;z-index:9998;display:grid;place-items:center;
+  background:#080d18;opacity:0;pointer-events:auto;
+  transition:opacity 190ms steps(6,end);overflow:hidden;
+}
+.battle-transition.visible{opacity:1}
+.battle-transition.leaving{opacity:0;transition-duration:250ms}
+.battle-transition-lines{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0 18px,rgba(125,228,255,.09) 18px 22px),
+             repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,255,255,.025) 38px 40px);
+  box-shadow:inset 0 0 120px 35px #080d18;
+}
+.battle-transition-mark{
+  position:relative;text-align:center;padding:14px 25px;
+  border-top:3px solid #7de4ff;border-bottom:3px solid #7de4ff;
+  background:#121b2c;color:#f4f8ff;
+  box-shadow:0 0 0 5px #080d18,0 0 24px rgba(125,228,255,.22);
+  font-size:clamp(.95rem,2.5vw,1.55rem);font-weight:900;
+  letter-spacing:.17em;text-shadow:2px 2px #25365c;
+}
+@media(prefers-reduced-motion:reduce){
+  .battle-transition{transition:none!important}
+}
+
+
+/* v0.15.59 • quick GBA-inspired maze clear/re-roll shutter (normal Explore only). */
+.maze-clear-transition{
+  --maze-clear-accent:#a6d6ad;
+  position:fixed;inset:0;z-index:9997;display:grid;place-items:center;
+  background:#0b101c;opacity:0;pointer-events:auto;
+  transition:opacity 210ms steps(7,end);overflow:hidden;
+}
+.maze-clear-transition.visible{opacity:1}
+.maze-clear-transition.leaving{opacity:0;transition-duration:280ms}
+.maze-clear-transition-pattern{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0 22px,rgba(255,255,255,.03) 22px 24px),
+    repeating-linear-gradient(90deg,transparent 0 32px,color-mix(in srgb,var(--maze-clear-accent) 12%,transparent) 32px 36px);
+  box-shadow:inset 0 0 140px 45px #080d18;
+}
+.maze-clear-transition-card{
+  position:relative;width:min(440px,88vw);padding:22px 28px;text-align:center;
+  border-top:4px solid var(--maze-clear-accent);border-bottom:4px solid var(--maze-clear-accent);
+  background:#151e2e;box-shadow:0 0 0 6px #0b101c,0 0 35px color-mix(in srgb,var(--maze-clear-accent) 24%,transparent);
+  display:grid;gap:7px;
+}
+.maze-clear-transition-card span{color:var(--maze-clear-accent);font-size:.7rem;font-weight:850;letter-spacing:.22em}
+.maze-clear-transition-card strong{color:#f5f8ff;font-size:clamp(1.25rem,4.8vw,2.15rem);letter-spacing:.12em;text-shadow:2px 3px #27344f}
+.maze-clear-transition-card small{color:#c1d3e2;font-size:.74rem;font-weight:700;letter-spacing:.15em}
+.maze-clear-transition.theme-soft-red{--maze-clear-accent:#e5a0a5}
+.maze-clear-transition.theme-soft-green{--maze-clear-accent:#a6d6ad}
+.maze-clear-transition.theme-lavender{--maze-clear-accent:#c8aae8}
+.maze-clear-transition.theme-cream{--maze-clear-accent:#f1e4c7}
+.maze-clear-transition.theme-icy-blue{--maze-clear-accent:#a8dcf4}
+.maze-clear-transition.theme-toxic-yellow{--maze-clear-accent:#d9e99e}
+.maze-clear-transition.theme-peach{--maze-clear-accent:#efba9b}
+.maze-clear-transition.theme-rose{--maze-clear-accent:#e9b0d1}
+@media(prefers-reduced-motion:reduce){.maze-clear-transition{transition:none!important}}
+
+/* v0.15.60: decision-driven Explore discoveries */
+.explore-discovery-panel{border-color:#67618c;background:linear-gradient(145deg,#242237,#141923);grid-template-columns:86px minmax(0,1fr);align-items:start}
+.discovery-icon{width:78px;height:78px;display:grid;place-items:center;border:2px solid #8174a8;border-radius:16px;background:linear-gradient(150deg,#33304e,#1d2135);color:#e4ceff;font-family:Georgia,serif;font-size:2.5rem;box-shadow:0 0 24px #7c65b022}
+.discovery-copy h3{font-size:1.45rem;margin:.22rem 0 .75rem;color:#efe6ff}
+.discovery-copy .eyebrow{color:#cbb2ee}
+.discovery-copy .story-text{max-width:65ch}
+.discovery-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.discovery-actions .discovery-option{text-align:left;white-space:normal;min-width:0;flex:1 1 210px;padding:11px 15px}
+.discovery-actions button:disabled{opacity:.48;cursor:not-allowed}
+.discovery-reward{display:inline-block;border:1px solid #748c70;border-radius:9px;background:#1a2b25;color:#c3e9aa;padding:9px 14px;font-weight:750;line-height:1.4}
+@media(max-width:760px){.explore-discovery-panel{grid-template-columns:1fr;text-align:center}.discovery-icon{margin:auto}.discovery-actions{justify-content:center}.discovery-actions .discovery-option{text-align:center;flex-basis:100%}}
+
+.alpha-chip{color:#f2d8a2;border:1px solid rgba(236,190,96,.55);background:rgba(236,190,96,.12);}
+/* v0.15.62: Alpha Tracking markers, visible on discovered cells. */
+.explore-maze .maze-alpha-clue,.explore-maze .maze-alpha-den{position:relative;z-index:1;display:inline-grid;place-items:center;line-height:1;font-size:clamp(.65rem,2vw,1.15rem);filter:drop-shadow(0 1px 2px #1d1024)}
+.explore-maze .maze-alpha-den{color:#f3c97e;font-weight:900;font-size:clamp(.8rem,2.3vw,1.5rem);text-shadow:0 0 8px rgba(255,198,91,.5)}
+.explore-maze .maze-alpha-clue{filter:drop-shadow(0 0 4px rgba(236,210,250,.8))}
+#exploreAlphaStatus{display:block;margin-top:7px;color:#e9c785;font-size:.79rem}
+
+
+/* v0.15.64 · Rare Relic Excavation */
+.explore-excavation-panel{display:block;padding:22px;max-width:100%;}
+.excavation-heading{display:flex;justify-content:space-between;gap:20px;align-items:start;margin-bottom:18px;}
+.excavation-heading h3{margin:4px 0 8px;font-size:1.45rem;}
+.excavation-heading p{margin:0;color:var(--muted,#b7c2d7);line-height:1.55;max-width:550px;}
+.excavation-counter{min-width:110px;border:1px solid rgba(244,220,172,.25);background:rgba(206,159,83,.08);border-radius:12px;padding:12px;text-align:center;display:grid;gap:2px;}
+.excavation-counter strong{font-size:1.8rem;color:#efcb91;}
+.excavation-counter span,.excavation-counter small{font-size:.77rem;color:#bfbea9;}
+.excavation-layout{display:grid;grid-template-columns:minmax(230px,360px) 1fr;gap:22px;align-items:start;}
+.excavation-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:12px;background:linear-gradient(145deg,#281e1b,#0d141d);border:2px solid #8e7353;border-radius:12px;box-shadow:inset 0 0 14px rgba(0,0,0,.6);width:100%;}
+.excavation-tile{aspect-ratio:1;background:linear-gradient(145deg,#846648,#453529);border:2px solid #9d7a55;border-radius:5px;color:#e0b884;cursor:pointer;font-size:1.4rem;font-weight:800;transition:filter .08s,transform .08s;min-height:38px;}
+.excavation-tile:hover:not(:disabled){filter:brightness(1.25);transform:translateY(-1px);}
+.excavation-tile.dug{background:#151d25;border-color:#33404d;color:#8491a2;cursor:default;}
+.excavation-tile.treasure-tile{background:linear-gradient(125deg,#38515d,#20303d);color:#ebc99e;border-color:#9d7b51;}
+.excavation-tile.complete-tile{color:#fbdf90;background:linear-gradient(135deg,#615030,#223d46);}
+.excavation-results{display:grid;align-content:start;gap:12px;}
+.excavation-results h4{margin:0;}.excavation-results p{margin:0;color:#aeb8c7;line-height:1.5;}
+.excavation-results ul{padding-left:23px;margin:0;color:#e6d2b4;line-height:1.9;}
+.relic-ledger{padding:12px;border:1px solid #5d5f5b;border-radius:10px;background:rgba(165,134,90,.08);}
+.relic-ledger strong{color:#f1dfbe;display:block;margin-bottom:5px;}
+@media(max-width:680px){.excavation-layout{grid-template-columns:1fr;}.excavation-heading{gap:12px}.excavation-counter{min-width:85px}.explore-excavation-panel{padding:14px}}
+@media(prefers-reduced-motion:reduce){.excavation-tile{transition:none}}
+
+/* v0.15.66 | Monster Habitats prototype: CSS scenery, existing species art */
+.habitat-prototype-tag{display:inline-block;vertical-align:middle;font-size:.55em;color:var(--gold);border:1px solid #665739;border-radius:5px;padding:4px 6px;letter-spacing:.14em}
+.habitat-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);margin:6px 0 18px}
+.habitat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,450px),1fr));gap:18px}
+.habitat-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.habitat-heading{display:flex;gap:10px;align-items:center}.habitat-heading input{flex:1;min-width:0;font-size:1.04rem;font-weight:750}.habitat-number{color:var(--cyan);font-weight:900}
+.habitat-controls,.habitat-assignments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.habitat-controls label,.habitat-assignments label{font-size:.72rem;color:var(--muted);display:grid;gap:5px}
+.habitat-controls select,.habitat-assignments select{width:100%;min-width:0;padding:9px 8px;font-size:.8rem}
+.habitat-assignments{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0}
+.habitat-scene{--hsky:#223e3c;--hmid:#264a38;--hground:#20402b;--haccent:#a5e99d;position:relative;height:440px;border:2px solid #445869;border-radius:15px;overflow:hidden;background:radial-gradient(circle at 76% 23%,color-mix(in srgb,var(--haccent) 24%,transparent),transparent 35%),linear-gradient(180deg,var(--hsky),var(--hmid) 71%,var(--hground) 72%);isolation:isolate}
+.habitat-ember{--hsky:#301b32;--hmid:#49302c;--hground:#40251f;--haccent:#ffa263}
+.habitat-frost{--hsky:#173d52;--hmid:#336074;--hground:#b0d6da;--haccent:#abf2ff}
+.habitat-void{--hsky:#17152f;--hmid:#302345;--hground:#262039;--haccent:#c29dff}
+.habitat-aether{--hsky:#202a53;--hmid:#394b5c;--hground:#31544c;--haccent:#c6bdff}
+.habitat-scene::before{content:'';position:absolute;inset:0;opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 31px,rgba(255,255,255,.035) 32px 34px);pointer-events:none}
+.habitat-ambience{position:absolute;right:12%;top:8%;filter:drop-shadow(0 0 14px var(--haccent));opacity:.57;font-size:36px}
+.habitat-floor{position:absolute;bottom:0;left:0;right:0;height:26%;background:repeating-linear-gradient(110deg,transparent 0 30px,rgba(0,0,0,.1) 31px 34px),linear-gradient(180deg,var(--hground),rgba(9,14,22,.65))}
+.habitat-decor{position:absolute;bottom:10%;left:14%;width:68%;height:24px;z-index:1;opacity:.78;pointer-events:none}
+.habitat-decor-stones{background:radial-gradient(ellipse at 16% 70%,#96a6aa 0 9%,transparent 10%),radial-gradient(ellipse at 48% 72%,#778d98 0 12%,transparent 13%),radial-gradient(ellipse at 82% 70%,#9cacc2 0 10%,transparent 11%)}
+.habitat-decor-crystals{background:linear-gradient(130deg,transparent 30%,#a5eaff 31% 53%,transparent 54%) 10% 80%/26px 24px no-repeat,linear-gradient(30deg,transparent 30%,#b0a0ff 31% 56%,transparent 57%) 48% 80%/36px 26px no-repeat,linear-gradient(130deg,transparent 30%,#e2b4f6 31% 53%,transparent 54%) 85% 80%/24px 20px no-repeat}
+.habitat-decor-flowers{background:radial-gradient(circle,#facde4 0 15%,transparent 16%) 4% 50%/22px 22px repeat-x}
+/* v0.15.67: keep each perch within the scene's height. A percentage-height image
+   inside an auto-sized grid row used to expand the row beyond the scene, hiding
+   the monster's feet and its name behind the scene's overflow clipping. */
+.habitat-perches{position:absolute;inset:8% 5% 8%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:4px;z-index:2}
+.habitat-perch{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.habitat-monster{display:block;width:100%;height:0;min-height:0;flex:1 1 0;object-fit:contain;object-position:center bottom;image-rendering:pixelated;filter:drop-shadow(0 8px 4px rgba(0,0,0,.55))}
+/* v0.15.68: self-contained terrarium movement, without extra artwork. */
+.habitat-walker{position:relative;display:block;flex:1 1 0;width:100%;height:0;min-height:0;min-width:0;pointer-events:none}
+.habitat-strider{position:absolute;inset:0;transform:translate3d(var(--habitat-x,0px),0,0) scaleX(var(--habitat-facing,1));transition:transform 330ms steps(5,end);will-change:transform}
+.habitat-breather{position:absolute;inset:0;transform-origin:center bottom;animation:habitat-soft-breath 2.8s ease-in-out infinite}
+.habitat-walking .habitat-breather{animation:habitat-step-wiggle 460ms ease-in-out infinite}
+.habitat-walker .habitat-monster{display:block;width:100%;height:100%;min-height:0;flex:none;object-fit:contain;object-position:center bottom}
+@keyframes habitat-soft-breath{
+  0%,100%{transform:scaleX(1) scaleY(1)}
+  50%{transform:scaleX(1.018) scaleY(.978)}
+}
+@keyframes habitat-step-wiggle{
+  0%,100%{transform:translateY(0) rotate(-1.2deg) scaleY(.99)}
+  50%{transform:translateY(-2px) rotate(1.2deg) scaleY(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .habitat-strider{transition:none!important;will-change:auto}
+  .habitat-breather,.habitat-walking .habitat-breather{animation:none!important}
+}
+.habitat-placeholder{display:grid;place-items:center;width:52px;height:68px;color:var(--haccent);border:2px dashed color-mix(in srgb,var(--haccent) 60%,transparent);background:rgba(0,0,0,.16);border-radius:25px;font-size:30px;margin:auto auto 8px}
+.habitat-perch-label{color:#e9f2ff;text-shadow:0 2px 6px #000,0 1px 3px #000;background:rgba(8,12,22,.5);max-width:100%;text-align:center;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:.65rem;padding:3px 5px;border-radius:5px;margin-top:3px}
+.habitat-footnote{margin-top:16px;font-size:.82rem}
+.habitat-shop-icon{display:inline-grid;place-items:center;font-size:3rem;min-width:65px;min-height:65px;background:radial-gradient(circle,#426950,#171d28 70%);border-radius:15px}.habitat-shop-large{font-size:5rem;width:120px;height:120px}
+@media(max-width:600px){.habitat-scene{height:320px}.habitat-assignments{grid-template-columns:1fr}.habitat-ambience{font-size:26px}}
+
+/* v0.15.69: desktop terrariums grow by 200px to match the expanded habitat preview;
+   mobile terrariums stay proportionate. All perch, sprite and animation rules unchanged. */
+
+/* v0.15.70: Always give each habitat the full row.
+   Multiple half-width terrariums compressed the three monster perches and clipped
+   their sprites. Keep the existing scene height and movement behavior intact. */
+.habitat-grid{grid-template-columns:minmax(0,1fr)}
+
+/* Prismwild v0.15.72: Hidden Vaults, CSS-only sigil puzzles */
+.maze-vault-marker{display:inline-block;filter:drop-shadow(0 0 6px #d9beef);font-size:1.25em;}
+.explore-vault-panel{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;text-align:center;gap:16px;padding:22px;background:linear-gradient(130deg,rgba(26,20,42,.96),rgba(15,28,38,.97));border:1px solid rgba(211,179,255,.38);box-shadow:inset 0 0 28px rgba(123,93,172,.14);max-width:100%;}
+.vault-heading .eyebrow{color:#cbb4f9;letter-spacing:.16em;}
+.vault-heading h3{margin:7px 0 0;font-size:1.5rem;color:#f1d5ae;}
+.explore-vault-panel p{margin:0;color:#bfc5d7;line-height:1.65;}
+.vault-sequence,.vault-inscription,.vault-symbol-actions,.vault-locks,.vault-plates{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;align-items:center;}
+.vault-sequence,.vault-inscription{background:#101626;padding:19px 12px;border:1px solid #615378;border-radius:12px;min-height:94px;}
+.vault-sigil{display:inline-grid;place-items:center;width:54px;height:54px;border-radius:10px;background:linear-gradient(145deg,#54416c,#243b50);border:1px solid #a794b6;color:#fbe5ac;font-size:1.85rem;box-shadow:0 0 12px rgba(184,142,219,.16);}
+.vault-sequence-hidden{font-size:1.5rem;color:#a4a0cb;letter-spacing:3px;}
+.vault-symbol-actions button,.vault-plates button,.vault-locks button{min-width:72px;min-height:74px;display:grid;justify-items:center;align-content:center;gap:6px;border-radius:11px;border:1px solid #75668c;background:linear-gradient(155deg,#382d4a,#182738);color:#f4dba7;font-size:1.7rem;cursor:pointer;transition:filter .12s;}
+.vault-symbol-actions button:hover:not(:disabled),.vault-plates button:hover:not(:disabled),.vault-locks button:hover:not(:disabled){filter:brightness(1.25);}
+.vault-symbol-actions button:disabled{opacity:.5;cursor:not-allowed;}
+.vault-symbol-actions small,.vault-plates small,.vault-locks small{font-size:.67rem;color:#c9c0d7;}
+.vault-locks button{min-width:105px;min-height:112px;}
+.vault-locks button span,.vault-plates button strong{font-size:2rem;}
+.vault-progress{text-align:center;font-size:.85rem;}
+.vault-feedback{color:#f2c49c!important;}
+.vault-success{padding:18px;border:1px solid #739e8a;background:rgba(60,102,80,.18);border-radius:12px;font-weight:700;color:#bde6cb;}
+.vault-footer{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(190,168,225,.2);}
+.vault-footer span{font-size:.8rem;color:#aaa9ba;}
+@media(max-width:530px){.explore-vault-panel{padding:14px}.vault-sigil{width:41px;height:44px;font-size:1.5rem}.vault-locks button{min-width:75px}.vault-symbol-actions button,.vault-plates button{min-width:56px;min-height:62px}}
+@media(prefers-reduced-motion:reduce){.vault-symbol-actions button,.vault-plates button,.vault-locks button{transition:none}}
+
+.vault-admin-tools{display:grid;gap:7px;margin-top:10px;padding:12px;border:1px dashed #735d91;border-radius:9px;background:rgba(45,35,66,.18)}
+.vault-admin-tools.hidden{display:none;}
+.vault-admin-tools small{color:#bbb0cc;}
+.vault-admin-tools select{width:100%;background:#192031;color:#e4d9f4;border:1px solid #494563;border-radius:6px;padding:8px;}
+
+/* v0.15.73 Keeper Artifacts • compact cabinets, collectible icons, desk claims */
+.artifact-desk-heading{padding:16px 18px;background:linear-gradient(115deg,rgba(88,62,124,.17),rgba(59,105,118,.13));border:1px solid rgba(181,157,223,.35);border-radius:12px;margin-bottom:14px}
+.artifact-desk-heading h3{margin:6px 0;color:#e9d4f5;font-size:1.5rem}.artifact-desk-heading p{margin:5px 0 0;color:#c9c7d9;line-height:1.6}
+.artifact-desk-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0}.artifact-desk-summary>div{display:grid;gap:4px;padding:13px;border:1px solid #504667;border-radius:10px;background:#1a2031}.artifact-desk-summary strong{font-size:1.4rem;color:#f4ddae}.artifact-desk-summary small{color:#bbb5c7;font-size:.78rem}
+.artifact-desk-message{min-height:30px;color:#d4c0eb;padding:9px 12px;border-left:3px solid #9f83d2;background:rgba(108,79,145,.12);margin:12px 0}
+.artifact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px;margin:14px 0 22px}.artifact-section-label{margin:24px 0 8px}
+.artifact-card{padding:17px;border:1px solid #64567c;border-radius:12px;background:linear-gradient(140deg,rgba(42,38,59,.95),rgba(20,31,43,.95));display:flex;flex-direction:column;gap:10px;min-width:0}.artifact-card p{margin:0;color:#c6c5d4;line-height:1.55;flex:1}.artifact-card-top{display:flex;align-items:center;gap:13px}.artifact-card-top>div{display:grid;gap:5px;min-width:0}.artifact-card-top strong{color:#f2e5c4;overflow-wrap:anywhere}.artifact-card-top small{color:#aaa8bc}.artifact-icon{flex:none;display:grid;place-items:center;font-size:35px;width:68px;height:68px;background:linear-gradient(140deg,#4d4660,#222c3b);border:1px solid #8877a7;border-radius:12px;overflow:hidden}.artifact-icon img{display:block;max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}.artifact-card-lore{font-size:.85rem;color:#d6c0ef;font-style:italic;border-top:1px solid #4c4661;padding-top:9px}
+.artifact-admin-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,.85fr);gap:20px;align-items:start}.artifact-admin-actions{display:flex;gap:7px;flex-wrap:wrap}.artifact-admin-list{padding:14px;border:1px solid #504760;border-radius:10px;background:rgba(20,24,37,.5)}.artifact-admin-list h3{margin:0 0 12px}.artifact-admin-entry{width:100%;display:flex;gap:12px;align-items:center;background:#20283a;color:#eae1f4;text-align:left;border:1px solid #504965;border-radius:9px;padding:8px;margin:6px 0;cursor:pointer}.artifact-admin-entry.selected{border-color:#c5a4eb}.artifact-admin-entry .artifact-icon{width:48px;height:48px;font-size:24px}.artifact-admin-entry strong,.artifact-admin-entry small{display:block}.artifact-admin-entry small{font-size:.75rem;color:#b7aeca;margin-top:3px}
+@media(max-width:720px){.artifact-admin-layout{grid-template-columns:1fr}.artifact-desk-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v0.15.74 compact Field Pouch: only usable exploration buffs live here. */
+.field-pouch-wrap{padding:14px 16px;margin-bottom:14px}
+.field-pouch-wrap .explore-supplies-heading{align-items:center;margin-bottom:10px}
+.field-pouch-wrap .explore-supplies-heading p{margin:4px 0 0;color:var(--muted);font-size:.82rem}
+.field-pouch-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding:0}
+.field-pouch-slot{min-width:0;display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:13px;background:#0c121b;padding:12px}
+.field-pouch-slot.field-buff-active{border-color:#68ba99;background:linear-gradient(120deg,#152c2a,#0c121b)}
+.field-pouch-icon{flex:0 0 48px;display:grid;place-items:center}
+.field-pouch-desc{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
+.field-pouch-desc strong{font-size:.95rem}
+.field-pouch-desc small{color:var(--muted);font-size:.77rem;line-height:1.3}
+.field-pouch-desc span{font-size:.72rem;color:#a8c4d7}
+.field-pouch-slot button{min-width:94px;white-space:nowrap}
+@media(max-width:840px){.field-pouch-slots{grid-template-columns:1fr}}
+@media(max-width:530px){.field-pouch-slot{flex-wrap:wrap}.field-pouch-slot button{width:100%}}
