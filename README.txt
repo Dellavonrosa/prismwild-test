@@ -1,3 +1,9 @@
+PRISMWILD PROTOTYPE v0.15.49
+
+See READ_ME_FIRST_v0.15.49.txt and PATCH_NOTES_v0.15.49.txt for the current checkpoint.
+
+HISTORIC NOTES FOLLOW
+---------------------
 PRISMWILD PROTOTYPE v0.15.44
 
 

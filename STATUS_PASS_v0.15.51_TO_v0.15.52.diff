@@ -1,0 +1,99 @@
+--- index.html.v0.15.51
++++ index.html.v0.15.52
+@@ -3,7 +3,7 @@
+ <head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+-<title>Prismwild Prototype v0.15.51</title>
++<title>Prismwild Prototype v0.15.52</title>
+ <link rel="stylesheet" href="styles.css">
+ </head>
+ <body>
+@@ -15,7 +15,7 @@
+ <div class="shell">
+   <header class="topbar">
+     <div>
+-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.51</div>
++      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.52</div>
+       <h1>PRISMWILD</h1>
+       <p>A Fantastical Grim Monster Breeding Game</p>
+     </div>
+@@ -1839,6 +1839,9 @@
+     {id:'attacks',category:'Battle',title:'Attacks, Styles & Statuses',summary:'Power, accuracy, attack weight, visual families, and status effects.',keywords:'moves signature attack scroll light standard heavy power accuracy status fx',note:`An attack is more than its Power number. Accuracy, status utility, Life Steal, and the monster using it can turn a quieter move into the right answer.`,body:()=>referenceList([
+       `Attack styles are <strong>${ATTACK_STYLES.join(', ')}</strong>. Style controls visual weight and helps describe how hard a move is meant to land.`,
+       `Current reusable status effects: <strong>${statusText}</strong>.`,
++      `Poison deals <strong>10% of maximum Vitality</strong> at the end of each round. Shock deals <strong>10 flat damage</strong> at round end (and retains its existing Speed and action effects).`,
++      `Bleed deals <strong>10% of damage actually inflicted</strong> immediately after the bleeding monster lands an attack. Missing, evading, or losing an action causes no Bleed damage.`,
++      `Each attack retains its own Status chance and duration in turns; these damage rules do not overwrite either setting.`,
+       `Visual FX families are ${ATTACK_FX_STYLES.filter(x=>x!=='Auto').join(', ')}. Auto chooses a family from the attack's name/description.`,
+       `Base species normally have a Signature Attack. Attack Scrolls can teach compatible registered attacks through the monster detail tools.`,
+       `Some moves carry extra effects such as Life Steal or a next-attack dodge effect.`
+@@ -6180,17 +6183,29 @@
+     battleSession.log.push(`${sideLabel(defenderSide)} was afflicted with ${move.status}!`);
+   }
+ 
++  // v0.15.52: Bleed is recoil from the damage actually delivered by an attack,
++  // not a max-HP damage-over-time effect. An attack that misses or is evaded
++  // exits above without triggering it. Use actualDamage to avoid overkill scaling.
++  let bleedDamage=0;
++  if(sessionStatus(attackerSide)?.name==='Bleed'&&actualDamage>0){
++    bleedDamage=Math.min(sessionHP(attackerSide),Math.max(1,Math.round(actualDamage*.10)));
++    if(bleedDamage>0){
++      setSessionHP(attackerSide,Math.max(0,sessionHP(attackerSide)-bleedDamage));
++      battleSession.log.push(`${sideLabel(attackerSide)} took ${bleedDamage} Bleed damage after attacking!`);
++    }
++  }
++
+   const effectText=effClass==='neutral'?'':`${effLabel} • `;
++  const followups=[];
++  if(lifeStealRecovered>0)followups.push({kind:'heal',main:`DRAIN +${lifeStealRecovered}`,sub:`${move.name} • Life Steal ${Math.round(lifeStealPct)}%`,targetSide:attackerSide});
++  if(dodgeGranted>0)followups.push({kind:'status',main:'STRIDE VEIL',sub:`${Math.round(dodgeGranted)}% dodge on the next incoming attack`,targetSide:attackerSide});
++  if(bleedDamage>0)followups.push({kind:'status',main:`BLEED -${bleedDamage}`,sub:'Recoil after attacking',targetSide:attackerSide});
+   return {
+     kind:effClass==='super'?'super':effClass==='resist'?'resist':'hit',
+     main:`${damage} DAMAGE`,
+     sub:appliedStatus?`${effectText}${move.name} • ${appliedStatus.toUpperCase()}!`:`${effectText}${move.name}`,
+     targetSide:defenderSide,
+-    followup:lifeStealRecovered>0
+-      ? {kind:'heal',main:`DRAIN +${lifeStealRecovered}`,sub:`${move.name} • Life Steal ${Math.round(lifeStealPct)}%`,targetSide:attackerSide}
+-      : dodgeGranted>0
+-        ? {kind:'status',main:'STRIDE VEIL',sub:`${Math.round(dodgeGranted)}% dodge on the next incoming attack`,targetSide:attackerSide}
+-        : null
++    followups
+   };
+ }
+ 
+@@ -6204,8 +6219,10 @@
+   let dot=0;
+ 
+   if(status.name==='Burn')dot=Math.max(1,Math.round(max*.05));
+-  if(status.name==='Poison')dot=Math.max(1,Math.round(max*.07));
+-  if(status.name==='Bleed')dot=Math.max(1,Math.round(max*.06));
++  if(status.name==='Poison')dot=Math.max(1,Math.round(max*.10));
++  if(status.name==='Shock')dot=10;
++  // Bleed now triggers immediately after a landed attack in performMove().
++  // Status turn countdown remains here so attack-defined durations are preserved.
+ 
+   let feedback=null;
+   if(dot){
+@@ -6306,9 +6323,9 @@
+   if(feedback.kind!=='status')await playBattleAttackFx(attackerSide,defenderSide,move,feedback);
+   await refreshBattleUI();
+   await showBattleFeedback(feedback);
+-  if(feedback?.followup){
++  for(const followup of feedback.followups||(feedback.followup?[feedback.followup]:[])){
+     await refreshBattleUI();
+-    await showBattleFeedback(feedback.followup);
++    await showBattleFeedback(followup);
+   }
+ }
+ async function resolveStatusTicks(){
+@@ -6892,7 +6909,7 @@
+ document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
+ document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
+ document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
+-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.51 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
++document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.52 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+ function tickLiveTimers(){
+   // Lottery status updates without rebuilding wheel or interrupting its spin animation.
+   if(currentShopMode==='lottery'&&!lotterySpinning){const el=document.getElementById('lotteryFreeStatus');if(el){const free=lotteryFreeReady();el.textContent=free?'Free spin ready!':`Next free spin in ${formatShortCooldown(state.lottery.nextFreeAt-Date.now())}`;const spin=document.getElementById('lotterySpin');spin.disabled=!free&&!(state.inventory.lottery_coin>0);spin.textContent=free?'Spin Free':(state.inventory.lottery_coin>0?'Spend 1 Lottery Coin':'Free Spin Recharging');}}

@@ -1,0 +1,157 @@
+--- v0.15.52/index.html
++++ v0.15.53/index.html
+@@ -666,7 +666,7 @@
+         <div class="admin-layout">
+           <aside class="registry-panel">
+             <h3>Sprite Registry</h3>
+-            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used. <strong>All uploaded Sprite Workshop replacements are automatically included in Export Live Package</strong>, including Halloween/event/shop icons.</p>
++            <p class="form-note">Edit the game's non-monster sprites, including each Shop item, Injector rank, Expedition Treasure, and Lottery reward. Shared atlas images remain visible until replaced. <strong>All uploaded replacements are included in Export Live Package.</strong></p>
+             <input id="spriteAdminSearch" placeholder="Search sprites...">
+             <div id="spriteRegistryList" class="registry-list"></div>
+           </aside>
+@@ -1528,8 +1528,13 @@
+ };
+ 
+ function iconMarkup(key,className='sheet-icon'){
+-  const icon=ITEM_ICONS[key]||ITEM_ICONS.mystery_capsule;
+-  const resolved=ITEM_ICONS[key]?key:'mystery_capsule';
++  // A dedicated item sprite may share an atlas fallback until its owner uploads art.
++  // Always retain the item's OWN sprite key, so replacing one item no longer
++  // accidentally replaces every other item using the same atlas tile.
++  const def=SPRITE_DEFS[key];
++  const fallbackKey=ITEM_ICONS[key]?key:(def?.atlasKey||'mystery_capsule');
++  const icon=ITEM_ICONS[fallbackKey]||ITEM_ICONS.mystery_capsule;
++  const resolved=(ITEM_ICONS[key]||def)?key:'mystery_capsule';
+   const x=(icon.col/3)*100,y=(icon.row/3)*100;
+   return `<span class="${className}" data-sprite-key="${resolved}" style="background-position:${x}% ${y}%" aria-hidden="true"></span>`;
+ }
+@@ -1574,7 +1579,10 @@
+ }
+ function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
+   if(info?.spriteKey)return imageSpriteMarkup(info.spriteKey,info.iconImage||SPRITE_DEFS[info.spriteKey]?.fallback||'',`field-find-icon ${className}`,'');
+-  return iconMarkup(info?.icon||'mystery_capsule',className);
++  // Attack scrolls share a deliberately common artwork; every ordinary shop,
++  // expedition, or lottery item gets its own replaceable Sprite Workshop slot.
++  const key=SPRITE_DEFS[info?.id]?info.id:(String(info?.id||'').startsWith('scroll:')?'attack_scroll':(info?.icon||'mystery_capsule'));
++  return iconMarkup(key,className);
+ }
+ 
+ const FAINT_DURATION_MS=3*60*1000;
+@@ -1800,6 +1808,29 @@
+ ];
+ 
+ 
++// Sprite Workshop inventory coverage (v0.15.53).
++// Register every shop item separately, including injectors by Potential rank,
++// while keeping the original shared-atlas icons as safe fallbacks. A new shop
++// item will now automatically become a selectable Sprite Workshop slot.
++for(const item of ITEM_SHOP){
++  if(!SPRITE_DEFS[item.id])SPRITE_DEFS[item.id]={
++    name:item.name,category:item.category||'Items',kind:'atlas',
++    atlasKey:ITEM_ICONS[item.icon]?item.icon:'mystery_capsule'
++  };
++}
++// All trade/expedition rewards and lottery items also need their own identities.
++for(const [id,item] of Object.entries(TRADE_GOODS)){
++  if(!SPRITE_DEFS[id])SPRITE_DEFS[id]={
++    name:item.name,category:item.category||'Expedition Treasure',kind:'atlas',
++    atlasKey:ITEM_ICONS[item.icon]?item.icon:'mystery_capsule'
++  };
++}
++Object.assign(SPRITE_DEFS,{
++  lottery_coin:{name:'Lottery Coin',category:'Lottery',kind:'atlas',atlasKey:'coin_pouch'},
++  lottery_egg:{name:'Lottery Egg',category:'Lottery',kind:'atlas',atlasKey:'egg_generic'},
++  winter_mystery_egg:{name:'Winter Mystery Egg',category:'Winter Event',kind:'atlas',atlasKey:'egg_generic'}
++});
++
+ // ---------- Silverwind Reference Guide ----------
+ let silverwindReferenceTopicId='getting-started';
+ const SILVERWIND_REFERENCE_CATEGORIES=['Getting Started','Monsters','Battle','Fieldwork','Progression','Events & Trials','Items & Economy'];
+@@ -2000,7 +2031,11 @@
+ async function customSpriteUrl(key){return (await storedAssetUrl(`sprite:${key}`))||liveAssetRefs[`sprite:${key}`]||null;}
+ async function hydrateSpriteElement(el){
+   if(!el?.dataset?.spriteKey)return;
+-  const url=await customSpriteUrl(el.dataset.spriteKey);
++  const key=el.dataset.spriteKey;
++  const ownUrl=await customSpriteUrl(key);
++  // Preserve older atlas-wide custom art for new dedicated item slots until
++  // that item is given its own replacement image.
++  const url=ownUrl||(SPRITE_DEFS[key]?.atlasKey?await customSpriteUrl(SPRITE_DEFS[key].atlasKey):null);
+   if(!url)return;
+   if(el.tagName==='IMG'){el.src=url;}
+   else{el.textContent='';el.style.backgroundImage=`url("${url}")`;el.classList.add('custom-sprite-active');}
+@@ -2565,7 +2600,7 @@
+   if(r.type==='scroll')return iconMarkup('attack_scroll',`sheet-icon ${className}`);
+   if(r.type==='item'){
+     const shopItem=ITEM_SHOP.find(x=>x.id===r.id);
+-    return iconMarkup(shopItem?.icon||'mystery_capsule',`sheet-icon ${className}`);
++    return shopItem?.spriteKey?glyphSpriteMarkup(shopItem.spriteKey,'◆',className):iconMarkup(shopItem?.id||'mystery_capsule',`sheet-icon ${className}`);
+   }
+   return iconMarkup('mystery_capsule',`sheet-icon ${className}`);
+ }
+@@ -2591,7 +2626,7 @@
+   if(!reward)return '◇';
+   if(reward.type==='money')return iconMarkup('currency','sheet-icon event-calendar-reward-icon');
+   if(reward.type==='eventCurrency')return eventCurrencySpriteMarkup(def||activeEvent()||EVENT_DEFS.winter_event_2026,'event-calendar-reward-icon');
+-  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return item?.spriteKey?glyphSpriteMarkup(item.spriteKey,'◆','event-calendar-reward-icon'):iconMarkup(item?.icon||'mystery_capsule','sheet-icon event-calendar-reward-icon');}
++  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return item?.spriteKey?glyphSpriteMarkup(item.spriteKey,'◆','event-calendar-reward-icon'):iconMarkup(item?.id||'mystery_capsule','sheet-icon event-calendar-reward-icon');}
+   if(reward.type==='egg')return iconMarkup('egg_generic','sheet-icon event-calendar-reward-icon');
+   if(reward.type==='monster')return '◆';
+   return '◇';
+@@ -2680,7 +2715,7 @@
+     <div class="event-columns winter-memory-layout"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT MINI-GAME</div><h3>${a.name}</h3><p>Match all eight monster pairs. Each pair earns ${a.pairReward} ${def.currency.name}; three misses trigger a 3-minute cooldown.</p></div><div class="memory-fail-bank"><span>Failed Matches</span><div>${failPips}</div><small>${m.fails} / ${a.maxFails}</small></div></div>
+       <div class="memory-board-wrap"><div class="memory-board">${cards}</div>${cooling?`<div class="memory-cooldown"><strong>${m.cooldownReason==='complete'?'Board Complete':'Board Frozen'}</strong><span>${memoryCooldownText(m)}</span><small>${m.cooldownReason==='complete'?'A new set unlocks after the one-hour completion cooldown.':'A new set shuffles after the 3-minute cooldown.'}</small></div>`:''}</div>
+       <div class="memory-status"><strong>${m.completed?'WINTER SET COMPLETE':cooling?'COOLDOWN ACTIVE':'MATCH THE MONSTERS'}</strong><p>${m.message||'Find all eight matching monster pairs.'}</p></div>
+-    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('egg_generic','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
++    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('winter_mystery_egg','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
+     <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">WINTER SHOP</div><h3>Snowflake Exchange</h3><p>Spend Snowflakes earned from Winter Memory and seasonal rewards on exclusive Winter stock.</p></div></div><div class="event-shop-grid">${shop||'<div class="event-dev-note">No Winter Shop stock is registered yet.</div>'}</div></section>`;
+   host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
+   host.querySelectorAll('[data-memory-card]').forEach(btn=>btn.addEventListener('click',()=>flipEventMemoryCard(def.id,Number(btn.dataset.memoryCard))));
+@@ -3841,7 +3876,7 @@
+   if(source==='event-maze')return imageSpriteMarkup('halloween_event_egg','assets/icons/halloween_event_egg.png',`${sizeClass} halloween-event-egg-icon`,'Haunted Event Egg');
+   const custom=await imageSrc(slug,'egg');
+   if(custom)return `<img class="${sizeClass}" src="${custom}" alt="">`;
+-  const key=source==='shop'||source==='event-shop'?'egg_shop':source==='wild'?'egg_wild':source==='prismatic'?'egg_prismatic':'egg_generic';
++  const key=source==='lottery'?'lottery_egg':source==='shop'||source==='event-shop'?'egg_shop':source==='wild'?'egg_wild':source==='prismatic'?'egg_prismatic':'egg_generic';
+   return iconMarkup(key,`sheet-icon ${sizeClass} egg-sheet-icon`);
+ }
+ function eggDisplayName(egg){return egg?.displayName||(egg?.speciesName?`${egg.speciesName} Egg`:'Unknown Egg');}
+@@ -4215,7 +4250,7 @@
+   ITEM_SHOP.forEach(item=>{
+     const tile=document.createElement('button');
+     wireShopTile(tile,'item',item.id);
+-    const visual=item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-tile',''):iconMarkup(item.icon||'mystery_capsule','sheet-icon icon-shop-tile');
++    const visual=item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-tile',''):iconMarkup(item.id,'sheet-icon icon-shop-tile');
+     tile.innerHTML=shopTileShell(item.name,item.category,visual);
+     grid.appendChild(tile);
+   });
+@@ -4278,7 +4313,7 @@
+       kind,id,name:item.name,category:item.category,price:Number(item.price),
+       description:item.desc,
+       meta:[],owned:`Owned: ${owned}`,
+-      visual:item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-detail',''):iconMarkup(item.icon||'mystery_capsule','sheet-icon icon-shop-detail'),
++      visual:item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-detail',''):iconMarkup(item.id,'sheet-icon icon-shop-detail'),
+       canBuy:state.currency>=Number(item.price)
+     };
+   }
+@@ -4768,8 +4803,9 @@
+ async function renderSpriteAdminPreview(key){
+   const box=document.getElementById('spriteAdminPreview');if(!box||!SPRITE_DEFS[key])return;
+   box.innerHTML=spriteFallbackMarkup(key,'sprite-admin-example');
+-  const custom=await getAssetBlob(`sprite:${key}`);
+-  document.getElementById('spriteFallbackNote').textContent=custom?'Custom sprite is active.':'Built-in example is active.';
++  const own=await customSpriteUrl(key);
++  const inherited=!own&&SPRITE_DEFS[key]?.atlasKey?await customSpriteUrl(SPRITE_DEFS[key].atlasKey):null;
++  document.getElementById('spriteFallbackNote').textContent=own?'Custom sprite is active.':inherited?'Shared artwork active. Upload a replacement to customize this item only.':'Built-in example is active.';
+   await hydrateSprites(box);
+ }
+ async function loadSpriteIntoForm(key){
+@@ -5501,7 +5537,7 @@
+       <div><span>Eggs</span><strong>×${looseEggs}</strong></div>
+     </div>`);
+   }
+-  if(capturePodActive())parts.push(`<div class="supply-chip capture-boost-supply">${iconMarkup('mystery_capsule','sheet-icon icon-md')}<div><span>Capture Pod • +20%</span><strong data-capture-pod-timer>${formatShortCooldown(capturePodRemaining())}</strong></div></div>`);
++  if(capturePodActive())parts.push(`<div class="supply-chip capture-boost-supply">${iconMarkup('capture_pod','sheet-icon icon-md')}<div><span>Capture Pod • +20%</span><strong data-capture-pod-timer>${formatShortCooldown(capturePodRemaining())}</strong></div></div>`);
+ 
+   for(const [id,qty] of entries){
+     const info=itemInfoForInventoryId(id);

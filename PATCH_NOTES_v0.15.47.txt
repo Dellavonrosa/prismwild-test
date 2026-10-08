@@ -20,7 +20,3 @@ WEEKDAY MUSIC PLAYER
 - The player checks for weekday rollover and switches to the appropriate day's theme.
 
 No gameplay balance, monster data, breeding logic, or Live Content publishing behavior was changed.
-
-Integrated content refresh:
-- Bundled the latest Live Content revision from 2026-10-07.
-- Rugaldrin now correctly uses Crag Rend per the supplied Live Content package.

@@ -1,0 +1,29 @@
+PRISMWILD v0.15.50 • LOTTERY WHEEL
+7 October 2026
+
+New in Shop > Lottery Wheel
+- One free spin every 60 minutes. Countdown persists in the existing player save.
+- Very rare Lottery Coins found in standard maze Explore (independent 0.2% chance per movement). Bonus coin spins do not change the free-spin timer.
+- Weighted wheel tiers, exactly 100% total:
+  50% Healing Item (Recovery Gel, Medium Healing Gel, Life Crystal)
+  20% Expedition Treasure (Ancient Coin, Gilded Idol, Starstone Relic)
+  10% Random enabled Attack Scroll or Potential Injector P3–P7
+  10% 500–1,000 normal currency
+   5% Lottery Egg
+  4.9% P8–P10 Potential Injector or Nature Disc
+  0.1% Prismatic Egg or 25,000 normal currency
+- The two broad either/or reward families are each split 50/50; the jackpot is 50/50.
+- Lottery Egg prizes are initially saved in Inventory as redeemable Lottery Eggs. They can be opened at Shop > Lottery once the admin pool has eligible species. Empty pools never delete or consume a won egg.
+- Opened Lottery Eggs are created as normal incubatable eggs; the monster is selected evenly from the pool when redeemed.
+- Prismatic Egg jackpot is fully generated and incubatable immediately using the existing normal expedition egg species pool (falls back to 25,000 currency if the pool is empty).
+- Wheel winnings are saved immediately before the 3.8-second celebration completes.
+
+New in Admin > Lottery Eggs
+- Editable add/remove species pool; supports future species without another build.
+- Admin pool is saved locally, included in admin JSON exports/imports, and published in the Export Live Package.
+- Draft custom monsters are skipped during published exports until they are marked Published.
+
+Preservation
+- Core game uses the same monsterGame_v06 save key and does not reset player progress.
+- Existing live content, uploaded art/assets, expeditions, and event calendars are not replaced by this update.
+- No new sprites/images are required: Lottery Egg and Lottery Coin use existing icon assets.

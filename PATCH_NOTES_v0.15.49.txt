@@ -1,0 +1,36 @@
+PRISMWILD v0.15.49 — CLEAN MODULAR HANDOFF BUILD
+Date: 2026-10-07
+
+PURPOSE
+-------
+- Establishes a clean, verified test baseline after the Oct. 7 music/content packaging incident.
+- Uses the repaired complete v0.15.47 tree as the foundation.
+- Includes the confirmed v0.15.48 Inventory consumable UI fix.
+- Includes Dell's corrected Live Content revision 2026-10-07T18:31:19.321Z.
+- Adds no new gameplay or balance changes beyond those already confirmed in v0.15.48.
+
+CURRENT FEATURES CARRIED FORWARD
+--------------------------------
+- Weekday music player beneath Keeper name.
+- Loop and Ambient Fade modes, persistent volume, configurable quiet interval.
+- Seven weekday zone backgrounds.
+- Refresh Juice and Capture Pod direct-use buttons restored in Inventory.
+- Corrected Rugaldrin -> Crag Rend Live Content wiring.
+- Current 27-species / 27-attack Live Content package.
+
+PACKAGING CHANGE
+----------------
+The build is now also delivered as separate handoff modules:
+- CORE_UI_CODE
+- BASE_ASSETS_A
+- BASE_ASSETS_B
+- LIVE_CONTENT
+- MUSIC_ASSETS
+
+Those module ZIPs are INCOMPLETE by themselves and must be merged into one root.
+The FULL_STANDALONE_BUILD ZIP is the complete ready-to-test copy.
+
+SAVE COMPATIBILITY
+------------------
+- Save key remains monsterGame_v06.
+- Music preferences remain prismwildMusic_v1.

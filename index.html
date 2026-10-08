@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.48</title>
+<title>Prismwild Prototype v0.15.52</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.48</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.52</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -57,7 +57,13 @@
       </div>
     </div>
 
-    <button class="tab" data-tab="shop">Shop</button>
+    <div class="nav-menu">
+      <button class="tab nav-menu-trigger" data-tab="shop" type="button">Shop <span class="nav-caret">▾</span></button>
+      <div class="nav-dropdown">
+        <button class="nav-link" data-route="shop-supplies" type="button">Supply Counter</button>
+        <button class="nav-link" data-route="shop-lottery" type="button">✦ Lottery Wheel</button>
+      </div>
+    </div>
     <button class="tab event-nav-tab" data-tab="event">Event <span id="eventBadge" class="badge">LIVE</span></button>
     <button class="tab" data-tab="requests">Requests <span id="requestBadge" class="badge">0</span></button>
 
@@ -303,6 +309,11 @@
         <h2>Shop</h2>
         <p>Browse the counter. Select an icon to inspect its details before purchasing.</p>
       </div>
+      <div class="shop-mode-switch" role="tablist" aria-label="Shop sections">
+        <button id="showShopSupplies" class="subtab active" type="button" aria-selected="true">Supply Counter</button>
+        <button id="showShopLottery" class="subtab" type="button" aria-selected="false">✦ Lottery Wheel</button>
+      </div>
+      <div id="shopSuppliesPane">
       <div class="shop-sections">
         <div><h3>Monster Eggs</h3><div id="eggShopGrid" class="shop-grid"></div></div>
         <div><h3>Attack Scrolls</h3><div id="scrollShopGrid" class="shop-grid"></div></div>
@@ -317,6 +328,22 @@
         <div id="blackMarketGrid" class="black-market-grid"></div>
         <p id="blackMarketMessage" class="black-market-message"></p>
       </section>
+      </div>
+      <div id="shopLotteryPane" class="hidden">
+        <div class="lottery-layout">
+          <div class="lottery-stage">
+            <div class="eyebrow">THE WHEEL OF WILDS</div>
+            <h3>Try Your Luck</h3>
+            <p>One free spin every hour. Very rare Lottery Coins found during Explore grant bonus spins.</p>
+            <div class="lottery-wheel-frame"><span class="lottery-pointer" aria-hidden="true">▼</span><div id="lotteryWheel" class="lottery-wheel"><div class="lottery-wheel-center">✦<small>PRISMWILD</small></div></div></div>
+            <div class="lottery-stats"><span id="lotteryFreeStatus"></span><span id="lotteryCoinCount"></span></div>
+            <button id="lotterySpin" class="primary lottery-spin-button" type="button">Spin Free</button>
+            <p id="lotteryResult" class="lottery-result" aria-live="polite"></p>
+            <div class="lottery-egg-bank"><strong>Lottery Eggs saved: <span id="lotteryEggCount">0</span></strong><button id="lotteryOpenEgg" class="ghost small" type="button">Open Lottery Egg</button><small id="lotteryEggStatus">Monster pool awaiting additions in Admin.</small></div>
+          </div>
+          <div class="lottery-odds"><h3>Wheel Rewards</h3><div id="lotteryOddsList"></div><p class="form-note">Colors are spread around the wheel, with repeated wedges for common prizes. Each tier keeps its exact listed chance. Rewards are saved as soon as you spin.</p></div>
+        </div>
+      </div>
     </section>
 
     <section id="event" class="page">
@@ -449,6 +476,16 @@
         <button id="showEventAdmin" class="subtab" type="button">Event Tester</button>
         <button id="showExpeditionAdmin" class="subtab" type="button">Expedition Tester</button>
         <button id="showTrialAdmin" class="subtab" type="button">Trial Workshop</button>
+        <button id="showLotteryAdmin" class="subtab" type="button">Lottery Eggs</button>
+      </div>
+
+      <div id="lotteryAdminPane" class="hidden">
+        <div class="note-card"><strong>Lottery Egg Monster Pool</strong><p>Manage which species may hatch from a Lottery Egg. The pool starts empty. Each selected species has equal odds. Local changes persist and are included in Export Live Package. Publish custom monsters before exporting them as Lottery Egg rewards.</p></div>
+        <div class="lottery-admin-grid">
+          <div class="admin-form"><h3>Add a Monster</h3><label>Registered species<select id="lotterySpeciesSelect"></select></label><button class="primary" id="addLotterySpecies" type="button">Add to Lottery Pool</button></div>
+          <div class="admin-form"><h3>Current Lottery Pool <span id="lotteryPoolCount"></span></h3><div id="lotteryPoolList" class="lottery-pool-list"></div></div>
+        </div>
+        <p class="admin-message" id="lotteryAdminMessage"></p>
       </div>
 
       <div id="speciesAdminPane">
@@ -629,7 +666,7 @@
         <div class="admin-layout">
           <aside class="registry-panel">
             <h3>Sprite Registry</h3>
-            <p class="form-note">Every current non-monster art slot lives here. Uploaded sprites override the built-in examples everywhere that slot is used. <strong>All uploaded Sprite Workshop replacements are automatically included in Export Live Package</strong>, including Halloween/event/shop icons.</p>
+            <p class="form-note">Edit the game's non-monster sprites, including each Shop item, Injector rank, Expedition Treasure, and Lottery reward. Shared atlas images remain visible until replaced. <strong>All uploaded replacements are included in Export Live Package.</strong></p>
             <input id="spriteAdminSearch" placeholder="Search sprites...">
             <div id="spriteRegistryList" class="registry-list"></div>
           </aside>
@@ -1491,8 +1528,13 @@ const SPRITE_DEFS={
 };
 
 function iconMarkup(key,className='sheet-icon'){
-  const icon=ITEM_ICONS[key]||ITEM_ICONS.mystery_capsule;
-  const resolved=ITEM_ICONS[key]?key:'mystery_capsule';
+  // A dedicated item sprite may share an atlas fallback until its owner uploads art.
+  // Always retain the item's OWN sprite key, so replacing one item no longer
+  // accidentally replaces every other item using the same atlas tile.
+  const def=SPRITE_DEFS[key];
+  const fallbackKey=ITEM_ICONS[key]?key:(def?.atlasKey||'mystery_capsule');
+  const icon=ITEM_ICONS[fallbackKey]||ITEM_ICONS.mystery_capsule;
+  const resolved=(ITEM_ICONS[key]||def)?key:'mystery_capsule';
   const x=(icon.col/3)*100,y=(icon.row/3)*100;
   return `<span class="${className}" data-sprite-key="${resolved}" style="background-position:${x}% ${y}%" aria-hidden="true"></span>`;
 }
@@ -1529,13 +1571,18 @@ function itemInfoForInventoryId(id){
     const price=Number(attack?.scrollPrice||5000);
     return attack?{id,name:`${attack.name} Scroll`,category:'Attack Scroll',desc:attackSummary(attack),icon:'attack_scroll',isConsumable:true,shopPrice:price,sellValue:Math.floor(price*.05)}:null;
   }
+  if(id==='lottery_coin')return {id,name:'Lottery Coin',category:'Lottery',desc:'A rare find from Explore. Grants one extra Lottery Wheel spin.',icon:'coin_pouch',isConsumable:false,sellValue:0};
+  if(id==='lottery_egg')return {id,name:'Lottery Egg',category:'Lottery',desc:'Redeem in Shop → Lottery Wheel for a random species from the admin-managed Lottery Egg pool.',icon:'egg_generic',isConsumable:true,sellValue:0};
   if(TRADE_GOODS[id])return {...TRADE_GOODS[id],id,isTradeGood:true,isConsumable:false};
   const item=ITEM_SHOP.find(x=>x.id===id);
   return item?{id,name:item.name,category:item.category,desc:item.desc,icon:item.icon||'mystery_capsule',spriteKey:item.spriteKey||null,iconImage:item.iconImage||null,isConsumable:item.consumable!==false,shopPrice:Number(item.price||0),sellValue:Math.floor(Number(item.price||0)*.05)}:null;
 }
 function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
   if(info?.spriteKey)return imageSpriteMarkup(info.spriteKey,info.iconImage||SPRITE_DEFS[info.spriteKey]?.fallback||'',`field-find-icon ${className}`,'');
-  return iconMarkup(info?.icon||'mystery_capsule',className);
+  // Attack scrolls share a deliberately common artwork; every ordinary shop,
+  // expedition, or lottery item gets its own replaceable Sprite Workshop slot.
+  const key=SPRITE_DEFS[info?.id]?info.id:(String(info?.id||'').startsWith('scroll:')?'attack_scroll':(info?.icon||'mystery_capsule'));
+  return iconMarkup(key,className);
 }
 
 const FAINT_DURATION_MS=3*60*1000;
@@ -1543,6 +1590,8 @@ const WILD_MONSTER_REWARD_CHANCE=.15;
 const CAPTURE_POD_BONUS=.20;
 const CAPTURE_POD_DURATION_MS=20*60*1000;
 const REFRESH_JUICE_COOLDOWN_MS=60*60*1000;
+const LOTTERY_FREE_COOLDOWN_MS=60*60*1000;
+const LOTTERY_COIN_FIND_CHANCE=.002; // rare independent Explore discovery, 1 in 500 steps
 const DNA_SPLICE_BONUS=15;
 const EXPLORE_RATES={battle:.60,field:.19,currency:.08,item:.08,egg:.05};
 
@@ -1759,6 +1808,29 @@ const ITEM_SHOP = [
 ];
 
 
+// Sprite Workshop inventory coverage (v0.15.53).
+// Register every shop item separately, including injectors by Potential rank,
+// while keeping the original shared-atlas icons as safe fallbacks. A new shop
+// item will now automatically become a selectable Sprite Workshop slot.
+for(const item of ITEM_SHOP){
+  if(!SPRITE_DEFS[item.id])SPRITE_DEFS[item.id]={
+    name:item.name,category:item.category||'Items',kind:'atlas',
+    atlasKey:ITEM_ICONS[item.icon]?item.icon:'mystery_capsule'
+  };
+}
+// All trade/expedition rewards and lottery items also need their own identities.
+for(const [id,item] of Object.entries(TRADE_GOODS)){
+  if(!SPRITE_DEFS[id])SPRITE_DEFS[id]={
+    name:item.name,category:item.category||'Expedition Treasure',kind:'atlas',
+    atlasKey:ITEM_ICONS[item.icon]?item.icon:'mystery_capsule'
+  };
+}
+Object.assign(SPRITE_DEFS,{
+  lottery_coin:{name:'Lottery Coin',category:'Lottery',kind:'atlas',atlasKey:'coin_pouch'},
+  lottery_egg:{name:'Lottery Egg',category:'Lottery',kind:'atlas',atlasKey:'egg_generic'},
+  winter_mystery_egg:{name:'Winter Mystery Egg',category:'Winter Event',kind:'atlas',atlasKey:'egg_generic'}
+});
+
 // ---------- Silverwind Reference Guide ----------
 let silverwindReferenceTopicId='getting-started';
 const SILVERWIND_REFERENCE_CATEGORIES=['Getting Started','Monsters','Battle','Fieldwork','Progression','Events & Trials','Items & Economy'];
@@ -1798,6 +1870,9 @@ function silverwindReferenceTopics(){
     {id:'attacks',category:'Battle',title:'Attacks, Styles & Statuses',summary:'Power, accuracy, attack weight, visual families, and status effects.',keywords:'moves signature attack scroll light standard heavy power accuracy status fx',note:`An attack is more than its Power number. Accuracy, status utility, Life Steal, and the monster using it can turn a quieter move into the right answer.`,body:()=>referenceList([
       `Attack styles are <strong>${ATTACK_STYLES.join(', ')}</strong>. Style controls visual weight and helps describe how hard a move is meant to land.`,
       `Current reusable status effects: <strong>${statusText}</strong>.`,
+      `Poison deals <strong>10% of maximum Vitality</strong> at the end of each round. Shock deals <strong>10 flat damage</strong> at round end (and retains its existing Speed and action effects).`,
+      `Bleed deals <strong>10% of damage actually inflicted</strong> immediately after the bleeding monster lands an attack. Missing, evading, or losing an action causes no Bleed damage.`,
+      `Each attack retains its own Status chance and duration in turns; these damage rules do not overwrite either setting.`,
       `Visual FX families are ${ATTACK_FX_STYLES.filter(x=>x!=='Auto').join(', ')}. Auto chooses a family from the attack's name/description.`,
       `Base species normally have a Signature Attack. Attack Scrolls can teach compatible registered attacks through the monster detail tools.`,
       `Some moves carry extra effects such as Life Steal or a next-attack dodge effect.`
@@ -1956,7 +2031,11 @@ async function customAssetUrl(slug,kind){return (await storedAssetUrl(`${slug}:$
 async function customSpriteUrl(key){return (await storedAssetUrl(`sprite:${key}`))||liveAssetRefs[`sprite:${key}`]||null;}
 async function hydrateSpriteElement(el){
   if(!el?.dataset?.spriteKey)return;
-  const url=await customSpriteUrl(el.dataset.spriteKey);
+  const key=el.dataset.spriteKey;
+  const ownUrl=await customSpriteUrl(key);
+  // Preserve older atlas-wide custom art for new dedicated item slots until
+  // that item is given its own replacement image.
+  const url=ownUrl||(SPRITE_DEFS[key]?.atlasKey?await customSpriteUrl(SPRITE_DEFS[key].atlasKey):null);
   if(!url)return;
   if(el.tagName==='IMG'){el.src=url;}
   else{el.textContent='';el.style.backgroundImage=`url("${url}")`;el.classList.add('custom-sprite-active');}
@@ -2033,6 +2112,7 @@ function defaultState(){
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
     blackMarket:null,
+    lottery:{nextFreeAt:0,lastResult:''},lotteryEggPool:[],
     itemCooldowns:{refreshJuiceUntil:0},buffs:{capturePodUntil:0},
     expeditions:{slots:{},lastMessage:''},
     liveContentRevision:'',liveContentManifest:{},
@@ -2150,6 +2230,10 @@ function normalizeState(){
   state.species=state.species||{};
   state.attacks=state.attacks||{};
   state.inventory=state.inventory||{};
+  state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
+  state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
+  state.lottery.lastResult=String(state.lottery.lastResult||'').slice(0,240);
+  state.lotteryEggPool=Array.isArray(state.lotteryEggPool)?[...new Set(state.lotteryEggPool.filter(x=>typeof x==='string'&&state.species[x]))]:[];
   state.liveContentManifest=state.liveContentManifest&&typeof state.liveContentManifest==='object'?state.liveContentManifest:{};
   normalizeLandingFeed();
 
@@ -2516,7 +2600,7 @@ function eventRewardSpriteMarkup(item,className='event-shop-icon-sprite'){
   if(r.type==='scroll')return iconMarkup('attack_scroll',`sheet-icon ${className}`);
   if(r.type==='item'){
     const shopItem=ITEM_SHOP.find(x=>x.id===r.id);
-    return iconMarkup(shopItem?.icon||'mystery_capsule',`sheet-icon ${className}`);
+    return shopItem?.spriteKey?glyphSpriteMarkup(shopItem.spriteKey,'◆',className):iconMarkup(shopItem?.id||'mystery_capsule',`sheet-icon ${className}`);
   }
   return iconMarkup('mystery_capsule',`sheet-icon ${className}`);
 }
@@ -2542,7 +2626,7 @@ function calendarRewardIcon(reward,def=null){
   if(!reward)return '◇';
   if(reward.type==='money')return iconMarkup('currency','sheet-icon event-calendar-reward-icon');
   if(reward.type==='eventCurrency')return eventCurrencySpriteMarkup(def||activeEvent()||EVENT_DEFS.winter_event_2026,'event-calendar-reward-icon');
-  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return item?.spriteKey?glyphSpriteMarkup(item.spriteKey,'◆','event-calendar-reward-icon'):iconMarkup(item?.icon||'mystery_capsule','sheet-icon event-calendar-reward-icon');}
+  if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);return item?.spriteKey?glyphSpriteMarkup(item.spriteKey,'◆','event-calendar-reward-icon'):iconMarkup(item?.id||'mystery_capsule','sheet-icon event-calendar-reward-icon');}
   if(reward.type==='egg')return iconMarkup('egg_generic','sheet-icon event-calendar-reward-icon');
   if(reward.type==='monster')return '◆';
   return '◇';
@@ -2631,7 +2715,7 @@ async function renderMemoryEventPage(host,def){
     <div class="event-columns winter-memory-layout"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT MINI-GAME</div><h3>${a.name}</h3><p>Match all eight monster pairs. Each pair earns ${a.pairReward} ${def.currency.name}; three misses trigger a 3-minute cooldown.</p></div><div class="memory-fail-bank"><span>Failed Matches</span><div>${failPips}</div><small>${m.fails} / ${a.maxFails}</small></div></div>
       <div class="memory-board-wrap"><div class="memory-board">${cards}</div>${cooling?`<div class="memory-cooldown"><strong>${m.cooldownReason==='complete'?'Board Complete':'Board Frozen'}</strong><span>${memoryCooldownText(m)}</span><small>${m.cooldownReason==='complete'?'A new set unlocks after the one-hour completion cooldown.':'A new set shuffles after the 3-minute cooldown.'}</small></div>`:''}</div>
       <div class="memory-status"><strong>${m.completed?'WINTER SET COMPLETE':cooling?'COOLDOWN ACTIVE':'MATCH THE MONSTERS'}</strong><p>${m.message||'Find all eight matching monster pairs.'}</p></div>
-    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('egg_generic','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
+    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('winter_mystery_egg','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
     <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">WINTER SHOP</div><h3>Snowflake Exchange</h3><p>Spend Snowflakes earned from Winter Memory and seasonal rewards on exclusive Winter stock.</p></div></div><div class="event-shop-grid">${shop||'<div class="event-dev-note">No Winter Shop stock is registered yet.</div>'}</div></section>`;
   host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
   host.querySelectorAll('[data-memory-card]').forEach(btn=>btn.addEventListener('click',()=>flipEventMemoryCard(def.id,Number(btn.dataset.memoryCard))));
@@ -3362,6 +3446,11 @@ function showHideoutPane(name='collection'){
 }
 function switchTab(name){
   if(name==='admin'&&!isAdminAccount())name='profile';
+  // Shop's dropdown destinations share one parent tab and retain its active state.
+  if(name==='shop-supplies'||name==='shop-lottery'){
+    currentShopMode=name==='shop-lottery'?'lottery':'supplies';
+    name='shop';
+  }else if(name==='shop')currentShopMode='supplies';
   if(exploreExpeditionActive)endExploreExpedition();
   // Internal destinations route straight into their hub homes.
   const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',inventory:'inventory',profile:'profile'};
@@ -3787,7 +3876,7 @@ async function eggVisual(slug,sizeClass='egg-image',source='generic'){
   if(source==='event-maze')return imageSpriteMarkup('halloween_event_egg','assets/icons/halloween_event_egg.png',`${sizeClass} halloween-event-egg-icon`,'Haunted Event Egg');
   const custom=await imageSrc(slug,'egg');
   if(custom)return `<img class="${sizeClass}" src="${custom}" alt="">`;
-  const key=source==='shop'||source==='event-shop'?'egg_shop':source==='wild'?'egg_wild':source==='prismatic'?'egg_prismatic':'egg_generic';
+  const key=source==='lottery'?'lottery_egg':source==='shop'||source==='event-shop'?'egg_shop':source==='wild'?'egg_wild':source==='prismatic'?'egg_prismatic':'egg_generic';
   return iconMarkup(key,`sheet-icon ${sizeClass} egg-sheet-icon`);
 }
 function eggDisplayName(egg){return egg?.displayName||(egg?.speciesName?`${egg.speciesName} Egg`:'Unknown Egg');}
@@ -3818,7 +3907,7 @@ async function renderEggInventory(renderVersion=null){
       const card=document.createElement('div');
       card.className='egg-card';
       const mom=state.monsters.find(m=>m.id===egg.motherId),dad=state.monsters.find(m=>m.id===egg.fatherId);
-      const origin=mom?`Parents: ${displayName(mom)} × ${displayName(dad)}`:egg.source==='newcomer'?'New Keeper Bundle':egg.source==='expedition'||egg.source==='prismatic'?'Expedition Reward':'Obtained from Shop / Admin';
+      const origin=mom?`Parents: ${displayName(mom)} × ${displayName(dad)}`:egg.source==='lottery'?'Lottery Wheel Reward':egg.source==='newcomer'?'New Keeper Bundle':egg.source==='expedition'||egg.source==='prismatic'?'Expedition Reward':'Obtained from Shop / Admin';
       const potentialLine=egg.source==='breeding'?`<p class="${egg.potentialRaised?'potential-boost':''}">Potential: P${egg.motherPotential||1}${egg.potentialRaised?` → <strong>P${egg.potentialOverride}</strong> ✦`:''}</p>`:'';
       card.innerHTML=`<div class="egg-visual">${await eggVisual(egg.slug,'egg-image',egg.source||'generic')}</div><div><strong>${eggDisplayName(egg)}</strong><span>${egg.id}</span><p>${origin}</p>${potentialLine}</div>`;
       const actions=document.createElement('div');
@@ -3985,6 +4074,154 @@ function wireShopTile(tile,kind,id){
   tile.onclick=()=>openShopDetail(kind,id);
 }
 
+// ---------- Lottery Wheel ----------
+const LOTTERY_TIERS=[
+  {id:'healing',name:'Healing Item',odds:50,color:'#669b93'},
+  {id:'treasure',name:'Expedition Treasure',odds:20,color:'#a99765'},
+  {id:'scroll',name:'Attack Scroll / P3–P7 Injector',odds:10,color:'#7f91bf'},
+  {id:'currency',name:'500–1,000 Currency',odds:10,color:'#c68f5e'},
+  {id:'egg',name:'Lottery Egg',odds:5,color:'#a97cba'},
+  {id:'rare',name:'P8–P10 Injector / Nature Disc',odds:4.9,color:'#b37b99'},
+  {id:'jackpot',name:'Prismatic Egg / 25,000 Currency',odds:.1,color:'#e0cb8a'}
+];
+// The colors repeat around the wheel instead of stacking each entire prize tier
+// into one contiguous chunk. Each 5% slot below reflects actual odds. One slot
+// is subdivided into 4.9% rare + 0.1% jackpot, keeping the wheel mathematically
+// faithful to the prize table (including the tiny jackpot sliver).
+const LOTTERY_WHEEL_PATTERN=[
+  'healing','treasure','healing','scroll','healing','treasure','healing','currency',
+  'healing','egg','healing','treasure','healing','scroll','healing','rare',
+  'healing','currency','healing','treasure'
+];
+const LOTTERY_WHEEL_SLICES=LOTTERY_WHEEL_PATTERN.flatMap(id=>id==='rare'
+  ?[{id:'rare',odds:4.9},{id:'jackpot',odds:0.1}]
+  :[{id,odds:5}]);
+let currentShopMode='supplies',lotterySpinning=false,lotteryWheelAngle=0,lotterySpinTimeout=null;
+function lotteryEligibleEggSpecies(){return (state.lotteryEggPool||[]).filter(slug=>!!state.species[slug]);}
+function lotteryFreeReady(){return Date.now()>=Number(state.lottery?.nextFreeAt||0);}
+function lotterySelectTier(){
+  // Integer precision makes the 0.1% jackpot exactly 10 chances in 10,000.
+  let roll=Math.floor(Math.random()*10000);
+  for(const tier of LOTTERY_TIERS){roll-=Math.round(tier.odds*100);if(roll<0)return tier;}
+  return LOTTERY_TIERS[LOTTERY_TIERS.length-1];
+}
+function lotteryWheelSegments(){
+  let start=0;
+  return LOTTERY_WHEEL_SLICES.map(slice=>{
+    const end=start+slice.odds*3.6;
+    const segment={...slice,start,end,color:LOTTERY_TIERS.find(t=>t.id===slice.id).color};
+    start=end;
+    return segment;
+  });
+}
+function lotteryWheelGradient(){
+  return `conic-gradient(${lotteryWheelSegments().map(s=>`${s.color} ${s.start.toFixed(3)}deg ${s.end.toFixed(3)}deg`).join(',')})`;
+}
+function lotteryTierMidpoint(id){
+  const matching=lotteryWheelSegments().filter(segment=>segment.id===id);
+  if(!matching.length)return 0;
+  const segment=randomChoice(matching);
+  return (segment.start+segment.end)/2;
+}
+function lotteryGiveItem(id){state.inventory[id]=(state.inventory[id]||0)+1;return itemInfoForInventoryId(id)?.name||id;}
+function awardLotteryTier(tier){
+  if(tier.id==='healing')return `${lotteryGiveItem(randomChoice(['heal_gel','medium_heal_gel','life_crystal']))} ×1`;
+  if(tier.id==='treasure')return `${lotteryGiveItem(randomChoice(['expedition_ancient_coin','expedition_gilded_idol','expedition_starstone_relic']))} ×1`;
+  if(tier.id==='scroll'){
+    const scroll=Math.random()<.5?randomScrollInventoryId():null;
+    return `${lotteryGiveItem(scroll||`injector_p${randomInt(3,7)}`)} ×1`;
+  }
+  if(tier.id==='currency'){const amount=randomInt(500,1000);state.currency+=amount;return `${money(amount)} Currency`;}
+  if(tier.id==='egg')return `${lotteryGiveItem('lottery_egg')} ×1`;
+  if(tier.id==='rare')return `${lotteryGiveItem(Math.random()<.5?'nature_disc':`injector_p${randomInt(8,10)}`)} ×1`;
+  if(tier.id==='jackpot'){
+    if(Math.random()<.5){state.currency+=25000;return '25,000 Currency • JACKPOT!';}
+    // A Prismatic Egg receives a species immediately, independent of the Lottery Egg pool.
+    const pool=regularExpeditionSpeciesPool();
+    if(!pool.length){state.currency+=25000;return '25,000 Currency • JACKPOT!';}
+    const [slug,sp]=randomChoice(pool);
+    state.eggs.push({id:uid('E',state.nextEggNum++),slug,speciesName:sp.name,displayName:'Prismatic Egg',motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:true,source:'prismatic',createdAt:Date.now(),status:'waiting',catalystUsed:false});
+    return `✦ Prismatic Egg (${sp.name}) • JACKPOT!`;
+  }
+  return '';
+}
+function renderLottery(){
+  const pane=document.getElementById('shopLotteryPane');if(!pane)return;
+  document.getElementById('shopSuppliesPane').classList.toggle('hidden',currentShopMode!=='supplies');
+  pane.classList.toggle('hidden',currentShopMode!=='lottery');
+  for(const [id,active] of [['showShopSupplies',currentShopMode==='supplies'],['showShopLottery',currentShopMode==='lottery']]){
+    const btn=document.getElementById(id);btn.classList.toggle('active',active);btn.setAttribute('aria-selected',String(active));
+  }
+  const wheel=document.getElementById('lotteryWheel');wheel.style.background=lotteryWheelGradient();wheel.style.transform=`rotate(${lotteryWheelAngle}deg)`;
+  document.getElementById('lotteryCoinCount').textContent=`Lottery Coins: ${Number(state.inventory.lottery_coin||0)}`;
+  document.getElementById('lotteryEggCount').textContent=Number(state.inventory.lottery_egg||0);
+  const pool=lotteryEligibleEggSpecies(),redeem=document.getElementById('lotteryOpenEgg');
+  redeem.disabled=!pool.length||!(state.inventory.lottery_egg>0)||lotterySpinning;
+  document.getElementById('lotteryEggStatus').textContent=pool.length?`${pool.length} eligible species in the current pool.`:'Lottery Eggs can be saved now and opened after monsters are added in Admin.';
+  const spin=document.getElementById('lotterySpin'),canFree=lotteryFreeReady(),coins=Number(state.inventory.lottery_coin||0);
+  spin.disabled=lotterySpinning||(!canFree&&coins<1);
+  spin.textContent=lotterySpinning?'Spinning…':canFree?'Spin Free':coins>0?'Spend 1 Lottery Coin':'Free Spin Recharging';
+  document.getElementById('lotteryFreeStatus').textContent=canFree?'Free spin ready!':`Next free spin in ${formatShortCooldown(Math.max(0,state.lottery.nextFreeAt-Date.now()))}`;
+  document.getElementById('lotteryResult').textContent=lotterySpinning?'The wheel is turning…':state.lottery.lastResult||'Will the wheel favor you?';
+  const odds=document.getElementById('lotteryOddsList');
+  if(!odds.childElementCount)odds.innerHTML=LOTTERY_TIERS.map(t=>`<div class="lottery-odds-row"><i style="background:${t.color}"></i><span>${t.name}</span><strong>${t.odds}%</strong></div>`).join('');
+}
+function showShopMode(mode){currentShopMode=mode==='lottery'?'lottery':'supplies';renderLottery();}
+function spinLottery(){
+  if(lotterySpinning)return;
+  const free=lotteryFreeReady(),coins=Number(state.inventory.lottery_coin||0);
+  if(!free&&coins<1)return;
+  if(free)state.lottery.nextFreeAt=Date.now()+LOTTERY_FREE_COOLDOWN_MS;
+  else state.inventory.lottery_coin=coins-1;
+  const tier=lotterySelectTier(),reward=awardLotteryTier(tier);
+  state.lottery.lastResult=`${tier.name}: ${reward}`;
+  save();lotterySpinning=true;
+  const center=lotteryTierMidpoint(tier.id),extraTurns=5+Math.floor(Math.random()*3);
+  // Pointer sits at 0deg, so the chosen segment must stop facing north.
+  const target=(360-center+360)%360;
+  const previousAngle=lotteryWheelAngle;
+  lotteryWheelAngle+=extraTurns*360+((target-(lotteryWheelAngle%360)+360)%360);
+  renderLottery();
+  const wheel=document.getElementById('lotteryWheel');
+  wheel.style.transition='none';wheel.style.transform=`rotate(${previousAngle}deg)`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{wheel.style.transition='transform 3.8s cubic-bezier(.13,.75,.13,1)';wheel.style.transform=`rotate(${lotteryWheelAngle}deg)`;}));
+  clearTimeout(lotterySpinTimeout);
+  lotterySpinTimeout=setTimeout(()=>{lotterySpinning=false;renderAll();},3900);
+}
+function redeemLotteryEgg(){
+  if(!(state.inventory.lottery_egg>0))return;
+  const pool=lotteryEligibleEggSpecies();
+  if(!pool.length){alert('The Lottery Egg pool is empty. Keep this Egg until monsters are added in Admin.');return;}
+  const slug=randomChoice(pool),sp=state.species[slug];
+  state.inventory.lottery_egg--;if(!state.inventory.lottery_egg)delete state.inventory.lottery_egg;
+  state.eggs.push({id:uid('E',state.nextEggNum++),slug,speciesName:sp.name,displayName:'Lottery Egg',motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'lottery',createdAt:Date.now(),status:'waiting',catalystUsed:false});
+  state.lottery.lastResult=`Lottery Egg opened: ${sp.name} Egg! Find it in Incubators.`;
+  save();renderAll();
+}
+function renderLotteryAdmin(){
+  const select=document.getElementById('lotterySpeciesSelect'),list=document.getElementById('lotteryPoolList');if(!select)return;
+  const current=select.value;
+  select.innerHTML='';
+  Object.entries(state.species).filter(([slug])=>!state.lotteryEggPool.includes(slug)).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([slug,sp])=>{const opt=document.createElement('option');opt.value=slug;opt.textContent=`${sp.name}${!sp.builtin&&!sp.published?' (DRAFT: not exported)':''}`;select.append(opt);});
+  if([...select.options].some(o=>o.value===current))select.value=current;
+  document.getElementById('addLotterySpecies').disabled=!select.options.length;
+  document.getElementById('lotteryPoolCount').textContent=`(${state.lotteryEggPool.length})`;
+  list.innerHTML='';
+  if(!state.lotteryEggPool.length)list.innerHTML='<div class="empty-card">No monsters in this pool yet. Add them whenever you are ready.</div>';
+  for(const slug of state.lotteryEggPool){const sp=state.species[slug];if(!sp)continue;
+    const row=document.createElement('div');row.className='lottery-pool-row';
+    const label=document.createElement('span');label.textContent=`${sp.name}${!sp.builtin&&!sp.published?' • Draft (excluded from Live export)':''}`;
+    const btn=document.createElement('button');btn.type='button';btn.className='ghost small';btn.textContent='Remove';btn.onclick=()=>{state.lotteryEggPool=state.lotteryEggPool.filter(x=>x!==slug);save();renderLotteryAdmin();renderLottery();};
+    row.append(label,btn);list.append(row);
+  }
+}
+function addLotterySpecies(){const slug=document.getElementById('lotterySpeciesSelect').value;if(!state.species[slug]||state.lotteryEggPool.includes(slug))return;state.lotteryEggPool.push(slug);save();renderLotteryAdmin();renderLottery();document.getElementById('lotteryAdminMessage').textContent=`Added ${state.species[slug].name} to the Lottery Egg pool. Export Live Package to publish.`;}
+function findLotteryCoin(){
+  if(Math.random()>=LOTTERY_COIN_FIND_CHANCE)return;
+  state.inventory.lottery_coin=(state.inventory.lottery_coin||0)+1;save();
+  const toast=document.getElementById('lotteryCoinToast');if(toast){toast.textContent='✦ Rare find! Lottery Coin ×1 added to Inventory!';toast.classList.add('visible');clearTimeout(findLotteryCoin.timeout);findLotteryCoin.timeout=setTimeout(()=>toast.classList.remove('visible'),4600);}
+}
+
 async function renderShop(){
   const eggGrid=document.getElementById('eggShopGrid');
   eggGrid.innerHTML='';
@@ -4013,7 +4250,7 @@ async function renderShop(){
   ITEM_SHOP.forEach(item=>{
     const tile=document.createElement('button');
     wireShopTile(tile,'item',item.id);
-    const visual=item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-tile',''):iconMarkup(item.icon||'mystery_capsule','sheet-icon icon-shop-tile');
+    const visual=item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-tile',''):iconMarkup(item.id,'sheet-icon icon-shop-tile');
     tile.innerHTML=shopTileShell(item.name,item.category,visual);
     grid.appendChild(tile);
   });
@@ -4076,7 +4313,7 @@ async function shopSelectionFor(kind,id){
       kind,id,name:item.name,category:item.category,price:Number(item.price),
       description:item.desc,
       meta:[],owned:`Owned: ${owned}`,
-      visual:item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-detail',''):iconMarkup(item.icon||'mystery_capsule','sheet-icon icon-shop-detail'),
+      visual:item.spriteKey?imageSpriteMarkup(item.spriteKey,item.iconImage||SPRITE_DEFS[item.spriteKey]?.fallback||'','field-find-icon icon-shop-detail',''):iconMarkup(item.id,'sheet-icon icon-shop-detail'),
       canBuy:state.currency>=Number(item.price)
     };
   }
@@ -4242,7 +4479,7 @@ async function openInventoryDetail(id){
   document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
   document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood?' • Resale rate: 5% of shop value':''}`;
   const use=document.getElementById('inventoryUseButton');
-  const directUse=id==='refresh_juice'||id==='capture_pod';
+  const directUse=id==='refresh_juice'||id==='capture_pod'||id==='lottery_egg';
   use.classList.toggle('hidden',!directUse);
   use.disabled=false;
   use.removeAttribute('data-refresh-juice-timer');
@@ -4255,6 +4492,9 @@ async function openInventoryDetail(id){
     const remain=capturePodRemaining();
     use.disabled=remain>0;
     use.textContent=remain>0?`Capture Boost • ${formatShortCooldown(remain)}`:'Activate Capture Pod • 20 min';
+  }else if(id==='lottery_egg'){
+    use.disabled=!lotteryEligibleEggSpecies().length;
+    use.textContent=use.disabled?'Monster Pool Not Ready':'Open Lottery Egg';
   }else{
     use.textContent='Use';
   }
@@ -4274,6 +4514,10 @@ async function useSelectedInventoryItem(){
   const id=inventorySelection.id;
   if(id==='refresh_juice')useRefreshJuice();
   else if(id==='capture_pod')useCapturePod();
+  else if(id==='lottery_egg'){
+    document.getElementById('inventoryDetailModal').close();inventorySelection=null;
+    redeemLotteryEgg();return;
+  }
   else return;
   const owned=Number(state.inventory[id]||0);
   if(owned<=0){
@@ -4559,8 +4803,9 @@ function renderSpriteRegistry(){
 async function renderSpriteAdminPreview(key){
   const box=document.getElementById('spriteAdminPreview');if(!box||!SPRITE_DEFS[key])return;
   box.innerHTML=spriteFallbackMarkup(key,'sprite-admin-example');
-  const custom=await getAssetBlob(`sprite:${key}`);
-  document.getElementById('spriteFallbackNote').textContent=custom?'Custom sprite is active.':'Built-in example is active.';
+  const own=await customSpriteUrl(key);
+  const inherited=!own&&SPRITE_DEFS[key]?.atlasKey?await customSpriteUrl(SPRITE_DEFS[key].atlasKey):null;
+  document.getElementById('spriteFallbackNote').textContent=own?'Custom sprite is active.':inherited?'Shared artwork active. Upload a replacement to customize this item only.':'Built-in example is active.';
   await hydrateSprites(box);
 }
 async function loadSpriteIntoForm(key){
@@ -4690,7 +4935,7 @@ async function buildLivePublishingPackage(){
       else if(liveAssetRefs[key])trialAssets[id][kind]=liveAssetRefs[key];
     }
   }
-  const pack={version:9,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,trialDefinitions,trialAssets};
+  const pack={version:9,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
   return {pack,files};
 }
 function liveContentManifestFromPack(pack){
@@ -4706,12 +4951,13 @@ function liveContentManifestFromPack(pack){
     announcements:(pack?.landingFeed?.announcements||[]).length,
     calendarPrizes:Object.values(pack?.eventCalendars||{}).reduce((n,c)=>n+Object.keys(c?.entries||{}).length,0),
     trials:Object.keys(pack?.trialDefinitions||{}).length,
+    lotteryPool:(pack?.lotteryEggPool||[]).length,
     trialAssets:trialAssetCount
   };
 }
 function liveContentManifestLabel(manifest){
   const m=manifest||{};
-  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials`;
+  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials • ${Number(m.lotteryPool||0)} lottery monsters`;
 }
 async function buildContentPack({publishedOnly=false}={}){
   const customSpecies={};
@@ -4726,7 +4972,7 @@ async function buildContentPack({publishedOnly=false}={}){
   const customSprites={};for(const key of Object.keys(SPRITE_DEFS)){const ref=await exportableAssetDataUrl(`sprite:${key}`);if(ref)customSprites[key]=ref;}
   // Dialogue, landing posts, Event Calendars, and Trials are content-layer data, not player save data.
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const ref=await exportableAssetDataUrl(`trial:${id}:${kind}`);if(ref)trialAssets[id][kind]=ref;}}
-  return {version:8,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,trialDefinitions,trialAssets};
+  return {version:8,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
   const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
@@ -4789,6 +5035,7 @@ async function applyLiveContent(data){
   if(data.silverwindDialogue)state.silverwindDialogue=data.silverwindDialogue;
   if(data.landingFeed)state.landingFeed=data.landingFeed;
   if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
+  if(Array.isArray(data.lotteryEggPool))state.lotteryEggPool=[...new Set(data.lotteryEggPool.filter(slug=>typeof slug==='string'))];
   if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
   for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]){const key=`trial:${id}:${kind}`,ref=assets[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
   state.liveContentRevision=revision||`legacy-${Date.now()}`;
@@ -4808,9 +5055,10 @@ async function importAdminFile(file){
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
     if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
+  if(Array.isArray(data.lotteryEggPool))state.lotteryEggPool=[...new Set(data.lotteryEggPool.filter(slug=>typeof slug==='string'))];
     if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
     for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]){const key=`trial:${id}:${kind}`,ref=assets[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
-    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Event Calendars, Silvy dialogue, and Trial data.';
+    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();renderLotteryAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Event Calendars, Silvy dialogue, and Trial data.';
   }catch(e){document.getElementById('adminMessage').textContent='Import failed: '+e.message;}
 }
 
@@ -5289,7 +5537,7 @@ function renderExploreSupplies(){
       <div><span>Eggs</span><strong>×${looseEggs}</strong></div>
     </div>`);
   }
-  if(capturePodActive())parts.push(`<div class="supply-chip capture-boost-supply">${iconMarkup('mystery_capsule','sheet-icon icon-md')}<div><span>Capture Pod • +20%</span><strong data-capture-pod-timer>${formatShortCooldown(capturePodRemaining())}</strong></div></div>`);
+  if(capturePodActive())parts.push(`<div class="supply-chip capture-boost-supply">${iconMarkup('capture_pod','sheet-icon icon-md')}<div><span>Capture Pod • +20%</span><strong data-capture-pod-timer>${formatShortCooldown(capturePodRemaining())}</strong></div></div>`);
 
   for(const [id,qty] of entries){
     const info=itemInfoForInventoryId(id);
@@ -5386,6 +5634,7 @@ async function moveExploreMaze(dir){
   }else{
     exploreMazeMessage='The trail opens a little farther ahead.';
   }
+  findLotteryCoin();
   await resolveExploreTrail(null);
 }
 
@@ -5970,17 +6219,29 @@ function performMove(attackerSide,moveId,defenderSide){
     battleSession.log.push(`${sideLabel(defenderSide)} was afflicted with ${move.status}!`);
   }
 
+  // v0.15.52: Bleed is recoil from the damage actually delivered by an attack,
+  // not a max-HP damage-over-time effect. An attack that misses or is evaded
+  // exits above without triggering it. Use actualDamage to avoid overkill scaling.
+  let bleedDamage=0;
+  if(sessionStatus(attackerSide)?.name==='Bleed'&&actualDamage>0){
+    bleedDamage=Math.min(sessionHP(attackerSide),Math.max(1,Math.round(actualDamage*.10)));
+    if(bleedDamage>0){
+      setSessionHP(attackerSide,Math.max(0,sessionHP(attackerSide)-bleedDamage));
+      battleSession.log.push(`${sideLabel(attackerSide)} took ${bleedDamage} Bleed damage after attacking!`);
+    }
+  }
+
   const effectText=effClass==='neutral'?'':`${effLabel} • `;
+  const followups=[];
+  if(lifeStealRecovered>0)followups.push({kind:'heal',main:`DRAIN +${lifeStealRecovered}`,sub:`${move.name} • Life Steal ${Math.round(lifeStealPct)}%`,targetSide:attackerSide});
+  if(dodgeGranted>0)followups.push({kind:'status',main:'STRIDE VEIL',sub:`${Math.round(dodgeGranted)}% dodge on the next incoming attack`,targetSide:attackerSide});
+  if(bleedDamage>0)followups.push({kind:'status',main:`BLEED -${bleedDamage}`,sub:'Recoil after attacking',targetSide:attackerSide});
   return {
     kind:effClass==='super'?'super':effClass==='resist'?'resist':'hit',
     main:`${damage} DAMAGE`,
     sub:appliedStatus?`${effectText}${move.name} • ${appliedStatus.toUpperCase()}!`:`${effectText}${move.name}`,
     targetSide:defenderSide,
-    followup:lifeStealRecovered>0
-      ? {kind:'heal',main:`DRAIN +${lifeStealRecovered}`,sub:`${move.name} • Life Steal ${Math.round(lifeStealPct)}%`,targetSide:attackerSide}
-      : dodgeGranted>0
-        ? {kind:'status',main:'STRIDE VEIL',sub:`${Math.round(dodgeGranted)}% dodge on the next incoming attack`,targetSide:attackerSide}
-        : null
+    followups
   };
 }
 
@@ -5994,8 +6255,10 @@ function tickStatus(side){
   let dot=0;
 
   if(status.name==='Burn')dot=Math.max(1,Math.round(max*.05));
-  if(status.name==='Poison')dot=Math.max(1,Math.round(max*.07));
-  if(status.name==='Bleed')dot=Math.max(1,Math.round(max*.06));
+  if(status.name==='Poison')dot=Math.max(1,Math.round(max*.10));
+  if(status.name==='Shock')dot=10;
+  // Bleed now triggers immediately after a landed attack in performMove().
+  // Status turn countdown remains here so attack-defined durations are preserved.
 
   let feedback=null;
   if(dot){
@@ -6096,9 +6359,9 @@ async function resolveAnimatedMove(attackerSide,moveId,defenderSide){
   if(feedback.kind!=='status')await playBattleAttackFx(attackerSide,defenderSide,move,feedback);
   await refreshBattleUI();
   await showBattleFeedback(feedback);
-  if(feedback?.followup){
+  for(const followup of feedback.followups||(feedback.followup?[feedback.followup]:[])){
     await refreshBattleUI();
-    await showBattleFeedback(feedback.followup);
+    await showBattleFeedback(followup);
   }
 }
 async function resolveStatusTicks(){
@@ -6506,6 +6769,7 @@ async function renderAll(){
 
   await renderShop();
   if(version!==uiRenderVersion)return;
+  renderLottery();
   await renderBlackMarket();
   if(version!==uiRenderVersion)return;
 
@@ -6608,7 +6872,7 @@ document.getElementById('closeShopDetail').addEventListener('click',()=>document
 document.getElementById('closeInventoryDetail').addEventListener('click',()=>document.getElementById('inventoryDetailModal').close());document.getElementById('inventoryDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('inventoryDetailModal'))document.getElementById('inventoryDetailModal').close();});document.getElementById('inventoryUseButton').addEventListener('click',useSelectedInventoryItem);document.getElementById('inventorySellButton').addEventListener('click',requestInventorySell);document.getElementById('inventoryCancelSell').addEventListener('click',resetInventorySellPanel);document.getElementById('inventoryConfirmSell').addEventListener('click',confirmInventorySale);document.getElementById('inventorySellQuantity').addEventListener('input',updateInventorySellPreview);
 document.getElementById('closeIncubatorDetail').addEventListener('click',()=>document.getElementById('incubatorDetailModal').close());document.getElementById('incubatorDetailModal').addEventListener('click',e=>{if(e.target===document.getElementById('incubatorDetailModal'))document.getElementById('incubatorDetailModal').close();});document.getElementById('incubatorDetailModal').addEventListener('close',()=>{selectedIncubatorIndex=null;});document.getElementById('useIncubatorCatalyst').addEventListener('click',useIncubationCatalyst);document.getElementById('hatchIncubatorEgg').addEventListener('click',hatchSelectedIncubator);
 
-function showAdminPane(name){document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();}
+function showAdminPane(name){document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('lotteryAdminPane').classList.toggle('hidden',name!=='lottery');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');document.getElementById('showLotteryAdmin').classList.toggle('active',name==='lottery');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();if(name==='lottery')renderLotteryAdmin();}
 document.getElementById('showSpeciesAdmin').addEventListener('click',()=>showAdminPane('species'));
 document.getElementById('showAttackAdmin').addEventListener('click',()=>showAdminPane('attack'));
 document.getElementById('showSpriteAdmin').addEventListener('click',()=>showAdminPane('sprite'));
@@ -6668,6 +6932,12 @@ document.getElementById('battleTypeChartHub').addEventListener('click',openTypeC
 document.getElementById('closeTypeChart').addEventListener('click',()=>document.getElementById('typeChartModal').close());
 document.getElementById('typeChartModal').addEventListener('click',e=>{if(e.target===document.getElementById('typeChartModal'))document.getElementById('typeChartModal').close();});
 
+document.getElementById('showShopSupplies').addEventListener('click',()=>showShopMode('supplies'));
+document.getElementById('showShopLottery').addEventListener('click',()=>showShopMode('lottery'));
+document.getElementById('lotterySpin').addEventListener('click',spinLottery);
+document.getElementById('lotteryOpenEgg').addEventListener('click',redeemLotteryEgg);
+document.getElementById('addLotterySpecies').addEventListener('click',addLotterySpecies);
+document.getElementById('showLotteryAdmin').addEventListener('click',()=>showAdminPane('lottery'));
 document.getElementById('accountIdentity').addEventListener('click',()=>switchTab('profile'));
 document.getElementById('saveKeeperName').addEventListener('click',()=>{const input=document.getElementById('keeperNameInput'),value=input.value.trim().slice(0,20);if(value.length<2){document.getElementById('keeperAccountMessage').textContent='Keeper name must be at least 2 characters.';return;}state.account.keeperName=value;save();document.getElementById('keeperAccountMessage').textContent='Keeper name updated.';renderAll();});
 document.getElementById('toggleAdminAccess').addEventListener('click',()=>{if(isAdminAccount()){if(!confirm('Leave local Admin Mode and return this account to Player view?'))return;state.account.role='player';save();document.getElementById('keeperAccountMessage').textContent='Player view restored.';switchTab('profile');return;}const code=prompt('Enter the local Prismwild Admin test code:');if(code===null)return;if(code===LOCAL_ADMIN_CODE){state.account.role='admin';save();document.getElementById('keeperAccountMessage').textContent='Local Admin Mode unlocked. This is prototype-only access control.';renderAll();}else document.getElementById('keeperAccountMessage').textContent='That Admin test code was not accepted.';});
@@ -6675,8 +6945,10 @@ document.getElementById('replayOnboarding').addEventListener('click',()=>openNew
 document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!confirm('Reset all local Prismwild progress and start again as a brand-new Player?'))return;if(!confirm('This removes monsters, eggs, currency, account progress, and local save data. Continue?'))return;resetToFreshPlayer();});
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
-document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.48 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.52 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
+  // Lottery status updates without rebuilding wheel or interrupting its spin animation.
+  if(currentShopMode==='lottery'&&!lotterySpinning){const el=document.getElementById('lotteryFreeStatus');if(el){const free=lotteryFreeReady();el.textContent=free?'Free spin ready!':`Next free spin in ${formatShortCooldown(state.lottery.nextFreeAt-Date.now())}`;const spin=document.getElementById('lotterySpin');spin.disabled=!free&&!(state.inventory.lottery_coin>0);spin.textContent=free?'Spin Free':(state.inventory.lottery_coin>0?'Spend 1 Lottery Coin':'Free Spin Recharging');}}
   // Keep breeding countdowns live without rebuilding the pen cards every tick.
   // Replacing a button between pointer-down and pointer-up can swallow clicks,
   // so the pen DOM is rebuilt only once when a timer crosses into READY.
@@ -6762,5 +7034,6 @@ setInterval(tickLiveTimers,500);
 
 (async()=>{initZoneBackdrop();await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
+<div id="lotteryCoinToast" class="lottery-coin-toast" role="status" aria-live="polite"></div>
 </body>
 </html>

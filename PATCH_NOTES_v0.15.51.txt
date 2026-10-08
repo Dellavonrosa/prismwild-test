@@ -1,0 +1,20 @@
+PRISMWILD v0.15.51 • LOTTERY WHEEL LAYOUT + SHOP SHORTCUTS
+7 October 2026
+
+Visual wheel distribution
+- Replaced the original contiguous, grouped tier wedges with alternating repeated segments around the full wheel.
+- Healing appears in ten 5% segments; Expedition Treasure in four 5% segments; Scroll / P3–P7 and Currency appear twice each in 5% segments; Lottery Egg has one 5% segment; Rare Injector / Nature Disc has 4.9%; Jackpot keeps its accurate tiny 0.1% section.
+- Total probability remains 100%, exactly matching the existing reward odds.
+- Spinner now targets one random physical wedge belonging to the already-chosen winning tier so the visual pointer always matches the awarded reward.
+- Odds list explains the repeated wedge layout.
+
+Shop navigation
+- Shop in the top navigation now has a dropdown following the existing My Hideout / Explore / Silverwind design.
+- Shortcuts: Supply Counter; ✦ Lottery Wheel.
+- Clicking the main Shop tab goes to Supply Counter; selecting Lottery Wheel from the dropdown lands directly on the wheel and keeps Shop highlighted.
+- The original Shop-internal Supply Counter / Lottery Wheel subtabs remain.
+
+Preserved
+- All seven reward probabilities, payout rules, free-spin interval, lottery coins, cooldown persistence, editable Lottery Egg admin pool, and exports are unchanged.
+- Player save key is unchanged; no existing save is reset or modified by installation.
+- Core-only merge patch; does not include or overwrite your live content or art.
