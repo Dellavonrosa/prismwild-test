@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.81</title>
-<link rel="stylesheet" href="styles.css?v=9f484efb027c">
+<title>Prismwild Prototype v0.15.83</title>
+<link rel="stylesheet" href="styles.css?v=0.15.83-reconstruction">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.81</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.83</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -43,6 +43,7 @@
         <button class="nav-link" data-route="collection" type="button">Collection</button>
         <button class="nav-link" data-route="eggs" type="button">Incubators</button>
         <button class="nav-link" data-route="breed" type="button">Breeding Pens</button>
+        <button class="nav-link" data-route="reconstruction" type="button">Reconstruction Lab</button>
         <button class="nav-link" data-route="habitats" type="button">Habitats</button>
         <button class="nav-link" data-route="inventory" type="button">Inventory</button>
         <button class="nav-link" data-route="profile" type="button">Profile</button>
@@ -55,6 +56,7 @@
         <button class="nav-link" data-route="battle" type="button">Battle</button>
         <button class="nav-link" data-route="expeditions" type="button">Expeditions <span id="expeditionBadge" class="badge">0</span></button>
         <button class="nav-link" data-route="trials" type="button">Trials</button>
+        <button class="nav-link" data-route="hunting" type="button">🪤 Hunting Zone <span id="huntingNavReady" class="badge hidden">0</span></button>
       </div>
     </div>
 
@@ -130,6 +132,7 @@
         <button id="showHideoutCollection" class="subtab active" type="button">Collection</button>
         <button id="showHideoutIncubators" class="subtab" type="button">Incubators <span id="eggBadge" class="badge">0</span><span id="incubatorReadyBadge" class="badge lab-ready-badge hidden">0 ready</span></button>
         <button id="showHideoutBreed" class="subtab" type="button">Breeding Pens <span id="breedReadyBadge" class="badge lab-ready-badge hidden">0 ready</span></button>
+        <button id="showHideoutReconstruction" class="subtab" type="button">Reconstruction Lab</button>
         <button id="showHideoutHabitats" class="subtab" type="button">Habitats</button>
         <button id="showHideoutInventory" class="subtab" type="button">Inventory <span id="invBadge" class="badge">0</span></button>
         <button id="showHideoutProfile" class="subtab" type="button">Profile</button>
@@ -169,7 +172,7 @@
   <div class="lab-status-strip"><span id="nurseryReadySummary">Eggs are settling in...</span><span id="incubatorCount"></span></div>
   <div id="incubators" class="nursery-incubators"></div>
   <div class="lab-inventory-heading"><div><h3>Egg Storage <span id="storedEggCount" class="badge">0</span></h3><p>Stored eggs keep their identities sealed until hatching.</p></div><button class="ghost small" type="button" data-route="breed">Return to Breeding</button></div>
-  <div class="lab-toolbar"><input id="eggSearch" type="search" placeholder="Search stored eggs or sources..." aria-label="Search egg storage"><select id="eggSourceFilter" aria-label="Filter egg source"><option value="all">All egg sources</option><option value="breeding">Breeding</option><option value="wild">Wild</option><option value="shop">Shop</option><option value="expedition">Expedition</option><option value="event">Event</option><option value="special">Special / Other</option></select><select id="eggSort" aria-label="Sort eggs"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="name">Name A–Z</option><option value="time">Shortest incubation</option></select></div>
+  <div class="lab-toolbar"><input id="eggSearch" type="search" placeholder="Search stored eggs or sources..." aria-label="Search egg storage"><select id="eggSourceFilter" aria-label="Filter egg source"><option value="all">All egg sources</option><option value="breeding">Breeding</option><option value="wild">Wild</option><option value="shop">Shop</option><option value="expedition">Expedition</option><option value="reconstruction">Reconstruction</option><option value="event">Event</option><option value="special">Special / Other</option></select><select id="eggSort" aria-label="Sort eggs"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="name">Name A–Z</option><option value="time">Shortest incubation</option></select></div>
   <div id="eggInventory" class="nursery-egg-storage"></div>
 </div>
 <div id="breed" class="hideout-pane hidden">
@@ -199,6 +202,14 @@
       <div id="habitatGrid" class="habitat-grid"></div>
       <p class="habitat-footnote">Habitat residents gain +1 Affection every 4 hours, even while offline. Pet a monster once per hour for +3 Affection. Every 10 Affection gives +1% critical-hit chance (up to +10%). Monsters remain available for battle and breeding.</p>
     </div>
+<div id="reconstruction" class="hideout-pane hidden">
+  <div class="page-heading"><div class="eyebrow">ANCIENT SCIENCE • FORGOTTEN CREATIONS</div><h2>🔬 Reconstruction Lab</h2><p>Recover lost recipes, collect three materials, and reconstruct extraordinary eggs. All reconstructed eggs hatch in your Incubators.</p></div>
+  <div class="recon-topline"><span id="reconKnownSummary">0 recipes discovered</span><span id="reconPageSummary">Ancient Pages: 0</span><span id="reconCurrencySummary">Currency: 0</span></div>
+  <div class="admin-switch recon-switch"><button id="reconShowChamber" class="subtab active" type="button">Reconstruction Chamber</button><button id="reconShowBook" class="subtab" type="button">📖 Recipe Book</button></div>
+  <div id="reconChamberPane"><div id="reconRecipeGrid" class="recon-recipe-grid"></div><div id="reconRecipeDetail" class="recon-details"></div></div>
+  <div id="reconBookPane" class="hidden"><div class="note-card"><strong>Keeper's Recipe Book</strong><p>Ancient Pages reveal one unknown recipe at a time. Recipes stay learned permanently, and an Ancient Page will never be wasted if there is nothing left to discover.</p></div><div id="reconBookGrid" class="recon-recipe-grid"></div></div>
+  <p id="reconMessage" class="recon-message" role="status" aria-live="polite"></p>
+</div>
 <div id="inventory" class="hideout-pane hidden">
       <div class="page-heading inventory-heading">
         <div>
@@ -246,6 +257,7 @@
         <button id="showAdventureBattle" class="subtab active" type="button">Battle</button>
         <button id="showAdventureExpeditions" class="subtab" type="button">Expeditions <span class="badge expedition-inline-badge">0</span></button>
         <button id="showAdventureTrials" class="subtab" type="button">Trials</button>
+        <button id="showAdventureHunting" class="subtab" type="button">🪤 Hunting Zone <span id="huntingTabReady" class="badge hidden">0</span></button>
       </div>
       <div id="adventureBattlePane" class="adventure-pane">
       <div class="page-heading">
@@ -298,6 +310,29 @@
         </div>
         <p id="trialMessage" class="trial-message"></p>
       </div>
+      <div id="adventureHuntingPane" class="adventure-pane hidden">
+        <div class="hunt-zone-banner">
+          <div class="eyebrow">THE ELUSIVE GROUNDS</div>
+          <h2>Hunting Zone</h2>
+          <p>Set your traps with bait, come back in four hours, and see what answered your call. These creatures don't appear during ordinary Explore encounters.</p>
+          <div class="hunt-zone-chips"><span id="huntingSlotCount">1 / 5 traps</span><span id="huntingReadyCount">0 ready</span><button class="ghost small" data-route="shop-supplies" type="button">Buy Bait &amp; Trap Upgrades ↗</button></div>
+        </div>
+        <div class="hunt-instruction"><strong>The hunt is patient.</strong> Bait is consumed when a trap is armed. Completed traps remain ready until you check them. No monsters are harmed.</div>
+        <div id="huntingTrapsGrid" class="hunt-traps-grid"></div>
+        <p id="huntingMessage" class="hunt-message" role="status"></p>
+        <div class="hunt-bait-guide"><h3>Bait in your pack</h3><div id="huntingBaitSummary" class="hunt-bait-summary"></div><p>Higher tiers improve both capture success and the chances of attracting rarer species. Configure exclusive monsters in Admin → Monster Studio → Obtain method → Hunting Zone.</p></div>
+      </div>
+      <dialog id="huntingBaitDialog" class="hunt-dialog">
+        <div class="hunt-dialog-head"><div><div class="eyebrow">READY THE TRAP</div><h3 id="huntingBaitHeading">Choose Bait</h3></div><button id="huntingCloseBait" class="ghost small" type="button">✕</button></div>
+        <p>Each bait starts the same four-hour hunt. Choose carefully: your bait is used immediately.</p>
+        <div id="huntingBaitChoices" class="hunt-bait-choices"></div>
+      </dialog>
+      <dialog id="huntingRevealDialog" class="hunt-dialog hunt-reveal-dialog">
+        <div class="hunt-reveal-art" id="huntingRevealArt"></div>
+        <div class="eyebrow">HUNTING ZONE REPORT</div><h2 id="huntingRevealTitle">Your trap is ready!</h2><p id="huntingRevealText"></p>
+        <div id="huntingRevealStats" class="hunt-reveal-stats"></div>
+        <button id="huntingCloseReveal" class="primary" type="button">Continue</button>
+      </dialog>
     </section>
 
     <section id="shop" class="page">
@@ -491,7 +526,7 @@
       <div class="admin2-nav" aria-label="Admin workshop navigation">
         <div class="admin2-nav-group"><span>Workspace</span><button id="showDashboardAdmin" class="subtab active" type="button">Overview</button><button id="showPublishingAdmin" class="subtab" type="button">Publishing &amp; Backups</button></div>
         <div class="admin2-nav-group"><span>Create</span><button id="showSpeciesAdmin" class="subtab" type="button">Monster Studio</button><button id="showAttackAdmin" class="subtab" type="button">Attack Editor</button><button id="showSpriteAdmin" class="subtab" type="button">Sprite Workshop</button></div>
-        <div class="admin2-nav-group"><span>World &amp; Rewards</span><button id="showTrialAdmin" class="subtab" type="button">Trials</button><button id="showLotteryAdmin" class="subtab" type="button">Lottery Eggs</button><button id="showAncientEggAdmin" class="subtab" type="button">Ancient Eggs</button><button id="showArtifactAdmin" class="subtab" type="button">Artifacts</button><button id="showDonationAdmin" class="subtab" type="button">Donations</button></div>
+        <div class="admin2-nav-group"><span>World &amp; Rewards</span><button id="showTrialAdmin" class="subtab" type="button">Trials</button><button id="showLotteryAdmin" class="subtab" type="button">Lottery Eggs</button><button id="showAncientEggAdmin" class="subtab" type="button">Ancient Eggs</button><button id="showArtifactAdmin" class="subtab" type="button">Artifacts</button><button id="showDonationAdmin" class="subtab" type="button">Donations</button><button id="showReconstructionAdmin" class="subtab" type="button">Reconstruction Lab</button></div>
         <div class="admin2-nav-group"><span>Events &amp; Content</span><button id="showDialogueAdmin" class="subtab" type="button">Silvy Dialogue</button><button id="showLandingAdmin" class="subtab" type="button">Landing Page</button><button id="showEventAdmin" class="subtab" type="button">Event Tester</button><button id="showExpeditionAdmin" class="subtab" type="button">Expeditions</button></div>
       </div>
       <div id="admin2DashboardPane" class="admin2-dashboard">
@@ -509,7 +544,37 @@
         <div class="note-card"><strong>GitHub workflow is unchanged</strong><p>Extract the ZIP into the repository root and commit/push the individual <code>content/</code> and <code>assets/live/</code> files. GitHub blocks files above 100 MiB. The checkup warns at 50 MiB and marks files at or above 100 MiB as needing attention. It cannot measure remote references that are not included in the new ZIP.</p><p>Existing export dependency blocking remains in place, including the unpublished signature attack safeguard.</p></div>
         <p id="admin2PublishingMessage" class="admin-message"></p>
       </div>
-      <div id="donationAdminPane" class="hidden">
+      <div id="reconstructionAdminPane" class="hidden">
+  <div class="note-card"><strong>Reconstruction Recipes &amp; Materials</strong><p>Create three-slot recipes that produce an egg. Ancient Pages only reveal recipes marked discoverable. New materials can be used in any recipe and optionally added to excavation rewards. Custom icons are editable in Sprite Workshop.</p></div>
+  <div class="recon-admin-columns">
+    <form id="reconRecipeForm" class="admin-form">
+      <h3>Recipe Editor</h3><input id="reconEditId" type="hidden">
+      <label>Recipe title<input id="reconRecipeTitle" maxlength="72" required placeholder="Forgotten Leviathan"></label>
+      <label>Resulting Monster<select id="reconRecipeSpecies" required></select></label>
+      <label>Egg Sprite Code<select id="reconRecipeEggSprite"></select><small>Automatic uses the species' custom egg artwork, if present. Or select an existing Sprite Workshop code.</small></label>
+      <div class="recon-admin-ingredients" id="reconAdminIngredients">
+        <label>Material A<select id="reconItem0" required></select><input type="number" id="reconQty0" min="1" max="9999" step="1" value="2" required></label>
+        <label>Material B<select id="reconItem1" required></select><input type="number" id="reconQty1" min="1" max="9999" step="1" value="1" required></label>
+        <label>Material C<select id="reconItem2" required></select><input type="number" id="reconQty2" min="1" max="9999" step="1" value="1" required></label>
+      </div>
+      <label class="check-row"><input id="reconPageDiscoverable" type="checkbox" checked><span>Ancient Pages can discover this recipe</span></label>
+      <div class="recon-admin-actions"><button class="primary" type="submit">Save Recipe</button><button id="reconNewRecipe" type="button" class="ghost">New</button><button id="reconGiveTestPage" type="button" class="ghost">Give Test Ancient Page</button><button id="reconDeleteRecipe" type="button" class="danger">Delete</button></div>
+      <p id="reconRecipeAdminMessage" class="admin-message" role="status"></p>
+      <h3>Saved Recipes</h3><div id="reconAdminRecipeList" class="recon-admin-list"></div>
+    </form>
+    <form id="reconMaterialForm" class="admin-form">
+      <h3>Materials Editor</h3><input id="reconMaterialEditId" type="hidden">
+      <label>Material name<input id="reconMaterialName" required maxlength="64" placeholder="Fossilized Heart"></label>
+      <label>Description<textarea id="reconMaterialDesc" rows="3" maxlength="320"></textarea></label>
+      <div class="form-grid three"><label>Category<select id="reconMaterialCategory"><option value="Excavation Find">Excavation Find</option><option value="Reconstruction Material">Reconstruction Material</option><option value="Expedition Treasure">Expedition Treasure</option></select></label><label>Sell value<input id="reconMaterialValue" type="number" min="0" max="100000" step="1" value="15"></label><label>Dig weight<input id="reconMaterialWeight" type="number" min="0" max="100" step="1" value="1"><small>0 = no random dig drops</small></label></div>
+      <div class="recon-admin-actions"><button class="primary" type="submit">Save Material</button><button id="reconNewMaterial" class="ghost" type="button">New</button><button id="reconDeleteMaterial" class="danger" type="button">Delete</button></div>
+      <p id="reconMaterialAdminMessage" class="admin-message" role="status"></p>
+      <h3>Registered Custom Materials</h3><div id="reconAdminMaterialList" class="recon-admin-list"></div>
+      <p class="form-note">Saving a material creates its own Sprite Workshop key, shown in the list. Upload artwork there, then export Live Content to publish it.</p>
+    </form>
+  </div>
+</div>
+<div id="donationAdminPane" class="hidden">
         <div class="note-card"><strong>Donation Requests &amp; XP Crystal Odds</strong><p>Manage the next day's eligible request goods and the optional crystal rates. At least two items per category must remain eligible. Settings are included in Admin Data and Export Live Package. Existing daily requests won't be rerolled when settings change.</p></div>
         <form id="donationAdminForm" class="admin-form donation-admin-panel">
           <h3>Crystal reward chances <small>(per donated crate)</small></h3>
@@ -662,6 +727,7 @@
               <div class="section-title"><span>3</span><div><h3>Obtaining & Breeding</h3><p>Where it comes from and how long it takes.</p></div></div>
               <div class="form-grid two">
                 <label>Obtain method<select id="obtainMethod"></select></label>
+                <label id="huntingRarityWrap" class="hidden">Hunting Zone rarity<select id="huntingRarity"><option value="Common">Common</option><option value="Uncommon">Uncommon</option><option value="Rare">Rare</option><option value="Elusive">Elusive</option></select><small>Relative attraction weight. Exotic bait gives elusive species better odds.</small></label>
                 <label id="shopPriceWrap"><span id="shopPriceLabel">Shop egg price</span><input id="shopPrice" type="number" min="0" step="1" value="1000"><small id="shopPriceHelp">Price in normal currency.</small></label>
               </div>
 
@@ -1422,7 +1488,7 @@ const TYPE_STRONG_MULTIPLIER=1.5;
 const TYPE_RESIST_MULTIPLIER=2/3;
 const TYPE_MIN_MULTIPLIER=.5;
 const TYPE_MAX_MULTIPLIER=2;
-const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Admin / Test"];
+const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Hunting Zone", "Reconstruction Lab Only", "Admin / Test"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
 const ATTACK_FX_STYLES = ["Auto","Bite","Slash","Slam","Projectile","Burst","Beam","Wave"];
@@ -1473,6 +1539,17 @@ const HABITAT_COSTS=[0,2500,6000,12000,25000];
 const HABITAT_THEMES={grove:{name:'Mossy Grove',emoji:'🌿'},ember:{name:'Volcanic Hollow',emoji:'🔥'},frost:{name:'Frozen Grotto',emoji:'❄️'},void:{name:'Twilight Hollow',emoji:'🌙'},aether:{name:'Moonlit Garden',emoji:'✨'}};
 const HABITAT_DECOR={none:'Bare Ground',stones:'Stepping Stones',crystals:'Crystal Cluster',flowers:'Wildflowers'};
 function emptyHabitat(i){return {name:`Habitat ${i+1}`,theme:'grove',decor:'stones',monsterIds:[null,null,null]};}
+// Hunting Zone 1.0: prices approved by the Keeper; balance odds are test values.
+const HUNT_DURATION_MS=4*60*60*1000;
+const HUNT_TRAP_COSTS=[0,10000,25000,50000,100000];
+const HUNT_BAITS=[
+ {id:'hunt_bait_basic',name:'Basic Bait',price:100,chance:.35,weights:{Common:100,Uncommon:24,Rare:5,Elusive:1},icon:'mystery_capsule',category:'Hunting Bait',desc:'Affordable bait. 35% capture success; usually attracts more common Hunting Zone species.'},
+ {id:'hunt_bait_scented',name:'Scented Bait',price:500,chance:.55,weights:{Common:75,Uncommon:45,Rare:13,Elusive:3},icon:'mystery_capsule',category:'Hunting Bait',desc:'Fragrant bait. 55% capture success, with better odds for unusual creatures.'},
+ {id:'hunt_bait_premium',name:'Premium Bait',price:1200,chance:.75,weights:{Common:55,Uncommon:55,Rare:30,Elusive:10},icon:'mystery_capsule',category:'Hunting Bait',desc:'High quality bait. 75% capture success and a better rare-species attraction table.'},
+ {id:'hunt_bait_exotic',name:'Exotic Bait',price:5000,chance:.90,weights:{Common:30,Uncommon:45,Rare:65,Elusive:32},icon:'mystery_capsule',category:'Hunting Bait',desc:'Rare aromatic bait. 90% capture success and significantly better elusive-species odds.'}
+];
+const HUNT_RARITIES=['Common','Uncommon','Rare','Elusive'];
+function emptyHuntingTrap(i){return {slot:i,startedAt:null,finishAt:null,baitId:null,result:null};}
 const HORMONE_CATALYST_REDUCTION_MS = 30*60*1000;
 const PRISMATIC_BASE_CHANCE = 0.005;
 const PRISMATIC_ONE_PRISTINE_CHANCE = 0.0075;
@@ -1746,7 +1823,14 @@ const SPRITE_DEFS={
   collection_pen:{name:'Collection Pen',category:'Facilities',kind:'image',fallback:'assets/icons/basic_sprites/breeding_pen.png'},
   hormone_catalyst:{name:'Hormone Catalyst',category:'Items',kind:'image',fallback:'assets/icons/basic_sprites/hormone_catalyst.png'},
   silverwind_normal:{name:'Silverwind • Normal Pose',category:'Characters',kind:'image',fallback:'assets/icons/basic_sprites/silverwind_normal.png'},
-  silverwind_checkin:{name:'Silverwind • Check-In Pose',category:'Characters',kind:'image',fallback:'assets/icons/basic_sprites/silverwind_checkin.png'}
+  silverwind_checkin:{name:'Silverwind • Check-In Pose',category:'Characters',kind:'image',fallback:'assets/icons/basic_sprites/silverwind_checkin.png'},
+  ancient_pages:{name:'Ancient Pages',category:'Excavation Finds',kind:'glyph',fallback:'📜'},
+  dig_fossil_shell:{name:'Petrified Shell',category:'Excavation Finds',kind:'glyph',fallback:'🐚'},
+  dig_fossil_root:{name:'Primeval Root Fossil',category:'Excavation Finds',kind:'glyph',fallback:'🌿'},
+  dig_bone_claw:{name:'Titan Claw',category:'Excavation Finds',kind:'glyph',fallback:'🦴'},
+  dig_bone_skull:{name:'Ancient Skull Fragment',category:'Excavation Finds',kind:'glyph',fallback:'💀'},
+  dig_gemstone_amber:{name:'Deep Amber',category:'Excavation Finds',kind:'glyph',fallback:'🟠'},
+  dig_gemstone_onyx:{name:'Dusk Onyx',category:'Excavation Finds',kind:'glyph',fallback:'🔮'}
 };
 
 // Use image URLs already held in browser memory while constructing HTML.
@@ -1806,7 +1890,13 @@ const TRADE_GOODS={
   dig_gemstone_sunstone:{name:'Golden Sunstone',category:'Excavation Find',sellValue:20,icon:'prismatic_shard',desc:'Warm, honey-colored gemstone recovered from a dig. Salvage value: 20 currency.'},
   dig_gemstone_moonstone:{name:'Pale Moonstone',category:'Excavation Find',sellValue:20,icon:'prismatic_shard',desc:'A softly luminous mineral polished by centuries underground. Salvage value: 20 currency.'},
   dig_bone_fang:{name:'Ancient Fang',category:'Excavation Find',sellValue:5,icon:'field_monster_scale',desc:'A weathered tooth from an unidentified ancient creature. Salvage value: 5 currency.'},
-  dig_bone_rib:{name:'Weathered Rib Bone',category:'Excavation Find',sellValue:5,icon:'field_monster_scale',desc:'A little fossil-aged rib bone. Salvage value: 5 currency.'}
+  dig_bone_rib:{name:'Weathered Rib Bone',category:'Excavation Find',sellValue:5,icon:'field_monster_scale',desc:'A little fossil-aged rib bone. Salvage value: 5 currency.'},
+  dig_fossil_shell:{name:'Petrified Shell',category:'Excavation Find',sellValue:12,desc:'An ancient shell etched with concentric ridges.'},
+  dig_fossil_root:{name:'Primeval Root Fossil',category:'Excavation Find',sellValue:12,desc:'A fossilized tangle from a vanished forest.'},
+  dig_bone_claw:{name:'Titan Claw',category:'Excavation Find',sellValue:8,desc:'A curved fossil claw from an enormous creature.'},
+  dig_bone_skull:{name:'Ancient Skull Fragment',category:'Excavation Find',sellValue:8,desc:'A jagged plate of an unidentified skull.'},
+  dig_gemstone_amber:{name:'Deep Amber',category:'Excavation Find',sellValue:25,desc:'Ancient amber trapping tiny sparks of light.'},
+  dig_gemstone_onyx:{name:'Dusk Onyx',category:'Excavation Find',sellValue:25,desc:'An opaque gemstone that seems to drink the light.'}
 };
 function fieldFindIds(){return Object.keys(TRADE_GOODS).filter(id=>TRADE_GOODS[id]?.category==='Field Find');}
 function itemInfoForInventoryId(id){
@@ -1817,6 +1907,7 @@ function itemInfoForInventoryId(id){
   }
   if(id==='lottery_coin')return {id,name:'Lottery Coin',category:'Lottery',desc:'A rare find from Explore. Grants one extra Lottery Wheel spin.',icon:'coin_pouch',isConsumable:false,sellValue:0};
   if(id==='lottery_egg')return {id,name:'Lottery Egg',category:'Lottery',desc:'Redeem in Shop → Lottery Wheel for a random species from the admin-managed Lottery Egg pool.',icon:'egg_generic',isConsumable:true,sellValue:0};
+  if(id==='ancient_pages')return {id,name:'Ancient Pages',category:'Excavation Find',desc:'A surviving scrap of ancient Keeper research. Use to discover one unknown Reconstruction Lab recipe, or sell for 500 currency.',isConsumable:true,sellValue:500,icon:'ancient_pages'};
   if(id==='ancient_egg')return {id,name:'Ancient Egg',category:'Excavation',desc:'An impossibly old egg recovered beneath the wilds. Open it to receive a hatchable egg from the Admin-managed Ancient Egg pool. If that pool is empty, this egg is kept safely.',icon:'egg_ancient',isConsumable:true,sellValue:0};
   if(TRADE_GOODS[id])return {...TRADE_GOODS[id],id,isTradeGood:true,isConsumable:false};
   if(DONATION_CRYSTALS[id])return {id,...DONATION_CRYSTALS[id],category:'Donation Reward',isConsumable:true,sellValue:0,shopPrice:0};
@@ -1824,7 +1915,9 @@ function itemInfoForInventoryId(id){
   return item?{id,name:item.name,category:item.category,desc:item.desc,icon:item.icon||'mystery_capsule',spriteKey:item.spriteKey||null,iconImage:item.iconImage||null,isConsumable:item.consumable!==false,shopPrice:Number(item.price||0),sellValue:Math.floor(Number(item.price||0)*.05)}:null;
 }
 function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
+  if(info?.spriteKey&&SPRITE_DEFS[info.spriteKey]?.kind==='glyph')return spriteFallbackMarkup(info.spriteKey,`field-find-icon ${className}`);
   if(info?.spriteKey)return imageSpriteMarkup(info.spriteKey,info.iconImage||SPRITE_DEFS[info.spriteKey]?.fallback||'',`field-find-icon ${className}`,'');
+  if(SPRITE_DEFS[info?.id]?.kind==='glyph')return spriteFallbackMarkup(info.id,`field-find-icon ${className}`);
   // Attack scrolls share a deliberately common artwork; every ordinary shop,
   // expedition, or lottery item gets its own replaceable Sprite Workshop slot.
   const key=SPRITE_DEFS[info?.id]?info.id:(String(info?.id||'').startsWith('scroll:')?'attack_scroll':(info?.icon||'mystery_capsule'));
@@ -1838,9 +1931,9 @@ const CAPTURE_POD_DURATION_MS=20*60*1000;
 const MONSTER_WARD_DURATION_MS=5*60*1000;
 const MONSTER_WARD_REDUCTION=.15;
 const EXCAVATION_CURIOSITY_IDS={
-  fossil:['dig_fossil_ammonite','dig_fossil_fern'],
-  gemstone:['dig_gemstone_sunstone','dig_gemstone_moonstone'],
-  bone:['dig_bone_fang','dig_bone_rib']
+  fossil:['dig_fossil_ammonite','dig_fossil_fern','dig_fossil_shell','dig_fossil_root'],
+  gemstone:['dig_gemstone_sunstone','dig_gemstone_moonstone','dig_gemstone_amber','dig_gemstone_onyx'],
+  bone:['dig_bone_fang','dig_bone_rib','dig_bone_claw','dig_bone_skull']
 };
 const REFRESH_JUICE_COOLDOWN_MS=60*60*1000;
 const LOTTERY_FREE_COOLDOWN_MS=60*60*1000;
@@ -2079,6 +2172,7 @@ function normalizeDonationSettings(raw){
   return {eligibleIds:[...new Set(ids)],rates};
 }
 const ITEM_SHOP = [
+  ...HUNT_BAITS,
   {id:'heal_gel',name:'Recovery Gel',category:'Consumable',price:120,icon:'recovery_gel',consumable:true,desc:'Restores 35% of maximum Vitality during battle.'},
   {id:'medium_heal_gel',name:'Medium Healing Gel',category:'Consumable',price:650,icon:'super_recovery_gel',consumable:true,desc:'Restores 50% of maximum Vitality during battle.'},
   {id:'life_crystal',name:'Life Crystal',category:'Consumable',price:2500,icon:'prismatic_shard',consumable:true,desc:'Fully restores a monster’s Vitality during battle.'},
@@ -2228,7 +2322,13 @@ function silverwindReferenceTopics(){
 
     {id:'explore-zones',category:'Fieldwork',title:'Explore & Weekday Zones',summary:'Endless map exploration and the Element rotation by day.',keywords:'map maze weekday monday tuesday zone chaos wastes wild encounters',note:`The weekday zones are predictable right up until Sunday, when the Chaos Wastes throw my filing system out a window.`,body:()=>`<p>Normal Explore uses a connected <strong>7×7</strong> fog-covered map. Each successful move resolves one Explore roll. Fully reveal a map and a fresh layout is generated so the run can continue.</p><div class="silverwind-reference-rows">${zones}</div><p>Wild zone eligibility is driven by a species' primary Element. Sunday chooses three Elements for the week and keeps them stable until the next weekly roll.</p>`+referenceActions([['battle','Open Explore']])},
 
-    {id:'capture',category:'Fieldwork',title:'Wild Recruitment & Capture Pods',summary:'How defeated wild monsters can join your collection.',keywords:'capture recruit reward wild monster chance pod 15 20',note:`Winning a wild battle does not mean the monster immediately moves into your spare room. Sometimes it does, though. Keepers are strange.`,body:()=>referenceList([
+    {id:'hunting',category:'Fieldwork',title:'Hunting Zone & Bait',summary:'Set baited traps and wait four hours for exclusive monsters.',keywords:'hunting safari traps bait basic scented premium exotic',note:`Some creatures are too elusive for a casual stroll through the wilds. Bring bait, and patience.`,body:()=>referenceList([
+      `<strong>Traps:</strong> Start with one; unlock up to five. Each armed trap completes after four real-time hours, including offline.`,
+      `<strong>Bait:</strong> Basic 100, Scented 500, Premium 1,200, Exotic 5,000 currency. The higher tiers improve success chances and elusive-species attraction weights.`,
+      `<strong>Exclusive species:</strong> Monster Studio Obtain Method: Hunting Zone. Higher Hunting Rarity tiers are progressively harder to attract.`,
+      `<strong>Collection:</strong> Caught monsters join directly. A full Collection holds a successful trap until room is available.`
+    ])+referenceActions([['hunting','Open Hunting Zone'],['shop','Buy Bait']])},
+    {id:'capture',category:'Fieldwork',title:'Wild Recruitment & Capture Pods' ,summary:'How defeated wild monsters can join your collection.',keywords:'capture recruit reward wild monster chance pod 15 20',note:`Winning a wild battle does not mean the monster immediately moves into your spare room. Sometimes it does, though. Keepers are strange.`,body:()=>referenceList([
       `Defeated capturable wild monsters have a base <strong>${referencePercent(WILD_MONSTER_REWARD_CHANCE)}</strong> recruitment chance.`,
       `A Capture Pod lasts <strong>${Math.round(CAPTURE_POD_DURATION_MS/60000)} minutes</strong> and adds <strong>${Math.round(CAPTURE_POD_BONUS*100)} percentage points</strong> to that chance.`,
       `The current maximum with that field bonus is <strong>${referencePercent(Math.min(1,WILD_MONSTER_REWARD_CHANCE+CAPTURE_POD_BONUS))}</strong>.`,
@@ -2469,6 +2569,127 @@ function normalizeArtifactCatalog(){
     a.lore=(Array.isArray(a.lore)?a.lore:[]).map(v=>String(v).trim().slice(0,300)).filter(Boolean).slice(0,25);
   }
 }
+// ---------- Reconstruction Lab (v0.15.83) ----------
+const RECONSTRUCTION_REGULAR_COST=2500,RECONSTRUCTION_MYTHIC_COST=25000;
+const RECONSTRUCTION_MATERIAL_PREFIX='lab_mat_';
+function reconSanitizeMaterial(id,raw){
+  const name=String(raw?.name||'').trim().slice(0,64);
+  if(!name||!/^lab_mat_[a-z0-9_-]{1,85}$/.test(id))return null;
+  const category=['Excavation Find','Reconstruction Material','Expedition Treasure'].includes(raw.category)?raw.category:'Reconstruction Material';
+  return {name,category,desc:String(raw.desc||'').slice(0,320),sellValue:Math.max(0,Math.min(100000,Math.floor(Number(raw.sellValue)||0))),digWeight:Math.max(0,Math.min(100,Math.floor(Number(raw.digWeight)||0))),spriteKey:id};
+}
+function syncReconstructionMaterialRegistry(){
+  for(const id of Object.keys(TRADE_GOODS))if(id.startsWith(RECONSTRUCTION_MATERIAL_PREFIX))delete TRADE_GOODS[id];
+  for(const id of Object.keys(SPRITE_DEFS))if(id.startsWith(RECONSTRUCTION_MATERIAL_PREFIX))delete SPRITE_DEFS[id];
+  for(const [id,m] of Object.entries(state.reconstructionMaterials||{})){
+    const valid=reconSanitizeMaterial(id,m);if(!valid)continue;
+    state.reconstructionMaterials[id]=valid;
+    TRADE_GOODS[id]=valid;
+    SPRITE_DEFS[id]={name:valid.name,category:'Reconstruction Materials',kind:'glyph',fallback:'⚙️'};
+  }
+}
+function reconRecipeIsValid(recipe){
+  if(!recipe||!state.species[recipe.slug]||!Array.isArray(recipe.ingredients)||recipe.ingredients.length!==3)return false;
+  if(recipe.eggSpriteKey&&recipe.eggSpriteKey!=='auto'&&!SPRITE_DEFS[recipe.eggSpriteKey])return false;
+  return recipe.ingredients.every(part=>part&&itemInfoForInventoryId(String(part.id||''))&&Number.isInteger(part.qty)&&part.qty>0&&part.qty<=9999);
+}
+function normalizeReconstructionState(){
+  const materials=state.reconstructionMaterials&&typeof state.reconstructionMaterials==='object'&&!Array.isArray(state.reconstructionMaterials)?state.reconstructionMaterials:{};
+  state.reconstructionMaterials={};
+  for(const [id,material] of Object.entries(materials)){
+    const valid=reconSanitizeMaterial(id,material);if(valid)state.reconstructionMaterials[id]=valid;
+  }
+  syncReconstructionMaterialRegistry();
+  const recipes=state.reconstructionRecipes&&typeof state.reconstructionRecipes==='object'&&!Array.isArray(state.reconstructionRecipes)?state.reconstructionRecipes:{};
+  state.reconstructionRecipes={};
+  for(const [id,r] of Object.entries(recipes)){
+    if(!/^recon_[a-z0-9_-]{1,90}$/.test(id)||!r||!Array.isArray(r.ingredients))continue;
+    state.reconstructionRecipes[id]={id,title:String(r.title||'Forgotten Formula').slice(0,72),slug:String(r.slug||''),eggSpriteKey:String(r.eggSpriteKey||'auto'),pageDiscoverable:r.pageDiscoverable!==false,ingredients:r.ingredients.slice(0,3).map(part=>({id:String(part?.id||''),qty:Math.floor(Number(part?.qty)||0)}))};
+  }
+  state.knownReconstructionRecipes=[...new Set((Array.isArray(state.knownReconstructionRecipes)?state.knownReconstructionRecipes:[]).filter(id=>typeof id==='string'&&id.length<=120))];
+}
+function reconCost(recipe){const sp=state.species[recipe.slug];return sp&&(sp.isMythic===true||sp.rarity==='Mythic')?RECONSTRUCTION_MYTHIC_COST:RECONSTRUCTION_REGULAR_COST;}
+function reconAllRecipes(){return Object.values(state.reconstructionRecipes||{}).filter(reconRecipeIsValid);}
+function reconEligibleUnknownRecipes(){const known=new Set(state.knownReconstructionRecipes);return reconAllRecipes().filter(r=>r.pageDiscoverable&&!known.has(r.id));}
+function useAncientPages(){
+  if(Number(state.inventory.ancient_pages||0)<1)return false;
+  const pool=reconEligibleUnknownRecipes();
+  if(!pool.length){alert('Every available Ancient Pages recipe is already known, or no discoverable recipes are available. Your page was not consumed.');return false;}
+  const recipe=randomChoice(pool);
+  state.inventory.ancient_pages--;if(!state.inventory.ancient_pages)delete state.inventory.ancient_pages;
+  state.knownReconstructionRecipes.push(recipe.id);save();renderAll();
+  document.getElementById('reconMessage').textContent=`Ancient Pages revealed: ${recipe.title}!`;
+  return true;
+}
+let reconSelectedRecipeId='',reconSelectedPane='chamber';
+function reconRecipeIngredientsMarkup(recipe){
+  return recipe.ingredients.map((part,i)=>{
+    const info=itemInfoForInventoryId(part.id),owned=Math.max(0,Number(state.inventory[part.id]||0));
+    return `<div class="recon-ingredient ${owned>=part.qty?'ready':'missing'}"><div class="recon-ingredient-icon">${inventoryIconMarkup(info,'sheet-icon recon-material-icon')}</div><div><strong>${labSafe(info?.name||part.id)}</strong><small>Required ×${part.qty} · Owned ×${owned}</small></div></div>`;
+  }).join('');
+}
+function reconMaterialsSatisfied(recipe){
+  const counts={};for(const part of recipe.ingredients)counts[part.id]=(counts[part.id]||0)+part.qty;
+  return Object.entries(counts).every(([id,qty])=>Number(state.inventory[id]||0)>=qty);
+}
+function renderReconstructionLab(){
+  const recipes=reconAllRecipes(),known=new Set(state.knownReconstructionRecipes),discovered=recipes.filter(r=>known.has(r.id));
+  document.getElementById('reconKnownSummary').textContent=`${discovered.length} / ${recipes.length} recipes discovered`;
+  document.getElementById('reconPageSummary').textContent=`Ancient Pages: ${Number(state.inventory.ancient_pages||0)}`;
+  document.getElementById('reconCurrencySummary').textContent=`Currency: ${money(state.currency)}`;
+  document.getElementById('reconShowChamber').classList.toggle('active',reconSelectedPane==='chamber');
+  document.getElementById('reconShowBook').classList.toggle('active',reconSelectedPane==='book');
+  document.getElementById('reconChamberPane').classList.toggle('hidden',reconSelectedPane!=='chamber');
+  document.getElementById('reconBookPane').classList.toggle('hidden',reconSelectedPane!=='book');
+  if(!discovered.some(r=>r.id===reconSelectedRecipeId))reconSelectedRecipeId=discovered[0]?.id||'';
+  document.getElementById('reconRecipeGrid').innerHTML=discovered.length?discovered.map(r=>`<button type="button" data-recon-select="${labSafe(r.id)}" class="recon-recipe-button ${r.id===reconSelectedRecipeId?'active':''}"><span>🥚</span><strong>${labSafe(r.title)}</strong><small>${labSafe(state.species[r.slug]?.name||'Unknown')} · ${money(reconCost(r))} currency</small></button>`).join(''):'<div class="empty-card">No recipes learned yet. Find Ancient Pages while digging, or discover new formulas as they are published.</div>';
+  const book=document.getElementById('reconBookGrid');
+  book.innerHTML=recipes.length?recipes.map(r=>known.has(r.id)?`<div class="recon-book-entry known"><span>📖</span><strong>${labSafe(r.title)}</strong><small>${labSafe(state.species[r.slug]?.name||'Unknown')} · ${r.ingredients.map(part=>labSafe(itemInfoForInventoryId(part.id)?.name||part.id)+' ×'+part.qty).join(' + ')}</small></div>`:`<div class="recon-book-entry locked"><span>🔒</span><strong>???</strong><small>Undiscovered formula</small></div>`).join(''):'<div class="empty-card">No formulas have been published to the Lab yet.</div>';
+  const chosen=discovered.find(r=>r.id===reconSelectedRecipeId),detail=document.getElementById('reconRecipeDetail');
+  if(!chosen){detail.innerHTML='<div class="note-card"><strong>Awaiting discovery</strong><p>Use Ancient Pages from Inventory to learn a new recipe. The ingredients and the resulting egg will be revealed in your Recipe Book.</p></div>';return;}
+  const price=reconCost(chosen),canPay=state.currency>=price,hasMaterials=reconMaterialsSatisfied(chosen),sp=state.species[chosen.slug];
+  detail.innerHTML=`<div class="recon-detail-head"><div><div class="eyebrow">SELECTED FORMULA</div><h3>${labSafe(chosen.title)}</h3><p>Produces a ${labSafe(sp?.name||'Monster')} Egg</p></div><div class="recon-outcome">🥚 <strong>${labSafe(sp?.name||'Monster')} Egg</strong><small>Incubation: ${fmtTime(Number(sp?.hatchSeconds||60)*1000)}</small></div></div><div class="recon-materials">${reconRecipeIngredientsMarkup(chosen)}</div><div class="recon-checkout"><div><strong>${currencyMarkup(price)}</strong><small>${price===RECONSTRUCTION_MYTHIC_COST?'Mythic reconstruction fee':'Standard reconstruction fee'}</small></div><button type="button" class="primary big" id="reconCreateEgg" ${canPay&&hasMaterials?'':'disabled'}>Reconstruct Egg</button></div>${canPay&&hasMaterials?'':`<p class="form-note">${!hasMaterials?'Missing required materials. ':''}${!canPay?'Not enough currency.':''}</p>`}`;
+}
+function reconstructSelectedEgg(){
+  const recipe=state.reconstructionRecipes[reconSelectedRecipeId];if(!reconRecipeIsValid(recipe)||!state.knownReconstructionRecipes.includes(recipe.id)){document.getElementById('reconMessage').textContent='This recipe is not available.';return false;}
+  const fee=reconCost(recipe),sp=state.species[recipe.slug];
+  if(state.currency<fee||!reconMaterialsSatisfied(recipe)){document.getElementById('reconMessage').textContent='You need all three materials and the full reconstruction fee.';renderReconstructionLab();return false;}
+  if(!confirm(`Reconstruct one ${sp.name} Egg for ${money(fee)} currency and the listed materials?`))return false;
+  // Validate again before spending. No egg-storage cap exists in this version;
+  // collection capacity is checked when the egg actually hatches.
+  if(!reconRecipeIsValid(recipe)||!state.knownReconstructionRecipes.includes(recipe.id)||state.currency<fee||!reconMaterialsSatisfied(recipe))return false;
+  const egg={id:uid('E',state.nextEggNum++),slug:recipe.slug,speciesName:sp.name,displayName:`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'reconstruction',eggSpriteKey:recipe.eggSpriteKey==='auto'?'':recipe.eggSpriteKey,reconstructionRecipeId:recipe.id,createdAt:Date.now(),status:'waiting'};
+  for(const part of recipe.ingredients){state.inventory[part.id]-=part.qty;if(state.inventory[part.id]<=0)delete state.inventory[part.id];}
+  state.currency-=fee;state.eggs.push(egg);save();
+  document.getElementById('reconMessage').textContent=`${sp.name} Egg reconstructed! It is waiting in Egg Storage.`;
+  renderAll();return true;
+}
+function renderReconstructionAdmin(){
+  if(!isAdminAccount())return;
+  const species=document.getElementById('reconRecipeSpecies'),selectedSpecies=species.value;
+  species.innerHTML='<option value="">Select a monster…</option>'+Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${labSafe(slug)}">${labSafe(sp.name)}${sp.rarity==='Mythic'||sp.isMythic?' (Mythic)':''}${!sp.builtin&&!sp.published?' [Draft]':''}</option>`).join('');species.value=selectedSpecies;
+  const items=Object.entries(TRADE_GOODS).filter(([,v])=>Number(v.sellValue)>=0).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  const fullItems=[...items,...ITEM_SHOP.filter(x=>x.id).map(x=>[x.id,{name:x.name}]),['ancient_pages',{name:'Ancient Pages'}]];
+  for(let i=0;i<3;i++){const select=document.getElementById(`reconItem${i}`),old=select.value;select.innerHTML='<option value="">Choose an item…</option>'+fullItems.map(([id,info])=>`<option value="${labSafe(id)}">${labSafe(info.name)}</option>`).join('');select.value=old;}
+  const spriteSelect=document.getElementById('reconRecipeEggSprite'),oldSprite=spriteSelect.value;
+  spriteSelect.innerHTML='<option value="auto">Automatic (species egg artwork)</option>'+Object.entries(SPRITE_DEFS).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([key,def])=>`<option value="${labSafe(key)}">${labSafe(def.name)} [${labSafe(key)}]</option>`).join('');spriteSelect.value=oldSprite||'auto';
+  document.getElementById('reconAdminRecipeList').innerHTML=Object.values(state.reconstructionRecipes).map(r=>`<button type="button" data-recon-admin-edit="${labSafe(r.id)}"><strong>${labSafe(r.title)}</strong><small>${labSafe(state.species[r.slug]?.name||'Missing species')} · ${r.pageDiscoverable?'Page discoverable':'Hidden recipe'}</small></button>`).join('')||'<p>No recipes saved.</p>';
+  document.getElementById('reconAdminMaterialList').innerHTML=Object.entries(state.reconstructionMaterials).map(([id,m])=>`<button type="button" data-recon-material-edit="${labSafe(id)}"><strong>${labSafe(m.name)}</strong><small>${labSafe(id)} · ${m.sellValue} currency · dig weight ${m.digWeight}</small></button>`).join('')||'<p>No custom materials saved.</p>';
+}
+function reconClearRecipe(){for(const id of ['reconEditId','reconRecipeTitle'])document.getElementById(id).value='';document.getElementById('reconRecipeSpecies').value='';document.getElementById('reconRecipeEggSprite').value='auto';document.getElementById('reconPageDiscoverable').checked=true;for(let i=0;i<3;i++){document.getElementById(`reconItem${i}`).value='';document.getElementById(`reconQty${i}`).value=i===0?'2':'1';}}
+function reconEditRecipe(id){const r=state.reconstructionRecipes[id];if(!r)return;document.getElementById('reconEditId').value=id;document.getElementById('reconRecipeTitle').value=r.title;document.getElementById('reconRecipeSpecies').value=r.slug;document.getElementById('reconRecipeEggSprite').value=r.eggSpriteKey||'auto';document.getElementById('reconPageDiscoverable').checked=r.pageDiscoverable!==false;r.ingredients.forEach((p,i)=>{document.getElementById(`reconItem${i}`).value=p.id;document.getElementById(`reconQty${i}`).value=p.qty;});}
+function reconSaveRecipe(e){e.preventDefault();if(!isAdminAccount())return;const title=document.getElementById('reconRecipeTitle').value.trim(),slug=document.getElementById('reconRecipeSpecies').value,eggSpriteKey=document.getElementById('reconRecipeEggSprite').value||'auto',ingredients=[0,1,2].map(i=>({id:document.getElementById(`reconItem${i}`).value,qty:Number(document.getElementById(`reconQty${i}`).value)})),out=document.getElementById('reconRecipeAdminMessage');
+  if(!title||!state.species[slug]||ingredients.some(p=>!p.id||!Number.isInteger(p.qty)||p.qty<1||p.qty>9999||!itemInfoForInventoryId(p.id))){out.textContent='Choose a species, a title, and three valid materials with quantities 1–9999.';return;}
+  const id=document.getElementById('reconEditId').value||`recon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,6)}`;
+  state.reconstructionRecipes[id]={id,title:title.slice(0,72),slug,eggSpriteKey,pageDiscoverable:document.getElementById('reconPageDiscoverable').checked,ingredients};
+  save();renderReconstructionAdmin();reconEditRecipe(id);renderReconstructionLab();out.textContent=`Saved ${title}. Include it in your next Live Content export.`;
+}
+function reconClearMaterial(){for(const id of ['reconMaterialEditId','reconMaterialName','reconMaterialDesc'])document.getElementById(id).value='';document.getElementById('reconMaterialCategory').value='Excavation Find';document.getElementById('reconMaterialValue').value=15;document.getElementById('reconMaterialWeight').value=1;}
+function reconEditMaterial(id){const m=state.reconstructionMaterials[id];if(!m)return;document.getElementById('reconMaterialEditId').value=id;document.getElementById('reconMaterialName').value=m.name;document.getElementById('reconMaterialDesc').value=m.desc;document.getElementById('reconMaterialCategory').value=m.category;document.getElementById('reconMaterialValue').value=m.sellValue;document.getElementById('reconMaterialWeight').value=m.digWeight;}
+function reconSaveMaterial(e){e.preventDefault();if(!isAdminAccount())return;const name=document.getElementById('reconMaterialName').value.trim(),out=document.getElementById('reconMaterialAdminMessage');if(!name){out.textContent='Enter a material name.';return;}const id=document.getElementById('reconMaterialEditId').value||`lab_mat_${slugify(name)}_${Math.random().toString(36).slice(2,6)}`,m=reconSanitizeMaterial(id,{name,category:document.getElementById('reconMaterialCategory').value,desc:document.getElementById('reconMaterialDesc').value,sellValue:document.getElementById('reconMaterialValue').value,digWeight:document.getElementById('reconMaterialWeight').value});if(!m){out.textContent='Invalid material name.';return;}state.reconstructionMaterials[id]=m;syncReconstructionMaterialRegistry();save();renderReconstructionAdmin();reconEditMaterial(id);renderInventory();renderSpriteRegistry();out.textContent=`Saved ${name}. Sprite Workshop code: ${id}.`;}
+function reconDeleteRecipe(){if(!isAdminAccount())return;const id=document.getElementById('reconEditId').value,r=state.reconstructionRecipes[id];if(!r||!confirm(`Delete the recipe ${r.title}? Existing eggs will be safe.`))return;delete state.reconstructionRecipes[id];save();renderReconstructionAdmin();reconClearRecipe();renderReconstructionLab();}
+function reconDeleteMaterial(){if(!isAdminAccount())return;const id=document.getElementById('reconMaterialEditId').value,m=state.reconstructionMaterials[id];if(!m)return;const referenced=Object.values(state.reconstructionRecipes).some(r=>r.ingredients.some(p=>p.id===id));if(referenced||Number(state.inventory[id]||0)>0){document.getElementById('reconMaterialAdminMessage').textContent='Cannot delete: a saved recipe or inventory still uses this material.';return;}if(!confirm(`Delete custom material ${m.name}?`))return;delete state.reconstructionMaterials[id];syncReconstructionMaterialRegistry();save();renderReconstructionAdmin();reconClearMaterial();renderSpriteRegistry();}
+
 function defaultState(){
   return {
     species:JSON.parse(JSON.stringify(BUILTIN_SPECIES)),
@@ -2477,10 +2698,12 @@ function defaultState(){
     monsters:[],
     activeMonsterId:null,
     currency:1000,breedJob:null,eggs:[],inventory:{},
+    reconstructionRecipes:{},reconstructionMaterials:{},knownReconstructionRecipes:[],
     account:{keeperName:'New Keeper',accountId:makeLocalAccountId(),role:'player'},
     onboarding:freshOnboardingState(),
     unlockedCollectionPens:1,collectionPens:Array.from({length:MAX_COLLECTION_PENS},()=>[]),
     unlockedBreedingPens:1,breedingPens:Array.from({length:5},(_,i)=>emptyBreedingPen(i)),
+    hunting:{unlockedTraps:1,traps:Array.from({length:5},(_,i)=>emptyHuntingTrap(i)),lastMessage:''},
     unlockedHabitats:1,habitats:Array.from({length:MAX_HABITATS},(_,i)=>emptyHabitat(i)),
     accountLevel:1,accountXp:0,
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
@@ -2608,6 +2831,7 @@ function normalizeState(){
   state.species=state.species||{};
   state.attacks=state.attacks||{};
   state.inventory=state.inventory||{};
+  normalizeReconstructionState();
   state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
   state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
   state.lottery.lastResult=String(state.lottery.lastResult||'').slice(0,240);
@@ -2746,6 +2970,13 @@ function normalizeState(){
   const oldPens=Array.isArray(state.breedingPens)?state.breedingPens:[];
   state.breedingPens=Array.from({length:5},(_,i)=>({...emptyBreedingPen(i),...(oldPens[i]||{}),slot:i}));
   state.unlockedBreedingPens=Math.max(1,Math.min(5,Number(state.unlockedBreedingPens||1)));
+  // Old saves had no Hunting Zone. Never replace saved in-progress or ready hunts.
+  const rawHunting=state.hunting&&typeof state.hunting==='object'?state.hunting:{};
+  state.hunting={unlockedTraps:Math.max(1,Math.min(5,Number(rawHunting.unlockedTraps)||1)),traps:Array.from({length:5},(_,i)=>{
+    const v=Array.isArray(rawHunting.traps)?rawHunting.traps[i]:null;
+    if(!v||!v.baitId||!v.result||!Number.isFinite(Number(v.finishAt)))return emptyHuntingTrap(i);
+    return {slot:i,startedAt:Math.max(0,Number(v.startedAt)||0),finishAt:Number(v.finishAt),baitId:String(v.baitId),result:v.result};
+  }),lastMessage:String(rawHunting.lastMessage||'').slice(0,250)};
   // v0.15.2 migration: preserve an in-progress legacy single breeding job in Pen 1.
   if(state.breedJob && !state.breedingPens.some(p=>p.motherId||p.fatherId)){
     state.breedingPens[0]={...emptyBreedingPen(0),...state.breedJob,slot:0,status:'breeding',catalystUsed:!!state.breedJob.catalystUsed,pendingEgg:state.breedJob.pendingEgg||null};
@@ -3968,21 +4199,23 @@ function showSilverwindPane(name='desk'){
 }
 let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle',currentSilverwindPane='desk';
 function showAdventurePane(name='battle'){
-  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane'};
-  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials'};
+  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane',hunting:'adventureHuntingPane'};
+  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials',hunting:'showAdventureHunting'};
   if(!panes[name])name='battle';currentAdventurePane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
   if(name==='expeditions')renderExpeditions();
   if(name==='trials')renderTrials();
+  if(name==='hunting')renderHuntingZone();
 }
 function showHideoutPane(name='collection'){
-  const panes={collection:'collection',eggs:'eggs',breed:'breed',habitats:'habitats',inventory:'inventory',profile:'profile'};
-  const buttons={collection:'showHideoutCollection',eggs:'showHideoutIncubators',breed:'showHideoutBreed',habitats:'showHideoutHabitats',inventory:'showHideoutInventory',profile:'showHideoutProfile'};
+  const panes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
+  const buttons={collection:'showHideoutCollection',eggs:'showHideoutIncubators',breed:'showHideoutBreed',reconstruction:'showHideoutReconstruction',habitats:'showHideoutHabitats',inventory:'showHideoutInventory',profile:'showHideoutProfile'};
   if(!panes[name])name='collection';
   currentHideoutPane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
+  if(name==='reconstruction')renderReconstructionLab();
   if(name==='habitats')renderHabitats();
   else stopHabitatMotion();
 }
@@ -3995,8 +4228,8 @@ function switchTab(name){
   }else if(name==='shop')currentShopMode='supplies';
   if(exploreExpeditionActive)endExploreExpedition();
   // Internal destinations route straight into their hub homes.
-  const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',habitats:'habitats',inventory:'inventory',profile:'profile'};
-  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials'};
+  const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
+  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials',hunting:'hunting'};
   const silverwindRoutes={'silverwind-desk':'desk','silverwind-artifacts':'artifacts','silverwind-reference':'reference','silverwind-archive':'archive','silverwind-attacks':'attacks'};
   const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null,silverwindPane=silverwindRoutes[name]||null;
   const mainName=hideoutPane?'hideout':adventurePane?'adventure':silverwindPane?'silverwind':name;
@@ -4090,6 +4323,7 @@ function monsterLineageLabel(ref){
 }
 function renderMonsterLineage(mon){
   const tree=document.getElementById('detailLineageTree');if(!tree)return;
+  if(mon.origin==='Reconstruction Lab'){tree.innerHTML='<div class="lineage-origin"><strong>Reconstruction Lab</strong><span>Reconstructed from an ancient recipe and hatched in the nursery.</span></div>';document.getElementById('detailLineage').textContent='Reconstruction Lab';return;}
   if(!mon.parents){tree.innerHTML='<div class="lineage-origin"><strong>Wild / Starter Individual</strong><span>No recorded parents.</span></div>';document.getElementById('detailLineage').textContent='Wild / starter individual';return;}
   const mother=monsterLineageLabel(mon.parents.mother),father=monsterLineageLabel(mon.parents.father),sp=speciesOf(mon);
   tree.innerHTML=`<div class="lineage-parents"><div class="lineage-node parent"><span>Mother</span><strong>${mother.name}</strong><small>${mother.meta}</small></div><div class="lineage-node parent"><span>Father</span><strong>${father.name}</strong><small>${father.meta}</small></div></div><div class="lineage-connector"><i></i></div><div class="lineage-node child"><span>Offspring</span><strong>${displayName(mon)}</strong><small>${sp?.name||mon.slug} • ${mon.id}</small></div>`;
@@ -4430,7 +4664,8 @@ function collectEgg(slotIndex=0){
   switchTab('eggs');
 }
 
-async function eggVisual(slug,sizeClass='egg-image',source='generic'){
+async function eggVisual(slug,sizeClass='egg-image',source='generic',egg=null){
+  if(egg?.eggSpriteKey&&SPRITE_DEFS[egg.eggSpriteKey])return spriteFallbackMarkup(egg.eggSpriteKey,`sheet-icon ${sizeClass} recon-egg-code`);
   if(source==='event-maze')return imageSpriteMarkup('halloween_event_egg','assets/icons/halloween_event_egg.png',`${sizeClass} halloween-event-egg-icon`,'Haunted Event Egg');
   const custom=await imageSrc(slug,'egg');
   if(custom)return `<img class="${sizeClass}" src="${custom}" alt="">`;
@@ -4449,7 +4684,7 @@ function sellLooseEgg(eggId){
   save();
   renderAll();
 }
-function labEggSourceGroup(e){const src=String(e.source||'').toLowerCase();if(src==='breeding'||e.motherId)return'breeding';if(src==='wild')return'wild';if(['shop','event-shop'].includes(src))return src==='shop'?'shop':'event';if(src.includes('expedition')||src==='prismatic')return'expedition';if(src.includes('event')||src.includes('halloween')||src.includes('winter'))return'event';return'special';}
+function labEggSourceGroup(e){const src=String(e.source||'').toLowerCase();if(src==='breeding'||e.motherId)return'breeding';if(src==='wild')return'wild';if(src==='reconstruction')return'reconstruction';if(['shop','event-shop'].includes(src))return src==='shop'?'shop':'event';if(src.includes('expedition')||src==='prismatic')return'expedition';if(src.includes('event')||src.includes('halloween')||src.includes('winter'))return'event';return'special';}
 function labEggName(egg){if(!egg)return 'Unknown Egg';const sp=state.species[egg.slug],discovered=(state.discoveredSpecies||[]).includes(egg.slug)||state.monsters.some(m=>m.slug===egg.slug);if(sp?.isCrossbreed&&!discovered)return 'Mysterious Breeding Egg';return eggDisplayName(egg);}
 function labHatchSeconds(egg){return Math.max(60,Math.min(18000,Number(state.species[egg.slug]?.hatchSeconds||60)));}
 function labStoredEggs(){const q=document.getElementById('eggSearch').value.trim().toLowerCase(),src=document.getElementById('eggSourceFilter').value,sort=document.getElementById('eggSort').value;const eggs=state.eggs.filter(e=>e.status==='waiting'&&(src==='all'||labEggSourceGroup(e)===src)&&(!q||[eggDisplayName(e),e.id,e.source].some(x=>String(x||'').toLowerCase().includes(q))));return eggs.sort((a,b)=>sort==='name'?eggDisplayName(a).localeCompare(eggDisplayName(b)):sort==='time'?labHatchSeconds(a)-labHatchSeconds(b):sort==='old'?Number(a.createdAt||0)-Number(b.createdAt||0):Number(b.createdAt||0)-Number(a.createdAt||0));}
@@ -4457,7 +4692,7 @@ async function renderEggInventory(renderVersion=null){
  const box=document.getElementById('eggInventory'),eggs=labStoredEggs(),free=state.incubators.slice(0,state.unlockedIncubators).some(s=>!s.eggId);document.getElementById('eggBadge').textContent=state.eggs.filter(e=>e.status!=='hatched').length;document.getElementById('storedEggCount').textContent=state.eggs.filter(e=>e.status==='waiting').length;
  const frag=document.createDocumentFragment();if(!eggs.length){const no=document.createElement('div');no.className='empty-card';no.textContent='No eggs match your storage filters.';frag.appendChild(no);}
  for(const e of eggs){const card=document.createElement('article');card.className='egg-card lab-stored-egg';const mom=labMon(e.motherId),dad=labMon(e.fatherId);const source=labEggSourceGroup(e),potential=e.source==='breeding'?`<small>Potential: P${e.motherPotential||1}${e.potentialRaised?` → P${e.potentialOverride} ✦`:''}</small>`:'';
- card.innerHTML=`<div class="egg-visual">${await eggVisual(e.slug,'egg-image',e.source||'generic')}</div><div class="lab-egg-copy"><strong>${labSafe(labEggName(e))}</strong><small>${labSafe(source.toUpperCase())} · ${labSafe(e.id)} · ${fmtTime(labHatchSeconds(e)*1000)}</small>${mom&&dad?`<small>${labSafe(displayName(mom))} × ${labSafe(displayName(dad))}</small>`:''}${potential}</div><div class="egg-card-actions"><button class="primary" type="button" data-egg-action="place" data-egg-id="${labSafe(e.id)}" ${free?'':'disabled'}>Incubate</button><button class="danger" type="button" data-egg-action="sell" data-egg-id="${labSafe(e.id)}">Sell +10</button></div>`;frag.appendChild(card);}
+ card.innerHTML=`<div class="egg-visual">${await eggVisual(e.slug,'egg-image',e.source||'generic',e)}</div><div class="lab-egg-copy"><strong>${labSafe(labEggName(e))}</strong><small>${labSafe(source.toUpperCase())} · ${labSafe(e.id)} · ${fmtTime(labHatchSeconds(e)*1000)}</small>${mom&&dad?`<small>${labSafe(displayName(mom))} × ${labSafe(displayName(dad))}</small>`:''}${potential}</div><div class="egg-card-actions"><button class="primary" type="button" data-egg-action="place" data-egg-id="${labSafe(e.id)}" ${free?'':'disabled'}>Incubate</button><button class="danger" type="button" data-egg-action="sell" data-egg-id="${labSafe(e.id)}">Sell +10</button></div>`;frag.appendChild(card);}
  if(renderVersion!==null&&renderVersion!==uiRenderVersion)return;box.replaceChildren(frag);updateLabBadges();
 }
 function putInIncubator(eggId,slotIndex=null){
@@ -4471,7 +4706,7 @@ async function renderIncubators(renderVersion=null){
  if(i>=state.unlockedIncubators){tile.innerHTML=`<div class="lab-pen-head"><strong>Incubator ${i+1}</strong><span>🔒 Locked</span></div><div class="nursery-empty-art">${glyphSpriteMarkup('incubator','⬡','facility-tile-icon')}</div><button type="button" class="ghost small" data-route="shop-supplies">Unlock from Shop</button>`;}
  else if(!slot.eggId){tile.innerHTML=`<div class="lab-pen-head"><strong>Incubator ${i+1}</strong><span>Empty</span></div><button type="button" class="nursery-place" data-incubator-action="choose" data-slot="${i}">${glyphSpriteMarkup('incubator_empty','◌','facility-tile-icon')}<span>＋ Choose an Egg</span></button>`;}
  else {const egg=state.eggs.find(e=>e.id===slot.eggId),remaining=Number(slot.finishAt||0)-now,ready=remaining<=0,total=Math.max(1000,Number(slot.finishAt||0)-Number(slot.startedAt||0)),prog=ready?100:Math.min(100,Math.max(0,(now-Number(slot.startedAt||0))/total*100));if(ready)readyN++;
- tile.classList.add(ready?'nursery-ready':'nursery-active');tile.innerHTML=`<div class="lab-pen-head"><strong>Incubator ${i+1}</strong><span>${ready?'Ready to Hatch!':'Incubating'}</span></div><button type="button" class="nursery-egg-button ${ready?'wiggling':prog>=90?'restless':''}" data-incubator-action="inspect" data-slot="${i}" aria-label="Inspect incubator ${i+1}"><div class="nursery-egg-art">${await eggVisual(egg?.slug||'','egg-shop-img',egg?.source||'generic')}</div><strong>${labSafe(egg?labEggName(egg):'Unknown Egg')}</strong><small>Tap to check egg ♡</small></button><div class="lab-progress"><span style="width:${prog.toFixed(1)}%" data-incubator-progress="${i}"></span></div><div class="nursery-countdown" data-incubator-timer="${i}">${ready?'READY':fmtTime(remaining)}</div>${ready?`<button class="primary" type="button" data-incubator-action="hatch" data-slot="${i}">Hatch Egg ✦</button>`:`<button class="ghost small" type="button" data-incubator-action="inspect" data-slot="${i}">Inspect / Catalyst</button>`}`;
+ tile.classList.add(ready?'nursery-ready':'nursery-active');tile.innerHTML=`<div class="lab-pen-head"><strong>Incubator ${i+1}</strong><span>${ready?'Ready to Hatch!':'Incubating'}</span></div><button type="button" class="nursery-egg-button ${ready?'wiggling':prog>=90?'restless':''}" data-incubator-action="inspect" data-slot="${i}" aria-label="Inspect incubator ${i+1}"><div class="nursery-egg-art">${await eggVisual(egg?.slug||'','egg-shop-img',egg?.source||'generic',egg)}</div><strong>${labSafe(egg?labEggName(egg):'Unknown Egg')}</strong><small>Tap to check egg ♡</small></button><div class="lab-progress"><span style="width:${prog.toFixed(1)}%" data-incubator-progress="${i}"></span></div><div class="nursery-countdown" data-incubator-timer="${i}">${ready?'READY':fmtTime(remaining)}</div>${ready?`<button class="primary" type="button" data-incubator-action="hatch" data-slot="${i}">Hatch Egg ✦</button>`:`<button class="ghost small" type="button" data-incubator-action="inspect" data-slot="${i}">Inspect / Catalyst</button>`}`;
  }frag.appendChild(tile);}
  if(renderVersion!==null&&renderVersion!==uiRenderVersion)return;box.replaceChildren(frag);document.getElementById('nurseryReadySummary').textContent=`${readyN} ready to hatch · ${state.eggs.filter(e=>e.status==='waiting').length} eggs in storage`;updateLabBadges();
 }
@@ -4492,7 +4727,7 @@ async function renderIncubatorDetail(openIfNeeded=false){
   document.getElementById('incubatorDetailCategory').textContent=`INCUBATOR ${i+1}`;
   document.getElementById('incubatorDetailName').textContent=labEggName(egg);
   document.getElementById('incubatorDetailId').textContent=egg.id||'';
-  document.getElementById('incubatorDetailVisual').innerHTML=await eggVisual(egg.slug,'shop-detail-egg',egg.source||'generic');
+  document.getElementById('incubatorDetailVisual').innerHTML=await eggVisual(egg.slug,'shop-detail-egg',egg.source||'generic',egg);
   updateIncubatorDetailLive();
   if(openIfNeeded&&!modal.open)modal.showModal();
 }
@@ -4557,7 +4792,7 @@ function hatchEgg(slotIndex){
   state.monsters.push({
     id,slug:egg.slug,level:1,xp:0,gender:hatchGender(),potential:egg.potentialOverride??egg.motherPotential??mother?.potential??1,
     trait:egg.inheritedTrait||rollTrait(),nickname:'',attacks,isPrismatic:!!egg.isPrismatic,
-    parents:{mother:egg.motherId||null,father:egg.fatherId||null}
+    parents:{mother:egg.motherId||null,father:egg.fatherId||null},origin:egg.source==='reconstruction'?'Reconstruction Lab':undefined
   });
   currentCollectionPen=placeMonsterInCollection(id);
   updateRequestProgress('hatch',1);
@@ -4575,7 +4810,7 @@ function hatchEgg(slotIndex){
 
 let labHatchTimeouts=[],labRevealId=null;
 function labClearHatchTimers(){labHatchTimeouts.forEach(t=>clearTimeout(t));labHatchTimeouts=[];}
-function openLabHatchReveal(id){const mon=labMon(id);if(!mon)return;labClearHatchTimers();labRevealId=id;const dlg=document.getElementById('labHatchDialog'),host=document.getElementById('labHatchAnimation');host.className='lab-hatch-animation stage-0';document.getElementById('labHatchTitle').textContent='The egg is moving...';document.getElementById('labHatchDescription').textContent='A little life is about to join your Collection.';document.getElementById('labHatchMeta').replaceChildren();document.getElementById('labHatchFinish').classList.add('hidden');document.getElementById('labSkipHatch').classList.remove('hidden');setMonsterImage(document.getElementById('labHatchMonsterImg'),mon.slug,monsterArtKind(mon));const hatchedEgg=state.eggs.find(e=>e.hatchedMonsterId===id);const eggHost=document.getElementById('labHatchEggSprite'),shell=host.querySelector('.lab-hatch-shell');if(hatchedEgg){eggVisual(hatchedEgg.slug,'lab-hatch-egg-img',hatchedEgg.source||'generic').then(markup=>{if(labRevealId===id&&dlg.open){eggHost.innerHTML=markup;shell.classList.add('has-sprite');}});}dlg.showModal();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){labFinishHatchAnimation();return;}
+function openLabHatchReveal(id){const mon=labMon(id);if(!mon)return;labClearHatchTimers();labRevealId=id;const dlg=document.getElementById('labHatchDialog'),host=document.getElementById('labHatchAnimation');host.className='lab-hatch-animation stage-0';document.getElementById('labHatchTitle').textContent='The egg is moving...';document.getElementById('labHatchDescription').textContent='A little life is about to join your Collection.';document.getElementById('labHatchMeta').replaceChildren();document.getElementById('labHatchFinish').classList.add('hidden');document.getElementById('labSkipHatch').classList.remove('hidden');setMonsterImage(document.getElementById('labHatchMonsterImg'),mon.slug,monsterArtKind(mon));const hatchedEgg=state.eggs.find(e=>e.hatchedMonsterId===id);const eggHost=document.getElementById('labHatchEggSprite'),shell=host.querySelector('.lab-hatch-shell');if(hatchedEgg){eggVisual(hatchedEgg.slug,'lab-hatch-egg-img',hatchedEgg.source||'generic',hatchedEgg).then(markup=>{if(labRevealId===id&&dlg.open){eggHost.innerHTML=markup;shell.classList.add('has-sprite');}});}dlg.showModal();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){labFinishHatchAnimation();return;}
  for(const [ms,stage] of [[650,1],[1550,2],[2450,3],[3250,4]])labHatchTimeouts.push(setTimeout(()=>{if(dlg.open)labSetHatchStage(stage);},ms));}
 function labSetHatchStage(stage){const host=document.getElementById('labHatchAnimation');host.className=`lab-hatch-animation stage-${stage}`;if(stage===1){document.getElementById('labHatchTitle').textContent='Something is stirring!';document.getElementById('labHatchDescription').textContent='The egg starts to wobble...';}else if(stage===2){document.getElementById('labHatchTitle').textContent='Crack!';document.getElementById('labHatchDescription').textContent='Little fractures spread across the shell.';}else if(stage===3){document.getElementById('labHatchTitle').textContent='It’s hatching!';document.getElementById('labHatchDescription').textContent='A burst of light fills the nursery.';}else if(stage===4)labFinishHatchAnimation();}
 function labFinishHatchAnimation(){labClearHatchTimers();const mon=labMon(labRevealId);if(!mon)return;const sp=speciesOf(mon),host=document.getElementById('labHatchAnimation');host.className='lab-hatch-animation stage-4'+(mon.isPrismatic?' prismatic-reveal':'');document.getElementById('labHatchTitle').textContent=`${mon.isPrismatic?'✦ PRISMATIC ':'Welcome, '}${sp?.name||'Monster'}!`;document.getElementById('labHatchDescription').textContent='Your new monster has joined the Collection.';document.getElementById('labHatchMeta').innerHTML=`<span>${labSafe(mon.gender)}</span><span>Potential P${mon.potential}</span><span>${labSafe(mon.trait)}</span>${mon.isPrismatic?'<span>✦ Prismatic</span>':''}`;document.getElementById('labHatchFinish').classList.remove('hidden');document.getElementById('labSkipHatch').classList.add('hidden');}
@@ -5114,6 +5349,12 @@ async function renderShop(){
     tile.innerHTML=shopTileShell(`Breeding Pen ${idx+1}`,'Facility Upgrade',glyphSpriteMarkup('breeding_pen','♡','facility-tile-icon'));
     fac.appendChild(tile);facilityOptions++;
   }
+  if(state.hunting.unlockedTraps<5){
+    const idx=state.hunting.unlockedTraps,tile=document.createElement('button');
+    wireShopTile(tile,'hunting_trap',String(idx));
+    tile.innerHTML=shopTileShell(`Hunting Trap ${idx+1}`,'Facility Upgrade','<span class="hunt-shop-symbol" aria-hidden="true">🪤</span>');
+    fac.appendChild(tile);facilityOptions++;
+  }
   if(state.unlockedHabitats<MAX_HABITATS){
     const idx=state.unlockedHabitats,tile=document.createElement('button');
     wireShopTile(tile,'habitat',String(idx));
@@ -5203,6 +5444,10 @@ async function shopSelectionFor(kind,id){
       canBuy:state.currency>=price
     };
   }
+  if(kind==='hunting_trap'){
+    const idx=state.hunting.unlockedTraps;if(idx>=5)return null;
+    const price=HUNT_TRAP_COSTS[idx];return {kind,id:String(idx),name:`Hunting Trap ${idx+1}`,category:'Facility Upgrade',price,description:'Permanently unlock another independent Hunting Zone trap. Up to five four-hour hunts can run at once.',meta:[`${idx}/5 traps unlocked`],owned:`After purchase: ${idx+1}/5`,visual:'<span class="hunt-shop-symbol">🪤</span>',canBuy:state.currency>=price};
+  }
   if(kind==='incubator'){
     const idx=state.unlockedIncubators;
     if(idx>=5)return null;
@@ -5265,6 +5510,7 @@ function confirmShopPurchase(){
   else if(s.kind==='breeding_pen')buyBreedingPen();
   else if(s.kind==='collection_pen')buyCollectionPen();
   else if(s.kind==='habitat')buyHabitat();
+  else if(s.kind==='hunting_trap')buyHuntingTrap();
 }
 
 function buySpeciesEgg(slug){const sp=state.species[slug],price=Number(sp.shopPrice||1000);if(!sp||state.currency<price)return;state.currency-=price;const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug,speciesName:sp.name,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'shop',createdAt:Date.now(),status:'waiting',catalystUsed:false});save();renderAll();}
@@ -5272,6 +5518,7 @@ function buyScroll(id){const a=state.attacks[id],price=Number(a?.scrollPrice||0)
 function buyItem(id){const item=ITEM_SHOP.find(x=>x.id===id);if(!item||state.currency<item.price)return;state.currency-=item.price;state.inventory[id]=(state.inventory[id]||0)+1;save();renderAll();}
 function buyIncubator(){const idx=state.unlockedIncubators;if(idx>=5)return;const cost=INCUBATOR_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedIncubators++;save();renderAll();}
 function buyBreedingPen(){const idx=state.unlockedBreedingPens;if(idx>=5)return;const cost=BREEDING_PEN_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedBreedingPens++;save();renderAll();}
+function buyHuntingTrap(){const idx=state.hunting.unlockedTraps;if(idx>=5)return false;const price=HUNT_TRAP_COSTS[idx];if(state.currency<price)return false;state.currency-=price;state.hunting.unlockedTraps++;save();renderAll();return true;}
 function buyCollectionPen(){const idx=state.unlockedCollectionPens;if(idx>=MAX_COLLECTION_PENS)return;const cost=COLLECTION_PEN_COSTS[idx];if(state.currency<cost)return;state.currency-=cost;state.unlockedCollectionPens++;save();renderAll();}
 let inventorySelection=null;
 function inventorySellValue(info){
@@ -5358,9 +5605,9 @@ async function openInventoryDetail(id){
   else if(info.shopPrice>0)meta.push(`Shop value ${money(info.shopPrice)}`);
   document.getElementById('inventoryDetailMeta').innerHTML=meta.map(x=>`<span>${x}</span>`).join('');
   document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
-  document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood?' • Resale rate: 5% of shop value':''}`;
+  document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood&&id!=='ancient_pages'?' • Resale rate: 5% of shop value':''}`;
   const use=document.getElementById('inventoryUseButton');
-  const directUse=id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||!!DONATION_CRYSTALS[id];
+  const directUse=id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||id==='ancient_pages'||!!DONATION_CRYSTALS[id];
   use.classList.toggle('hidden',!directUse);
   use.disabled=false;
   use.removeAttribute('data-refresh-juice-timer');
@@ -5381,6 +5628,9 @@ async function openInventoryDetail(id){
   }else if(id==='lottery_egg'){
     use.disabled=!lotteryEligibleEggSpecies().length;
     use.textContent=use.disabled?'Monster Pool Not Ready':'Open Lottery Egg';
+  }else if(id==='ancient_pages'){
+    use.disabled=!reconEligibleUnknownRecipes().length;
+    use.textContent=use.disabled?'No Unknown Recipes Available':'Read Ancient Pages • Discover Recipe';
   }else if(id==='ancient_egg'){
     use.disabled=!ancientEggEligibleSpecies().length;
     use.textContent=use.disabled?'Ancient Egg Pool Not Ready':'Open Ancient Egg';
@@ -5417,6 +5667,10 @@ async function useSelectedInventoryItem(){
   }else if(id==='ancient_egg'){
     document.getElementById('inventoryDetailModal').close();inventorySelection=null;
     redeemAncientEgg();return;
+  }else if(id==='ancient_pages'){
+    const consumed=useAncientPages();
+    if(consumed){document.getElementById('inventoryDetailModal').close();inventorySelection=null;switchTab('reconstruction');}
+    return;
   }
   else return;
   const owned=Number(state.inventory[id]||0);
@@ -5473,7 +5727,7 @@ function renderInventory(){
     const tile=document.createElement('button');
     tile.className='shop-tile inventory-tile'+(info.isTradeGood?' trade-good-card':'');
     tile.type='button';
-    tile.innerHTML=`<span class="inventory-tile-qty">×${qty}</span><span class="shop-tile-visual">${inventoryIconMarkup(info,'sheet-icon icon-shop-tile')}</span><span class="shop-tile-name">${info.name}</span><span class="shop-tile-category">${info.category}</span>`;
+    tile.innerHTML=`<span class="inventory-tile-qty">×${qty}</span><span class="shop-tile-visual">${inventoryIconMarkup(info,'sheet-icon icon-shop-tile')}</span><span class="shop-tile-name">${labSafe(info.name)}</span><span class="shop-tile-category">${labSafe(info.category)}</span>`;
     tile.onclick=()=>openInventoryDetail(id);
     box.appendChild(tile);
   });
@@ -5592,12 +5846,12 @@ function populateParentDropdowns(excludeSlug=''){
   document.getElementById('parentA').innerHTML=opts;document.getElementById('parentB').innerHTML=opts;
 }
 function newSpeciesForm(){
-  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('mythicTempleOnly').checked=false;document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
+  document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('mythicTempleOnly').checked=false;document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('huntingRarity').value='Uncommon';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
   speciesSignatureDraft='';
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('huntingRarity').value=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon';document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
   for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
@@ -5630,6 +5884,7 @@ function updateAdminConditional(){
     if(secondary.value===primary)secondary.value=ELEMENTS.find(x=>x!==primary)||ELEMENTS[0];
   }
   obtainSelect.disabled=cross||templeCheck.checked;
+  document.getElementById('huntingRarityWrap').classList.toggle('hidden',cross||obtainSelect.value!=='Hunting Zone');
   const normalShop=!cross&&obtainSelect.value==='Shop Egg';
   const halloweenShop=!cross&&obtainSelect.value==='Halloween Event Shop Egg';
   const winterShop=!cross&&obtainSelect.value==='Winter Event Shop Egg';
@@ -5643,9 +5898,10 @@ function updateAdminConditional(){
   document.getElementById('shopPriceWrap').classList.toggle('hidden',!shop);
   document.getElementById('shopPriceLabel').textContent=halloweenShop?'Halloween shop egg price':winterShop?'Winter shop egg price':'Shop egg price';
   document.getElementById('shopPriceHelp').textContent=halloweenShop?'Price in Halloween Fangs.':winterShop?'Price in Snowflakes.':'Price in normal currency.';
-  document.getElementById('eggArtCard').classList.toggle('soft-disabled',!shop);
-  document.getElementById('eggArt').disabled=!shop;
-  document.getElementById('eggArtHelp').textContent=shop?'Used for this species’ shop egg.':'Available for Shop Egg, Halloween Event Shop Egg, and Winter Event Shop Egg species.';
+  const eggArtAllowed=shop||obtainSelect.value==='Reconstruction Lab Only';
+  document.getElementById('eggArtCard').classList.toggle('soft-disabled',!eggArtAllowed);
+  document.getElementById('eggArt').disabled=!eggArtAllowed;
+  document.getElementById('eggArtHelp').textContent=eggArtAllowed?'Used for eggs produced by this species, including Reconstruction Lab eggs.':'Available for shop-egg and Reconstruction Lab Only species.';
   document.getElementById('encounterDaysWrap').classList.toggle('hidden',!wild);
   document.getElementById('breedTimerLabel').textContent=fmtDuration(document.getElementById('breedTimer').value);
   document.getElementById('hatchTimerLabel').textContent=fmtDuration(document.getElementById('hatchTimer').value);
@@ -5676,7 +5932,7 @@ async function saveSpeciesForm(e){
   if(document.getElementById('publishSpecies').checked&&!selectedSignature){document.getElementById('adminMessage').textContent='Choose a signature attack before publishing this monster.';return;}
   if(!confirm(oldSlug?`Save changes to monster "${name}"?`:`Create new monster "${name}"?`))return;
   const {encounterDays:_legacyEncounterDays,signatureAttack:_legacySignatureAttack,...cleanPrev}=prev;
-  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',mythicTempleOnly:templeOnly,element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
+  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',mythicTempleOnly:templeOnly,element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,huntingRarity:obtain==='Hunting Zone'?document.getElementById('huntingRarity').value:(prev.huntingRarity||'Uncommon'),shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
   save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Package when you are ready to publish it.':' It remains a draft.'}`;renderAll();await loadSpeciesIntoForm(slug);admin2MarkClean('species');
@@ -5708,7 +5964,7 @@ function renderSpriteRegistry(){
     .sort((a,b)=>a[1].category.localeCompare(b[1].category)||a[1].name.localeCompare(b[1].name))
     .forEach(([key,def])=>{
       const b=document.createElement('button');b.type='button';b.className='registry-item';
-      b.innerHTML=`<strong>${def.name}</strong><span>${def.category} • ${key}</span>`;
+      b.innerHTML=`<strong>${labSafe(def.name)}</strong><span>${labSafe(def.category)} • ${labSafe(key)}</span>`;
       b.onclick=()=>loadSpriteIntoForm(key);box.appendChild(b);
     });
 }
@@ -5854,7 +6110,7 @@ async function buildLivePublishingPackage(){
     if(blob){const path=`assets/live/artifacts/${safeLiveFilePart(id,'artifact')}.${liveAssetExtension(blob)}`;artifactIcons[id]=path;files.push({name:path,data:blob});}
     else if(liveAssetRefs[key])artifactIcons[id]=liveAssetRefs[key];
   }
-  const pack={version:11,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
+  const pack={version:12,reconstructionRecipes:Object.fromEntries(Object.entries(state.reconstructionRecipes).filter(([,r])=>reconRecipeIsValid(r)&&(state.species[r.slug]?.builtin||state.species[r.slug]?.published))),reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
   return {pack,files};
 }
 function liveContentManifestFromPack(pack){
@@ -5873,12 +6129,14 @@ function liveContentManifestFromPack(pack){
     lotteryPool:(pack?.lotteryEggPool||[]).length,
     ancientEggPool:(pack?.ancientEggPool||[]).length,
     artifacts:Object.keys(pack?.artifactCatalog||{}).length,
+    reconstructionRecipes:Object.keys(pack?.reconstructionRecipes||{}).length,
+    reconstructionMaterials:Object.keys(pack?.reconstructionMaterials||{}).length,
     trialAssets:trialAssetCount
   };
 }
 function liveContentManifestLabel(manifest){
   const m=manifest||{};
-  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials • ${Number(m.lotteryPool||0)} lottery monsters • ${Number(m.artifacts||0)} artifacts`;
+  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials • ${Number(m.lotteryPool||0)} lottery monsters • ${Number(m.artifacts||0)} artifacts • ${Number(m.reconstructionRecipes||0)} recipes • ${Number(m.reconstructionMaterials||0)} materials`;
 }
 async function buildContentPack({publishedOnly=false}={}){
   const customSpecies={};
@@ -5894,7 +6152,7 @@ async function buildContentPack({publishedOnly=false}={}){
   // Dialogue, landing posts, Event Calendars, and Trials are content-layer data, not player save data.
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const ref=await exportableAssetDataUrl(`trial:${id}:${kind}`);if(ref)trialAssets[id][kind]=ref;}}
   const artifactIcons={};for(const id of Object.keys(state.artifactCatalog||{})){if(state.artifactCatalog[id]?.iconRemoved)continue;const ref=await exportableAssetDataUrl(`artifact:${id}:icon`);if(ref)artifactIcons[id]=ref;}
-  return {version:11,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
+  return {version:12,reconstructionRecipes:state.reconstructionRecipes,reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
   const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
@@ -5906,7 +6164,7 @@ async function exportLiveContent(){
   }
   const {pack,files}=await buildLivePublishingPackage();
   const manifest=liveContentManifestFromPack(pack);
-  const payload={kind:'prismwild-live-content',schemaVersion:11,contentRevision:new Date().toISOString(),manifest,...pack};
+  const payload={kind:'prismwild-live-content',schemaVersion:12,contentRevision:new Date().toISOString(),manifest,...pack};
   const text='window.PRISMWILD_LIVE_CONTENT='+JSON.stringify(payload)+';\n';
   const readme=`PRISMWILD LIVE CONTENT PACKAGE\n\nExtract this ZIP directly into the ROOT of your local prismwild-test GitHub repository.\nAllow your unzip tool to merge/overwrite matching paths.\n\nThis package contains:\n- content/prismwild-content.js\n- assets/live/... published monster, sprite, and Trial artwork\n\nThen use GitHub Desktop to Commit and Push origin.\nPlayer save data is not included.\n`;
   files.unshift({name:'content/prismwild-content.js',data:text},{name:'LIVE_CONTENT_PACKAGE_README.txt',data:readme});
@@ -5953,6 +6211,7 @@ async function applyLiveContent(data){
       if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;
     }
   }
+  if(data.reconstructionMaterials){state.reconstructionMaterials=data.reconstructionMaterials;syncReconstructionMaterialRegistry();}
   for(const [id,a] of Object.entries(data.customAttacks||{}))state.attacks[id]={...(state.attacks[id]||{}),...a,builtin:false,published:true};
   for(const [key,ref] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&ref){if(String(ref).startsWith('data:'))await putAsset(`sprite:${key}`,await dataURLToBlob(ref));else liveAssetRefs[`sprite:${key}`]=ref;}}
   if(data.artifactCatalog){state.artifactCatalog=data.artifactCatalog;normalizeArtifactCatalog();}
@@ -5961,6 +6220,8 @@ async function applyLiveContent(data){
   if(data.landingFeed)state.landingFeed=data.landingFeed;
   if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
   if(data.donationSettings)state.donationSettings=normalizeDonationSettings(data.donationSettings);
+  if(data.reconstructionMaterials){state.reconstructionMaterials=data.reconstructionMaterials;syncReconstructionMaterialRegistry();}
+  if(data.reconstructionRecipes){state.reconstructionRecipes=data.reconstructionRecipes;normalizeReconstructionState();}
   if(Array.isArray(data.lotteryEggPool))state.lotteryEggPool=[...new Set(data.lotteryEggPool.filter(slug=>typeof slug==='string'))];
   if(Array.isArray(data.ancientEggPool))state.ancientEggPool=[...new Set(data.ancientEggPool.filter(slug=>typeof slug==='string'))];
   if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
@@ -5985,6 +6246,8 @@ async function importAdminFile(file){
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
     if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
     if(data.donationSettings)state.donationSettings=normalizeDonationSettings(data.donationSettings);
+  if(data.reconstructionMaterials){state.reconstructionMaterials=data.reconstructionMaterials;syncReconstructionMaterialRegistry();}
+  if(data.reconstructionRecipes){state.reconstructionRecipes=data.reconstructionRecipes;normalizeReconstructionState();}
   if(Array.isArray(data.lotteryEggPool))state.lotteryEggPool=[...new Set(data.lotteryEggPool.filter(slug=>typeof slug==='string'))];
   if(Array.isArray(data.ancientEggPool))state.ancientEggPool=[...new Set(data.ancientEggPool.filter(slug=>typeof slug==='string'))];
     if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
@@ -7242,11 +7505,14 @@ function renderArtifactDesk(){
 const EXCAVATION_SIZE=5,EXCAVATION_DIGS=10;
 function excavationRewardRoll(){
   // Ancient Eggs are exceptionally rare: 1% of an excavation cache, not 1% of steps.
-  const type=weightedChoice([{value:'curiosity',weight:36},{value:'currency',weight:22},{value:'supply',weight:17},{value:'treasure',weight:14},{value:'tablet',weight:10},{value:'ancient_egg',weight:1}]);
+  const type=weightedChoice([{value:'curiosity',weight:34},{value:'ancient_pages',weight:2},{value:'currency',weight:22},{value:'supply',weight:17},{value:'treasure',weight:14},{value:'tablet',weight:10},{value:'ancient_egg',weight:1}]);
   if(type==='curiosity'){
-    const family=randomChoice(Object.keys(EXCAVATION_CURIOSITY_IDS));
-    return {type,id:randomChoice(EXCAVATION_CURIOSITY_IDS[family]),qty:randomInt(1,2)};
+    const base=Object.values(EXCAVATION_CURIOSITY_IDS).flat();
+    const custom=Object.entries(state.reconstructionMaterials||{}).filter(([,m])=>m.digWeight>0).map(([id,m])=>({value:id,weight:m.digWeight}));
+    const id=weightedChoice([...base.map(value=>({value,weight:2})),...custom]);
+    return {type,id,qty:randomInt(1,2)};
   }
+  if(type==='ancient_pages')return {type,id:'ancient_pages',qty:1};
   if(type==='currency')return {type,min:20,max:65};
   if(type==='supply')return {type,id:randomChoice(['heal_gel','incu_catalyst']),qty:1};
   if(type==='treasure')return {type,id:randomChoice(['expedition_ancient_coin','expedition_gilded_idol','expedition_starstone_relic']),qty:1};
@@ -8465,6 +8731,115 @@ async function silverwindCheckIn(){
   silverwindPoseTimer=setTimeout(()=>{silverwindPoseUntil=0;setSilverwindPortraitPose('normal');},3800);
 }
 
+
+// ---------- Hunting Zone 1.0: independent timed traps & pre-rolled catch results ----------
+let selectedHuntingTrap=null;
+function huntingSpeciesPool(){return Object.entries(state.species||{}).filter(([,sp])=>sp.obtain==='Hunting Zone'&&!sp.isCrossbreed);}
+function huntTrapStatus(t){return !t?.result?'empty':Date.now()>=Number(t.finishAt||0)?'ready':'waiting';}
+function huntingReadyCount(){return state.hunting.traps.slice(0,state.hunting.unlockedTraps).filter(t=>huntTrapStatus(t)==='ready').length;}
+function huntingWeightedSpecies(bait){
+  const pool=huntingSpeciesPool();if(!pool.length)return null;
+  let total=0;const entries=pool.map(([slug,sp])=>{const rank=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon',w=Math.max(0,Number(bait.weights[rank]||1));total+=w;return {slug,weight:w};});
+  if(!total)return pool[0][0];
+  let draw=Math.random()*total;for(const x of entries){draw-=x.weight;if(draw<=0)return x.slug;}return entries[entries.length-1].slug;
+}
+function huntingBaitIcon(baitId){return ({hunt_bait_basic:'🍃',hunt_bait_scented:'🌸',hunt_bait_premium:'💠',hunt_bait_exotic:'✨'})[baitId]||'🪤';}
+function huntingReport(text){state.hunting.lastMessage=String(text).slice(0,250);document.getElementById('huntingMessage').textContent=state.hunting.lastMessage;}
+function armHuntingTrap(i,baitId){
+  const hunt=state.hunting,t=hunt.traps[i],bait=HUNT_BAITS.find(b=>b.id===baitId);
+  if(!Number.isInteger(i)||i<0||i>=hunt.unlockedTraps||!t||huntTrapStatus(t)!=='empty'||!bait||!(state.inventory[baitId]>0))return false;
+  if(!huntingSpeciesPool().length){huntingReport('No Hunting Zone species are registered yet. Add one in Monster Studio before using bait.');return false;}
+  // Outcome rolls NOW and is serialized. Refreshes and delayed collection never reroll.
+  const success=Math.random()<bait.chance,slug=success?huntingWeightedSpecies(bait):null,sp=slug?state.species[slug]:null;
+  if(success&&(!sp||sp.obtain!=='Hunting Zone'))return false;
+  const result=success?{success:true,slug,potential:1+Math.floor(Math.random()*4),trait:rollWildTrait(sp),gender:hatchGender(),isPrismatic:rollPrismatic()}: {success:false};
+  const now=Date.now();hunt.traps[i]={slot:i,baitId,startedAt:now,finishAt:now+HUNT_DURATION_MS,result};
+  state.inventory[baitId]--;if(state.inventory[baitId]<=0)delete state.inventory[baitId];
+  huntingReport(`Trap ${i+1} armed with ${bait.name}. Check back in four hours.`);save();renderAll();return true;
+}
+function openHuntingBaitPicker(i){
+  if(!Number.isInteger(i)||i<0||i>=state.hunting.unlockedTraps||huntTrapStatus(state.hunting.traps[i])!=='empty')return;
+  selectedHuntingTrap=i;document.getElementById('huntingBaitHeading').textContent=`Trap ${i+1} • Choose Bait`;
+  const host=document.getElementById('huntingBaitChoices');host.replaceChildren();
+  HUNT_BAITS.forEach(bait=>{const qty=Number(state.inventory[bait.id]||0),btn=document.createElement('button');btn.type='button';btn.className='hunt-bait-choice';btn.disabled=!qty||!huntingSpeciesPool().length;
+    btn.innerHTML=`<span class="hunt-bait-emoji">${huntingBaitIcon(bait.id)}</span><span class="hunt-bait-name"><strong>${bait.name}</strong><small>${Math.round(bait.chance*100)}% catch chance • Rarer species favored</small></span><span class="hunt-bait-owned">Owned: ${qty}</span>`;
+    btn.addEventListener('click',()=>{if(armHuntingTrap(selectedHuntingTrap,bait.id)){document.getElementById('huntingBaitDialog').close();selectedHuntingTrap=null;}});host.appendChild(btn);});
+  if(!huntingSpeciesPool().length){const note=document.createElement('p');note.textContent='No exclusive species yet: add one in Admin → Monster Studio and set Obtain method to Hunting Zone.';host.prepend(note);}
+  document.getElementById('huntingBaitDialog').showModal();
+}
+function collectHuntingTrap(i){
+  const hunt=state.hunting,t=hunt.traps[i];if(!t||i>=hunt.unlockedTraps||huntTrapStatus(t)!=='ready')return false;
+  const r=t.result;let mon=null,sp=null;
+  if(r?.success){
+    if(!collectionHasOpenSlot()){huntingReport('Your Collection Pens are full. The captured monster is safe in the trap until you make room.');return false;}
+    sp=state.species[r.slug];
+    // Preserve an already-set result if the species was subsequently removed from admin.
+    if(!sp){huntingReport('This trap references a missing species. Restore it from Admin data before collecting.');return false;}
+    const id=uid('M',state.nextMonsterNum++);
+    mon={id,slug:r.slug,level:1,xp:0,gender:r.gender||'Male',potential:r.potential||1,trait:r.trait||rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:!!r.isPrismatic,isAlpha:false,faintedUntil:0,parents:null};
+    state.monsters.push(mon);placeMonsterInCollection(id);
+    if(!state.discoveredSpecies.includes(r.slug))state.discoveredSpecies.push(r.slug);
+  }
+  // Clear the saved trap before drawing the result. Double click cannot duplicate a reward.
+  hunt.traps[i]=emptyHuntingTrap(i);
+  huntingReport(mon?`Trap ${i+1}: ${sp.name} joined your Collection!`:`Trap ${i+1} was empty. Something enjoyed the bait and escaped.`);
+  save();renderAll();
+  const dialog=document.getElementById('huntingRevealDialog'),art=document.getElementById('huntingRevealArt'),stats=document.getElementById('huntingRevealStats');art.replaceChildren();stats.replaceChildren();
+  document.getElementById('huntingRevealTitle').textContent=mon?(mon.isPrismatic?`✦ Prismatic ${sp.name}!`:`${sp.name} caught!`):'The trail went cold...';
+  document.getElementById('huntingRevealText').textContent=mon?'Your patience paid off. A rare visitor has joined your Collection.':'You found tracks, but no monster. The bait is gone. Better luck on the next hunt!';
+  if(mon){const img=document.createElement('img');img.alt=sp.name;art.appendChild(img);setMonsterImage(img,mon.slug,monsterArtKind(mon));stats.textContent=`${mon.gender} • P${mon.potential} • ${mon.trait}${mon.isPrismatic?' • ✦ PRISMATIC':''}`;}
+  else art.textContent='🍂';
+  dialog.showModal();return true;
+}
+function renderHuntingZone(){
+  const hunt=state.hunting;if(!hunt)return;const grid=document.getElementById('huntingTrapsGrid');if(!grid)return;
+  grid.replaceChildren();document.getElementById('huntingSlotCount').textContent=`${hunt.unlockedTraps} / 5 traps unlocked`;
+  const ready=huntingReadyCount();document.getElementById('huntingReadyCount').textContent=`${ready} ready`;
+  for(const id of ['huntingNavReady','huntingTabReady']){const badge=document.getElementById(id);if(badge){badge.textContent=String(ready);badge.classList.toggle('hidden',ready===0);}}
+  document.getElementById('huntingMessage').textContent=hunt.lastMessage||'';
+  const summary=document.getElementById('huntingBaitSummary');summary.replaceChildren();
+  HUNT_BAITS.forEach(bait=>{const item=document.createElement('div');item.className='hunt-bait-summary-item';item.innerHTML=`<span>${huntingBaitIcon(bait.id)} ${bait.name}</span><strong>${Number(state.inventory[bait.id]||0)}</strong>`;summary.appendChild(item);});
+  for(let i=0;i<5;i++){
+    const t=hunt.traps[i],locked=i>=hunt.unlockedTraps,status=locked?'locked':huntTrapStatus(t),card=document.createElement('article');card.className=`hunt-trap-card ${status}`;card.dataset.huntingSlot=String(i);
+    const head=document.createElement('div');head.className='hunt-trap-header';head.innerHTML=`<strong>TRAP ${i+1}</strong><span>${locked?'🔒 LOCKED':status==='empty'?'AVAILABLE':status==='waiting'?'TRACKING...':'✦ READY'}</span>`;
+    const scene=document.createElement('div');scene.className='hunt-trap-scene';scene.innerHTML=`<div class="hunt-ground"></div><div class="hunt-trap-art ${status==='ready'?'hunt-shaking':''}">${status==='waiting'?'🪤':status==='ready'?'🪤':locked?'🔒':'🪤'}</div><div class="hunt-trail">${status==='waiting'?'· · ·':status==='ready'?'✦ ✦ ✦':'· ·'}</div>`;
+    const details=document.createElement('div');details.className='hunt-trap-info';
+    if(locked){const cost=HUNT_TRAP_COSTS[i];details.innerHTML=`<strong>Upgrade in the Shop</strong><small>Next available trap: ${money(cost)} currency</small><button type="button" class="ghost small" data-route="shop-supplies">View Upgrade ↗</button>`;}
+    else if(status==='empty')details.innerHTML=`<strong>Waiting for bait</strong><small>Four-hour real-time hunt. No bait is consumed until you arm this trap.</small><button type="button" class="primary" data-hunt-action="choose" data-hunt-index="${i}">Set Bait</button>`;
+    else if(status==='waiting'){
+      const remain=Math.max(0,Number(t.finishAt)-Date.now()),progress=Math.max(0,Math.min(100,(Date.now()-Number(t.startedAt))/Math.max(1,Number(t.finishAt)-Number(t.startedAt))*100)),bait=HUNT_BAITS.find(b=>b.id===t.baitId);
+      details.innerHTML=`<strong>${bait?.name||'Bait'} placed</strong><small data-hunt-timer="${i}">${fmtTime(remain)} remaining</small><div class="hunt-progress"><span data-hunt-progress="${i}" style="width:${progress}%"></span></div><small>Result sealed until ready</small>${isAdminAccount()?`<button type="button" class="ghost small" data-hunt-action="finish-test" data-hunt-index="${i}">⚙ Test: Finish Hunt Now</button>`:''}`;
+    }else details.innerHTML=`<strong>Something disturbed the trap!</strong><small>Inspect to reveal whether anything was caught.</small><button type="button" class="primary" data-hunt-action="collect" data-hunt-index="${i}">Check Trap ✦</button>`;
+    card.append(head,scene,details);grid.appendChild(card);
+  }
+  if(!huntingSpeciesPool().length){const message=document.createElement('div');message.className='hunt-empty-note';message.textContent='No Hunting Zone exclusive monsters are configured yet. Add species in Monster Studio and publish them with the existing Live Package to populate this hunting pool.';grid.before(message);const previous=grid.parentElement.querySelectorAll('.hunt-empty-note');if(previous.length>1)Array.from(previous).slice(0,-1).forEach(n=>n.remove());}
+  else grid.parentElement.querySelectorAll('.hunt-empty-note').forEach(n=>n.remove());
+}
+function tickHuntingZone(){
+  if(!state?.hunting)return;
+  let needsRefresh=false;
+  for(let i=0;i<state.hunting.unlockedTraps;i++){
+    const t=state.hunting.traps[i];if(huntTrapStatus(t)==='empty')continue;
+    const timer=document.querySelector(`[data-hunt-timer="${i}"]`),progress=document.querySelector(`[data-hunt-progress="${i}"]`),remain=Number(t.finishAt)-Date.now();
+    if(remain<=0){if(timer)needsRefresh=true;continue;}
+    if(timer)timer.textContent=`${fmtTime(remain)} remaining`;
+    if(progress)progress.style.width=`${Math.max(0,Math.min(100,(Date.now()-Number(t.startedAt))/Math.max(1,Number(t.finishAt)-Number(t.startedAt))*100))}%`;
+  }
+  if(needsRefresh&&currentAdventurePane==='hunting')renderHuntingZone();
+  const ready=huntingReadyCount();for(const id of ['huntingNavReady','huntingTabReady']){const badge=document.getElementById(id);if(badge){badge.textContent=String(ready);badge.classList.toggle('hidden',!ready);}}
+}
+document.getElementById('huntingTrapsGrid').addEventListener('click',e=>{
+  const route=e.target.closest('[data-route]');if(route){switchTab(route.dataset.route);return;}
+  const btn=e.target.closest('[data-hunt-action]');if(!btn)return;const index=Number(btn.dataset.huntIndex);
+  if(!Number.isInteger(index)||index<0||index>=5)return;
+  if(btn.dataset.huntAction==='choose')openHuntingBaitPicker(index);
+  else if(btn.dataset.huntAction==='collect')collectHuntingTrap(index);
+  else if(btn.dataset.huntAction==='finish-test'&&isAdminAccount()){const t=state.hunting.traps[index];if(huntTrapStatus(t)==='waiting'){t.finishAt=Date.now();save();renderHuntingZone();}}
+});
+document.getElementById('huntingCloseBait').addEventListener('click',()=>document.getElementById('huntingBaitDialog').close());
+document.getElementById('huntingCloseReveal').addEventListener('click',()=>document.getElementById('huntingRevealDialog').close());
+document.getElementById('huntingBaitDialog').addEventListener('close',()=>{selectedHuntingTrap=null;});
+
 let uiRenderVersion=0;
 async function renderAll(){
   const version=++uiRenderVersion;
@@ -8482,6 +8857,7 @@ async function renderAll(){
   await renderExpeditions();
   if(version!==uiRenderVersion)return;
   renderCollection();
+  renderHuntingZone();
   renderBreedSelectors();
   renderBreedJob();
   renderSilverwindDesk();
@@ -8501,6 +8877,7 @@ async function renderAll(){
   if(version!==uiRenderVersion)return;
 
   renderInventory();
+  renderReconstructionLab();
   renderEventPage();
   renderEventAdmin();
   renderAttackIndex();
@@ -8526,6 +8903,20 @@ async function renderAll(){
   await hydrateSprites(document);
 }
 
+// Reconstruction Lab and Admin material/recipe controls.
+document.getElementById('reconShowChamber').addEventListener('click',()=>{reconSelectedPane='chamber';renderReconstructionLab();});
+document.getElementById('reconShowBook').addEventListener('click',()=>{reconSelectedPane='book';renderReconstructionLab();});
+document.getElementById('reconRecipeGrid').addEventListener('click',e=>{const button=e.target.closest('[data-recon-select]');if(button){reconSelectedRecipeId=button.dataset.reconSelect;renderReconstructionLab();}});
+document.getElementById('reconRecipeDetail').addEventListener('click',e=>{if(e.target.closest('#reconCreateEgg'))reconstructSelectedEgg();});
+document.getElementById('reconRecipeForm').addEventListener('submit',reconSaveRecipe);
+document.getElementById('reconMaterialForm').addEventListener('submit',reconSaveMaterial);
+document.getElementById('reconNewRecipe').addEventListener('click',reconClearRecipe);
+document.getElementById('reconGiveTestPage').addEventListener('click',()=>{if(!isAdminAccount())return;state.inventory.ancient_pages=(state.inventory.ancient_pages||0)+1;save();renderInventory();renderReconstructionLab();document.getElementById('reconRecipeAdminMessage').textContent='Granted one Ancient Page for local testing.';});
+document.getElementById('reconDeleteRecipe').addEventListener('click',reconDeleteRecipe);
+document.getElementById('reconNewMaterial').addEventListener('click',reconClearMaterial);
+document.getElementById('reconDeleteMaterial').addEventListener('click',reconDeleteMaterial);
+document.getElementById('reconAdminRecipeList').addEventListener('click',e=>{const b=e.target.closest('[data-recon-admin-edit]');if(b)reconEditRecipe(b.dataset.reconAdminEdit);});
+document.getElementById('reconAdminMaterialList').addEventListener('click',e=>{const b=e.target.closest('[data-recon-material-edit]');if(b)reconEditMaterial(b.dataset.reconMaterialEdit);});
 document.getElementById('expeditionGrid').addEventListener('click',e=>{const prep=e.target.closest('[data-expedition-prepare]'),collect=e.target.closest('[data-expedition-collect]');if(prep)openExpeditionTeam(prep.dataset.expeditionPrepare);else if(collect)collectExpedition(collect.dataset.expeditionCollect);});
 document.getElementById('expeditionTeamPicker').addEventListener('click',e=>{const btn=e.target.closest('[data-expedition-monster-id]');if(btn)toggleExpeditionMonster(btn.dataset.expeditionMonsterId);});
 document.getElementById('startSelectedExpedition').addEventListener('click',startSelectedExpedition);
@@ -8539,8 +8930,8 @@ document.getElementById('expeditionFinishActive').addEventListener('click',finis
 document.getElementById('expeditionRerollDaily').addEventListener('click',()=>{rerollUnstartedExpeditions();document.getElementById('expeditionAdminMessage').textContent='Unstarted daily expedition contracts rerolled.';});
 
 document.getElementById('search').addEventListener('input',renderCollection);document.getElementById('filter').addEventListener('change',renderCollection);
-document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutHabitats').addEventListener('click',()=>showHideoutPane('habitats'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));document.getElementById('showHideoutProfile').addEventListener('click',()=>showHideoutPane('profile'));
-document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));
+document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutReconstruction').addEventListener('click',()=>showHideoutPane('reconstruction'));document.getElementById('showHideoutHabitats').addEventListener('click',()=>showHideoutPane('habitats'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));document.getElementById('showHideoutProfile').addEventListener('click',()=>showHideoutPane('profile'));
+document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));document.getElementById('showAdventureHunting').addEventListener('click',()=>showAdventurePane('hunting'));
 document.getElementById('habitatGrid').addEventListener('change',e=>{if(e.target.matches('[data-habitat-name],[data-habitat-theme],[data-habitat-decor],[data-habitat-monster]'))changeHabitatSetting(e.target);});
 document.getElementById('habitatGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-habitat-pet]');if(btn)petHabitatMonster(btn.dataset.habitatPet,btn);});
 document.getElementById('habitatVisitShop').addEventListener('click',()=>switchTab('shop-supplies'));
@@ -8753,7 +9144,7 @@ function showAdminPane(name){
   document.getElementById('showDashboardAdmin').classList.toggle('active',name==='dashboard');
   document.getElementById('showPublishingAdmin').classList.toggle('active',name==='publishing');
   if(name==='dashboard')admin2RenderDashboard();
-  if(name==='publishing')admin2ResetCheckup();document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('lotteryAdminPane').classList.toggle('hidden',name!=='lottery');document.getElementById('ancientEggAdminPane').classList.toggle('hidden',name!=='ancient');document.getElementById('artifactAdminPane').classList.toggle('hidden',name!=='artifacts');document.getElementById('donationAdminPane').classList.toggle('hidden',name!=='donations');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');document.getElementById('showLotteryAdmin').classList.toggle('active',name==='lottery');document.getElementById('showAncientEggAdmin').classList.toggle('active',name==='ancient');document.getElementById('showArtifactAdmin').classList.toggle('active',name==='artifacts');document.getElementById('showDonationAdmin').classList.toggle('active',name==='donations');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();if(name==='lottery')renderLotteryAdmin();if(name==='ancient')renderAncientEggAdmin();if(name==='artifacts'){renderArtifactAdmin();renderArtifactPreview();}if(name==='donations')renderDonationAdmin();}
+  if(name==='publishing')admin2ResetCheckup();document.getElementById('speciesAdminPane').classList.toggle('hidden',name!=='species');document.getElementById('attackAdminPane').classList.toggle('hidden',name!=='attack');document.getElementById('spriteAdminPane').classList.toggle('hidden',name!=='sprite');document.getElementById('dialogueAdminPane').classList.toggle('hidden',name!=='dialogue');document.getElementById('landingAdminPane').classList.toggle('hidden',name!=='landing');document.getElementById('eventAdminPane').classList.toggle('hidden',name!=='event');document.getElementById('expeditionAdminPane').classList.toggle('hidden',name!=='expedition');document.getElementById('trialAdminPane').classList.toggle('hidden',name!=='trial');document.getElementById('lotteryAdminPane').classList.toggle('hidden',name!=='lottery');document.getElementById('ancientEggAdminPane').classList.toggle('hidden',name!=='ancient');document.getElementById('artifactAdminPane').classList.toggle('hidden',name!=='artifacts');document.getElementById('donationAdminPane').classList.toggle('hidden',name!=='donations');document.getElementById('reconstructionAdminPane').classList.toggle('hidden',name!=='reconstruction');document.getElementById('showSpeciesAdmin').classList.toggle('active',name==='species');document.getElementById('showAttackAdmin').classList.toggle('active',name==='attack');document.getElementById('showSpriteAdmin').classList.toggle('active',name==='sprite');document.getElementById('showDialogueAdmin').classList.toggle('active',name==='dialogue');document.getElementById('showLandingAdmin').classList.toggle('active',name==='landing');document.getElementById('showEventAdmin').classList.toggle('active',name==='event');document.getElementById('showExpeditionAdmin').classList.toggle('active',name==='expedition');document.getElementById('showTrialAdmin').classList.toggle('active',name==='trial');document.getElementById('showLotteryAdmin').classList.toggle('active',name==='lottery');document.getElementById('showAncientEggAdmin').classList.toggle('active',name==='ancient');document.getElementById('showArtifactAdmin').classList.toggle('active',name==='artifacts');document.getElementById('showDonationAdmin').classList.toggle('active',name==='donations');document.getElementById('showReconstructionAdmin').classList.toggle('active',name==='reconstruction');if(name==='sprite')loadSpriteIntoForm(selectedSpriteKey);if(name==='dialogue')renderDialogueAdmin();if(name==='landing')renderLandingAdmin();if(name==='trial')renderTrialAdmin();if(name==='lottery')renderLotteryAdmin();if(name==='ancient')renderAncientEggAdmin();if(name==='artifacts'){renderArtifactAdmin();renderArtifactPreview();}if(name==='donations')renderDonationAdmin();if(name==='reconstruction')renderReconstructionAdmin();}
 document.getElementById('showDashboardAdmin').addEventListener('click',()=>showAdminPane('dashboard'));
 document.getElementById('showPublishingAdmin').addEventListener('click',()=>showAdminPane('publishing'));
 document.getElementById('showSpeciesAdmin').addEventListener('click',()=>showAdminPane('species'));
@@ -8767,6 +9158,7 @@ document.getElementById('showTrialAdmin').addEventListener('click',()=>showAdmin
 document.getElementById('showAncientEggAdmin').addEventListener('click',()=>showAdminPane('ancient'));
 document.getElementById('showArtifactAdmin').addEventListener('click',()=>showAdminPane('artifacts'));
 document.getElementById('showDonationAdmin').addEventListener('click',()=>showAdminPane('donations'));
+document.getElementById('showReconstructionAdmin').addEventListener('click',()=>showAdminPane('reconstruction'));
 document.getElementById('donationAdminForm').addEventListener('submit',saveDonationSettings);
 document.getElementById('donationGrid').addEventListener('click',e=>{const b=e.target.closest('[data-donate-crate]');if(b)donateToCrate(Number(b.dataset.donateCrate));});
 
@@ -8917,6 +9309,8 @@ function tickLiveTimers(){
     el.textContent=`BREEDING • ${remaining<=0?'READY':fmtTime(remaining)}`;
   });
 
+  // Hunting traps tick visually without rebuilding the whole Explore screen.
+  tickHuntingZone();
   // Keep the open incubator detail timer live without rebuilding the icon grid.
   for(let i=0;i<state.unlockedIncubators;i++){const slot=state.incubators[i];if(!slot?.eggId)continue;const remain=Number(slot.finishAt||0)-Date.now(),timer=document.querySelector(`[data-incubator-timer="${i}"]`),prog=document.querySelector(`[data-incubator-progress="${i}"]`);if(timer)timer.textContent=remain<=0?'READY':fmtTime(remain);if(prog)prog.style.width=`${Math.min(100,Math.max(0,(Date.now()-Number(slot.startedAt||0))/Math.max(1000,Number(slot.finishAt||0)-Number(slot.startedAt||0))*100))}%`;const tileNow=document.querySelector(`[data-nursery-slot="${i}"]`),eggBtn=tileNow?.querySelector('.nursery-egg-button');if(eggBtn&&!tileNow.classList.contains('nursery-ready'))eggBtn.classList.toggle('restless',remain>0&&Number(prog?.style.width.replace('%','')||0)>=90);if(remain<=0&&!document.querySelector(`[data-nursery-slot="${i}"] .nursery-ready-marker`)){const tile=document.querySelector(`[data-nursery-slot="${i}"]`);if(tile&&!tile.classList.contains('nursery-ready')){tile.classList.add('nursery-ready');tile.querySelector('.nursery-egg-button')?.classList.remove('restless');tile.querySelector('.nursery-egg-button')?.classList.add('wiggling');const btn=tile.querySelector('[data-incubator-action="inspect"]:last-child');if(btn){btn.dataset.incubatorAction='hatch';btn.textContent='Hatch Egg ✦';btn.className='primary nursery-ready-marker';}}}}
   updateLabBadges();
