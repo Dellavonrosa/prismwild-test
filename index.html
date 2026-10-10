@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.83</title>
-<link rel="stylesheet" href="styles.css?v=0.15.83-reconstruction">
+<title>Prismwild Prototype v0.15.85a</title>
+<link rel="stylesheet" href="styles.css?v=0.15.85a-excavation-sprites">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.83</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.85a</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -148,12 +148,26 @@
           <span id="collectionPenLabel">Pen 1</span>
         </div>
       </div>
-      <p class="collection-reorder-hint">Press and hold a monster, then drag over another monster in the same Pen to rearrange them.</p>
+      <div class="collection-autosort-bar" aria-label="Collection Pen organization">
+        <div class="collection-autosort-controls">
+          <label for="collectionPenAutoSort">Auto Sort Pen</label>
+          <select id="collectionPenAutoSort" aria-label="Choose how to permanently arrange this Pen">
+            <option value="gender">Gender (Female → Male → Intersex)</option>
+            <option value="level">Level ↓ then Potential ↓</option>
+            <option value="species">Species (registered order)</option>
+            <option value="element">Element (group primary type)</option>
+          </select>
+          <button id="collectionPenAutoSortApply" class="primary" type="button">Auto Sort</button>
+          <button id="collectionPenAutoSortUndo" class="ghost" type="button" disabled>Undo Sort</button>
+        </div>
+        <span id="collectionPenAutoSortStatus" class="collection-autosort-status" role="status" aria-live="polite"></span>
+      </div>
+      <p class="collection-reorder-hint">Search and Filter only change what you see; Auto Sort saves the order of all monsters in the selected Pen. Press and hold a monster to rearrange it manually.</p>
       <section class="summary">
         <div><h2>My Monsters</h2><p><strong id="visibleCount">0</strong> creatures shown in this Pen.</p></div>
         <div class="filters">
           <input id="search" type="search" placeholder="Search monsters...">
-          <select id="filter">
+          <select id="filter" aria-label="Filter monsters in this Pen" title="Filter (does not change Pen order)">
             <option value="all">All monsters</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -665,7 +679,7 @@
 
             <div class="registry-filters">
               <label>Battle type<select id="adminBattleFilter"><option value="all">All battle types</option><option value="Speed">Speed</option><option value="Brute">Brute</option><option value="Defender">Defender</option></select></label>
-              <label>Roster<select id="adminRosterFilter"><option value="all">Whole roster</option><option value="base">Base Monsters</option><option value="crossbreed">Crossbreeds</option><option value="builtin">Built-in only</option><option value="custom">Custom only</option><option value="published">Published custom</option><option value="draft">Draft custom</option><option value="mythic">Mythic only</option></select></label>
+              <label>Roster<select id="adminRosterFilter"><option value="all">Whole roster</option><option value="base">Base Monsters</option><option value="crossbreed">Crossbreeds</option><option value="builtin">Built-in only</option><option value="custom">Custom only</option><option value="published">Published custom</option><option value="draft">Draft custom</option><option value="mythic">Mythic only</option><option value="god">GOD only</option></select></label>
               <label>Sort<select id="adminSpeciesSort"><option value="name">Name A–Z</option><option value="element">Element</option><option value="battle">Battle type</option><option value="bstLow">P1 BST low → high</option><option value="bstHigh">P1 BST high → low</option></select></label>
             </div>
             <div id="registryFilterSummary" class="registry-filter-summary"></div>
@@ -674,7 +688,7 @@
 
           <form id="speciesForm" class="admin-form admin2-species-form">
             <input id="editSlug" type="hidden">
-            <div class="admin2-studio-header"><div><span class="eyebrow">MONSTER STUDIO</span><h3 id="admin2SpeciesTitle">New Monster</h3><span id="admin2SpeciesDirty" class="admin2-dirty">All changes saved</span></div><label class="admin2-template-label">Quick-start template<select id="admin2SpeciesTemplate"><option value="">Choose a preset…</option><option value="speed">Standard • Speed</option><option value="brute">Standard • Brute</option><option value="defender">Standard • Defender</option><option value="mythic">Mythic</option><option value="crossbreed">Crossbreed</option><option value="event">Event Monster</option></select></label></div>
+            <div class="admin2-studio-header"><div><span class="eyebrow">MONSTER STUDIO</span><h3 id="admin2SpeciesTitle">New Monster</h3><span id="admin2SpeciesDirty" class="admin2-dirty">All changes saved</span></div><label class="admin2-template-label">Quick-start template<select id="admin2SpeciesTemplate"><option value="">Choose a preset…</option><option value="speed">Standard • Speed</option><option value="brute">Standard • Brute</option><option value="defender">Standard • Defender</option><option value="mythic">Mythic</option><option value="god">GOD Grade</option><option value="crossbreed">Crossbreed</option><option value="event">Event Monster</option></select></label></div>
             <div class="admin2-jump-nav"><button type="button" data-admin2-jump="admin2Identity">① Identity &amp; Art</button><button type="button" data-admin2-jump="admin2Combat">② Battle Profile</button><button type="button" data-admin2-jump="admin2Breeding">③ Availability &amp; Breeding</button></div>
             <div id="admin2MonsterSnapshot" class="admin2-monster-snapshot" aria-live="polite"></div>
 
@@ -702,7 +716,7 @@
                   <span>Special Egg Art</span>
                   <input id="eggArt" type="file" accept="image/png,image/webp,image/jpeg">
                   <img id="eggPreview" alt="Egg art preview">
-                  <small id="eggArtHelp">Shown for Shop Egg, Halloween Event Shop Egg, and Winter Event Shop Egg species.</small>
+                  <small id="eggArtHelp">Available for Shop Eggs, Reconstruction Eggs, and GOD-grade breeding eggs.</small>
                 </label>
               </div>
             </div>
@@ -712,7 +726,7 @@
               <div class="form-grid four">
                 <label>Battle type<select id="battleType"><option>Speed</option><option>Brute</option><option>Defender</option></select></label>
                 <label>Native battle facing<select id="nativeFacing"><option value="right">Right</option><option value="left">Left</option></select></label>
-                <label>Rarity<select id="speciesRarity"><option value="Standard">Standard</option><option value="Mythic">Mythic</option></select></label>
+                <label>Rarity<select id="speciesRarity"><option value="Standard">Standard</option><option value="Mythic">Mythic</option><option value="GOD">GOD</option></select></label>
                 <label>P1 BST<input id="p1bst" type="number" min="80" max="800" step="1" value="280" required></label>
                 <label>Signature attack<select id="signatureAttack"></select></label>
                 <label>Role / short description<input id="speciesRole" maxlength="80" placeholder="e.g. Spiral ram beetle"></label>
@@ -752,10 +766,10 @@
                   <label>Second Element<select id="speciesElement2"></select></label>
                   <label>Parent species A<select id="parentA"></select></label>
                   <label>Parent species B<select id="parentB"></select></label>
-                  <label>Crossbreed chance %<input id="crossbreedChance" type="number" min="1" max="20" step="1" value="15"></label>
+                  <label>Crossbreed chance %<input id="crossbreedChance" type="number" min="0.5" max="20" step="0.5" value="15"></label>
                   <label>Seasonal recipe<select id="crossbreedSeason"><option value="">Always available</option><option value="spooky_halloween">Spooky Halloween only</option><option value="winter_event">Winter Event only</option></select><small>Seasonal recipes go dormant outside that event. Already-owned monsters remain usable.</small></label>
                 </div>
-                <p class="form-note">Crossbreeds are breeding-only dual-Element species. Parent order does not matter. Standard Crossbreeds usually use 10–20%; Mythic recipes may use rarer odds.</p>
+                <p class="form-note">GOD grade: 0.5% breeding odds when BOTH parents are Mythic. GOD eggs have a 5% chance to hatch with one exclusive divine trait. <strong>GOD species cannot appear in ordinary wild encounters or reconstruction.</strong></p><p class="form-note">Crossbreeds are breeding-only dual-Element species. Parent order does not matter. Standard Crossbreeds usually use 10–20%; Mythic recipes may use rarer odds. GOD recipes require two Mythic parent species and always have a 0.5% success chance.</p>
               </div>
 
               <div class="timer-grid">
@@ -1589,19 +1603,37 @@ const ALPHA_TRAITS={
 // A Mythic parent can pass one only to Mythic offspring, at a 30% chance.
 const MYTHIC_TRAITS={
   Sovereign:{mods:{hp:5,attack:0,armor:8,speed:-5},weight:1,note:'Vitality +5, Armor +8, Speed -5'},
-  Calamitous:{mods:{hp:0,attack:12,armor:-7,speed:-3},weight:1,note:'Attack +12, Armor -7, Speed -3'},
+  Ruinous:{mods:{hp:0,attack:12,armor:-7,speed:-3},weight:1,note:'Attack +12, Armor -7, Speed -3'},
   Ageless:{mods:{hp:12,attack:-5,armor:0,speed:-5},weight:1,note:'Vitality +12, Attack -5, Speed -5'},
   Oracular:{mods:{hp:0,attack:-7,armor:5,speed:8},weight:1,note:'Speed +8, Armor +5, Attack -7'},
   Unbound:{mods:{hp:-4,attack:6,armor:-8,speed:6},weight:1,note:'Attack +6, Speed +6, Armor -8, Vitality -4'}
 };
+// GODs are crossbred from two Mythic species. A new GOD has a flat 5%
+// birth chance for ONE of these four traits, independent of parent trait.
+const GOD_CROSSBREED_CHANCE=.5; // percentage points: 0.5% per attempt
+const GOD_BIRTH_TRAIT_CHANCE=.05;
+const GOD_INVINCIBLE_RESISTANCE=.50;
+const GOD_TRAITS={
+  'Divine One':{mods:{hp:20,attack:0,armor:0,speed:0},weight:1,note:'Vitality +20 • restores 15 HP at the end of each turn'},
+  'Calamitous':{mods:{hp:0,attack:20,armor:0,speed:0},weight:1,note:'Attack +20 • opponent loses 10 HP at the end of each turn'},
+  'Invincible':{mods:{hp:0,attack:0,armor:20,speed:0},weight:1,note:'Armor +20 • resists all direct attacks (50% less damage)'},
+  'Light Speed':{mods:{hp:0,attack:0,armor:0,speed:20},weight:1,note:'Speed +20 • attacks twice per turn'}
+};
+function isGodSpecies(sp){return !!sp&&sp.rarity==='GOD';}
+function hasGodTrait(mon,name){return !!mon&&mon.trait===name&&isGodSpecies(speciesOf(mon));}
+function rollGodBirthTrait(sp,ordinaryTrait){
+  if(!isGodSpecies(sp))return GOD_TRAITS[ordinaryTrait]?rollTrait():ordinaryTrait;
+  return Math.random()<GOD_BIRTH_TRAIT_CHANCE?randomChoice(Object.keys(GOD_TRAITS)):(GOD_TRAITS[ordinaryTrait]?rollTrait():ordinaryTrait);
+}
 const RARE_TRAIT_INHERIT_CHANCE=.30;
 function isMythicSpecies(sp){return !!sp&&(sp.rarity==='Mythic'||sp.isMythic===true);}
 function rollAlphaTrait(){return weightedChoice(Object.entries(ALPHA_TRAITS).map(([value,info])=>({value,weight:info.weight})));}
 function rollMythicTrait(){return weightedChoice(Object.entries(MYTHIC_TRAITS).map(([value,info])=>({value,weight:info.weight})));}
-function traitDefinition(name){return TRAITS[name]||ALPHA_TRAITS[name]||MYTHIC_TRAITS[name]||null;}
-function rollWildTrait(sp){return isMythicSpecies(sp)?rollMythicTrait():rollTrait();}
+function traitDefinition(name){return TRAITS[name]||ALPHA_TRAITS[name]||MYTHIC_TRAITS[name]||GOD_TRAITS[name]||null;}
+function rollWildTrait(sp){return isGodSpecies(sp)?rollGodBirthTrait(sp,rollTrait()):isMythicSpecies(sp)?rollMythicTrait():rollTrait();}
 function inheritBreedingTrait(father,targetSpecies){
   const trait=father?.trait;
+  if(GOD_TRAITS[trait])return rollTrait(); // only a fresh GOD birth roll can grant divine traits
   if(ALPHA_TRAITS[trait])return Math.random()<RARE_TRAIT_INHERIT_CHANCE?trait:rollTrait();
   if(MYTHIC_TRAITS[trait])return isMythicSpecies(targetSpecies)&&Math.random()<RARE_TRAIT_INHERIT_CHANCE?trait:rollTrait();
   return TRAITS[trait]?trait:rollTrait();
@@ -1632,6 +1664,7 @@ const HABITAT_PERSONALITIES={
   Myth:{label:'Imposing',description:'Holds commanding poses between deliberate strides.',gait:'heavy',reaction:'pose',pause:[4400,8500],pace:[500,750],steps:[2,3],range:.65},
   Shamed:{label:'Withdrawn',description:'Stays toward the edges and avoids looking at others.',gait:'shamble',reaction:'snub',pause:[6200,11000],pace:[550,820],steps:[2,3],range:.5,pattern:'away'},
   Sovereign:{label:'Proud',description:'Surveys its domain from commanding, unhurried poses.',gait:'steady',reaction:'pose',pause:[4500,8200],pace:[510,740],steps:[2,4],range:.78},
+  Ruinous:{label:'Destructive',description:'Stomps and makes short, explosive lunges.',gait:'heavy',reaction:'stomp',pause:[1300,3900],pace:[280,470],steps:[3,5],range:1},
   Calamitous:{label:'Destructive',description:'Stomps and makes short, explosive lunges.',gait:'heavy',reaction:'stomp',pause:[1300,3900],pace:[280,470],steps:[3,5],range:1},
   Ageless:{label:'Ancient',description:'Stands motionless for ages, then takes a few calm steps.',gait:'glide',reaction:'sway',pause:[11000,19000],pace:[690,900],steps:[2,3],range:.45},
   Oracular:{label:'Watchful',description:'Studies nearby creatures, then turns thoughtfully.',gait:'sneak',reaction:'scan',pause:[3900,7400],pace:[450,680],steps:[2,4],range:.7,pattern:'toward'},
@@ -2232,7 +2265,7 @@ function referenceActions(items){return `<div class="silverwind-reference-action
 function silverwindReferenceTopics(){
   const currentChaos=zoneElementsFor('Sunday');
   const zones=DAY_NAMES.slice(1).concat('Sunday').map(day=>{const z=ZONES[day],els=day==='Sunday'?currentChaos:(z.elements||[]);return `<div class="reference-row"><strong>${day} • ${z.name}</strong><span>${els.join(' • ')}</span></div>`;}).join('');
-  const traitRows=[...Object.entries(TRAITS),...Object.entries(ALPHA_TRAITS),...Object.entries(MYTHIC_TRAITS)].map(([name,t])=>`<div class="reference-row"><strong>${name}${ALPHA_TRAITS[name]?' • ALPHA LINEAGE':MYTHIC_TRAITS[name]?' • WILD MYTHIC':''}</strong><span>${t.note} • ${personalitySummary(name)}</span></div>`).join('');
+  const traitRows=[...Object.entries(TRAITS),...Object.entries(ALPHA_TRAITS),...Object.entries(MYTHIC_TRAITS),...Object.entries(GOD_TRAITS)].map(([name,t])=>`<div class="reference-row"><strong>${name}${ALPHA_TRAITS[name]?' • ALPHA LINEAGE':MYTHIC_TRAITS[name]?' • WILD MYTHIC':GOD_TRAITS[name]?' • GOD EXCLUSIVE':''}</strong><span>${t.note} • ${personalitySummary(name)}</span></div>`).join('');
   const typeRows=ELEMENTS.map(el=>{const t=TYPE_CHART[el];return `<div class="reference-row"><strong>${el}</strong><span>Strong into: ${t.strong.join(', ')} • Resisted by: ${t.weak.join(', ')}</span></div>`;}).join('');
   const battleRows=Object.entries(TYPE_WEIGHTS).map(([name,w])=>{const g=TYPE_GROWTH[name];return `<div class="reference-row"><strong>${name}</strong><span>P1 emphasis: ${name==='Speed'?'Speed + Attack':name==='Brute'?'Attack + Armor':'Armor + Vitality'} • Potential growth/rank: VIT +${g.hp}, ATK +${g.attack}, ARM +${g.armor}, SPD +${g.speed}</span></div>`;}).join('');
   const trialRows=Object.entries(state.trials||{}).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||'')).map(([id,t])=>`<div class="reference-row"><strong>${t.name} • ${t.captainName}</strong><span>${t.element} • ${t.trialPhilosophy||'Trial'} • Normal Lv.${t.normalRequirement} / Hard Lv.${t.hardRequirement}</span></div>`).join('')||'<div class="empty-card">No Trials are registered right now.</div>';
@@ -2589,7 +2622,7 @@ function syncReconstructionMaterialRegistry(){
   }
 }
 function reconRecipeIsValid(recipe){
-  if(!recipe||!state.species[recipe.slug]||!Array.isArray(recipe.ingredients)||recipe.ingredients.length!==3)return false;
+  if(!recipe||!state.species[recipe.slug]||isGodSpecies(state.species[recipe.slug])||!Array.isArray(recipe.ingredients)||recipe.ingredients.length!==3)return false;
   if(recipe.eggSpriteKey&&recipe.eggSpriteKey!=='auto'&&!SPRITE_DEFS[recipe.eggSpriteKey])return false;
   return recipe.ingredients.every(part=>part&&itemInfoForInventoryId(String(part.id||''))&&Number.isInteger(part.qty)&&part.qty>0&&part.qty<=9999);
 }
@@ -2608,7 +2641,7 @@ function normalizeReconstructionState(){
   }
   state.knownReconstructionRecipes=[...new Set((Array.isArray(state.knownReconstructionRecipes)?state.knownReconstructionRecipes:[]).filter(id=>typeof id==='string'&&id.length<=120))];
 }
-function reconCost(recipe){const sp=state.species[recipe.slug];return sp&&(sp.isMythic===true||sp.rarity==='Mythic')?RECONSTRUCTION_MYTHIC_COST:RECONSTRUCTION_REGULAR_COST;}
+function reconCost(recipe){const sp=state.species[recipe.slug];return sp&&(sp.isMythic===true||sp.rarity==='Mythic'||isGodSpecies(sp))?RECONSTRUCTION_MYTHIC_COST:RECONSTRUCTION_REGULAR_COST;}
 function reconAllRecipes(){return Object.values(state.reconstructionRecipes||{}).filter(reconRecipeIsValid);}
 function reconEligibleUnknownRecipes(){const known=new Set(state.knownReconstructionRecipes);return reconAllRecipes().filter(r=>r.pageDiscoverable&&!known.has(r.id));}
 function useAncientPages(){
@@ -2679,6 +2712,7 @@ function renderReconstructionAdmin(){
 function reconClearRecipe(){for(const id of ['reconEditId','reconRecipeTitle'])document.getElementById(id).value='';document.getElementById('reconRecipeSpecies').value='';document.getElementById('reconRecipeEggSprite').value='auto';document.getElementById('reconPageDiscoverable').checked=true;for(let i=0;i<3;i++){document.getElementById(`reconItem${i}`).value='';document.getElementById(`reconQty${i}`).value=i===0?'2':'1';}}
 function reconEditRecipe(id){const r=state.reconstructionRecipes[id];if(!r)return;document.getElementById('reconEditId').value=id;document.getElementById('reconRecipeTitle').value=r.title;document.getElementById('reconRecipeSpecies').value=r.slug;document.getElementById('reconRecipeEggSprite').value=r.eggSpriteKey||'auto';document.getElementById('reconPageDiscoverable').checked=r.pageDiscoverable!==false;r.ingredients.forEach((p,i)=>{document.getElementById(`reconItem${i}`).value=p.id;document.getElementById(`reconQty${i}`).value=p.qty;});}
 function reconSaveRecipe(e){e.preventDefault();if(!isAdminAccount())return;const title=document.getElementById('reconRecipeTitle').value.trim(),slug=document.getElementById('reconRecipeSpecies').value,eggSpriteKey=document.getElementById('reconRecipeEggSprite').value||'auto',ingredients=[0,1,2].map(i=>({id:document.getElementById(`reconItem${i}`).value,qty:Number(document.getElementById(`reconQty${i}`).value)})),out=document.getElementById('reconRecipeAdminMessage');
+  if(isGodSpecies(state.species[slug])){out.textContent='GOD species are exclusive to Mythic × Mythic breeding, not Reconstruction.';return;}
   if(!title||!state.species[slug]||ingredients.some(p=>!p.id||!Number.isInteger(p.qty)||p.qty<1||p.qty>9999||!itemInfoForInventoryId(p.id))){out.textContent='Choose a species, a title, and three valid materials with quantities 1–9999.';return;}
   const id=document.getElementById('reconEditId').value||`recon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,6)}`;
   state.reconstructionRecipes[id]={id,title:title.slice(0,72),slug,eggSpriteKey,pageDiscoverable:document.getElementById('reconPageDiscoverable').checked,ingredients};
@@ -2701,7 +2735,7 @@ function defaultState(){
     reconstructionRecipes:{},reconstructionMaterials:{},knownReconstructionRecipes:[],
     account:{keeperName:'New Keeper',accountId:makeLocalAccountId(),role:'player'},
     onboarding:freshOnboardingState(),
-    unlockedCollectionPens:1,collectionPens:Array.from({length:MAX_COLLECTION_PENS},()=>[]),
+    unlockedCollectionPens:1,collectionPens:Array.from({length:MAX_COLLECTION_PENS},()=>[]),collectionPenSortUndo:Array.from({length:MAX_COLLECTION_PENS},()=>null),
     unlockedBreedingPens:1,breedingPens:Array.from({length:5},(_,i)=>emptyBreedingPen(i)),
     hunting:{unlockedTraps:1,traps:Array.from({length:5},(_,i)=>emptyHuntingTrap(i)),lastMessage:''},
     unlockedHabitats:1,habitats:Array.from({length:MAX_HABITATS},(_,i)=>emptyHabitat(i)),
@@ -2790,6 +2824,16 @@ function normalizeCollectionPensState(){
     if(!placed)pens[MAX_COLLECTION_PENS-1].push(id);
   }
   state.collectionPens=pens;
+  // Undo history is optional in older saves and never overrides current monster placement.
+  const previousUndo=Array.isArray(state.collectionPenSortUndo)?state.collectionPenSortUndo:[];
+  state.collectionPenSortUndo=Array.from({length:MAX_COLLECTION_PENS},(_,i)=>{
+    const entry=previousUndo[i];
+    if(!entry||!Array.isArray(entry.before)||!Array.isArray(entry.after))return null;
+    const current=pens[i];
+    if(entry.after.length!==current.length||entry.after.some((id,j)=>id!==current[j]))return null;
+    if(entry.before.length!==current.length||new Set(entry.before).size!==current.length||entry.before.some(id=>!current.includes(id)))return null;
+    return {before:entry.before.slice(),after:entry.after.slice()};
+  });
 }
 function collectionPenIndexForMonster(monId){return (state.collectionPens||[]).findIndex(p=>Array.isArray(p)&&p.includes(monId));}
 function collectionPenCount(index){return Array.isArray(state.collectionPens?.[index])?state.collectionPens[index].length:0;}
@@ -2802,10 +2846,14 @@ function placeMonsterInCollection(monId,preferredPen=null){
   let target=Number.isInteger(preferredPen)&&preferredPen>=0&&preferredPen<state.unlockedCollectionPens&&collectionPenCount(preferredPen)<COLLECTION_PEN_CAPACITY?preferredPen:firstCollectionPenWithSpace();
   if(target<0)return -1;
   state.collectionPens[target].push(monId);
+  if(state.collectionPenSortUndo)state.collectionPenSortUndo[target]=null;
   return target;
 }
 function removeMonsterFromCollectionPens(monId){
-  for(const pen of state.collectionPens||[]){const i=pen.indexOf(monId);if(i>=0)pen.splice(i,1);}
+  for(const [index,pen] of (state.collectionPens||[]).entries()){
+    const i=pen.indexOf(monId);
+    if(i>=0){pen.splice(i,1);if(state.collectionPenSortUndo)state.collectionPenSortUndo[index]=null;}
+  }
 }
 function moveMonsterToCollectionPen(monId,targetPen){
   targetPen=Number(targetPen);
@@ -2815,12 +2863,15 @@ function moveMonsterToCollectionPen(monId,targetPen){
   if(collectionPenCount(targetPen)>=COLLECTION_PEN_CAPACITY)return false;
   removeMonsterFromCollectionPens(monId);
   state.collectionPens[targetPen].push(monId);
+  if(state.collectionPenSortUndo)state.collectionPenSortUndo[targetPen]=null;
   return true;
 }
 function reorderMonsterInCollectionPen(sourceId,targetId,penIndex){
   const pen=state.collectionPens?.[penIndex];if(!Array.isArray(pen)||sourceId===targetId)return false;
   const from=pen.indexOf(sourceId),to=pen.indexOf(targetId);if(from<0||to<0)return false;
-  pen.splice(from,1);pen.splice(to,0,sourceId);return true;
+  pen.splice(from,1);pen.splice(to,0,sourceId);
+  if(state.collectionPenSortUndo)state.collectionPenSortUndo[penIndex]=null;
+  return true;
 }
 function collectionHasOpenSlot(){return firstCollectionPenWithSpace()>=0;}
 
@@ -2835,8 +2886,8 @@ function normalizeState(){
   state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
   state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
   state.lottery.lastResult=String(state.lottery.lastResult||'').slice(0,240);
-  state.lotteryEggPool=Array.isArray(state.lotteryEggPool)?[...new Set(state.lotteryEggPool.filter(x=>typeof x==='string'&&state.species[x]))]:[];
-  state.ancientEggPool=Array.isArray(state.ancientEggPool)?[...new Set(state.ancientEggPool.filter(x=>typeof x==='string'&&state.species[x]))]:[];
+  state.lotteryEggPool=Array.isArray(state.lotteryEggPool)?[...new Set(state.lotteryEggPool.filter(x=>typeof x==='string'&&state.species[x]&&!isGodSpecies(state.species[x])))]:[];
+  state.ancientEggPool=Array.isArray(state.ancientEggPool)?[...new Set(state.ancientEggPool.filter(x=>typeof x==='string'&&state.species[x]&&!isGodSpecies(state.species[x])))]:[];
   state.relicJournal=state.relicJournal&&typeof state.relicJournal==='object'?state.relicJournal:{unlocked:false};
   normalizeArtifactCatalog();
   const journal=state.artifactJournal&&typeof state.artifactJournal==='object'?state.artifactJournal:{};
@@ -2867,6 +2918,13 @@ function normalizeState(){
     if(sp.seasonalEventFamily&&!['spooky_halloween','winter_event'].includes(sp.seasonalEventFamily))sp.seasonalEventFamily='';
     if(sp.isCrossbreed && sp.secondaryElement===sp.element)sp.secondaryElement='';
     if(sp.isCrossbreed)sp.obtain='Breeding Only';
+    if(isGodSpecies(sp)){
+      sp.isCrossbreed=true;
+      sp.isMythic=false;
+      sp.obtain='Breeding Only';
+      sp.mythicTempleOnly=false;
+      sp.crossbreedChance=GOD_CROSSBREED_CHANCE;
+    }
     // The obtain method and the Admin toggle describe the same exclusive encounter pool.
     // Legacy records default to false, without changing older Mythic obtain settings.
     sp.mythicTempleOnly=!sp.isCrossbreed&&(sp.obtain==='Mythic Temple Only'||sp.mythicTempleOnly===true);
@@ -2875,6 +2933,13 @@ function normalizeState(){
     if(!sp.builtin)sp.published=!!sp.published;
   }
   state.migrations=state.migrations||{};
+  if(!state.migrations.godGradeTraitV01584){
+    for(const mon of state.monsters||[])if(mon.trait==='Calamitous'&&!isGodSpecies(state.species[mon.slug]))mon.trait='Ruinous';
+    for(const egg of state.eggs||[])if(egg.inheritedTrait==='Calamitous'&&!isGodSpecies(state.species[egg.slug]))egg.inheritedTrait='Ruinous';
+    for(const pen of state.breedingPens||[])if(pen?.pendingEgg?.inheritedTrait==='Calamitous'&&!isGodSpecies(state.species[pen.pendingEgg.slug]))pen.pendingEgg.inheritedTrait='Ruinous';
+    state.migrations.godGradeTraitV01584=true;
+  }
+
   // v0.15.18: the old Halloween shop listed Mournwick at 75 Fangs in a hard-coded
   // event item while the species record still carried the generic 1000 shop default.
   // Repair only that legacy mismatch; custom Halloween eggs keep whatever price was saved.
@@ -4109,7 +4174,7 @@ function battleStatsFor(mon){
   if(!sp)return {hp:1,attack:1,armor:1,speed:1,bst:0};
   const base=statsFor(sp,mon.potential||1);
   const levels=Math.max(0,(mon.level||1)-1);
-  const mods=traitDefinition(mon.trait)?.mods||{hp:0,attack:0,armor:0,speed:0};
+  const mods=(!GOD_TRAITS[mon.trait]||isGodSpecies(sp)?traitDefinition(mon.trait):null)?.mods||{hp:0,attack:0,armor:0,speed:0};
   const dna={hp:0,attack:0,armor:0,speed:0};
   if(mon.dnaSplice&&dna.hasOwnProperty(mon.dnaSplice.stat))dna[mon.dnaSplice.stat]=DNA_SPLICE_BONUS;
   return {
@@ -4256,12 +4321,76 @@ function monsterCard(mon){
   const active=state.activeMonsterId===mon.id,fainted=isMonsterFainted(mon),breedPen=breedingPenForMonster(mon.id),breedRemaining=breedPen?Number(breedPen.finishAt||0)-Date.now():0,expedition=expeditionForMonster(mon.id),expeditionLeft=expeditionRemaining(expedition);
   const el=document.createElement('button');el.type='button';el.dataset.monsterId=mon.id;el.className='monster-card'+(active?' active-monster':'')+(fainted?' fainted-monster':'')+(breedPen?' breeding-monster':'')+(expedition?' expedition-monster':'')+(mon.isPrismatic?' prismatic-monster':'');
   el.innerHTML=`<div class="sprite-well">${active?'<div class="active-badge">ACTIVE</div>':''}${mon.isPrismatic?'<div class="prismatic-badge">✦ PRISMATIC</div>':''}${fainted?`<div class="faint-badge" data-faint-countdown="${mon.id}">FAINTED • ${fmtTime(faintRemaining(mon))}</div>`:''}${breedPen?`<div class="breeding-badge" data-breed-countdown="${mon.id}">BREEDING • ${breedRemaining<=0?'READY':fmtTime(breedRemaining)}</div>`:''}${expedition?`<div class="expedition-badge" data-expedition-countdown="${mon.id}">EXPEDITION • ${fmtExpeditionTime(expeditionLeft)}</div>`:''}<img alt="${sp.name}"></div><div class="card-copy">
-    <div class="card-title"><h3>${displayName(mon)}</h3><span>Lv.${mon.level}</span></div>
+    <div class="card-title"><h3 class="${isGodSpecies(sp)?'god-rgb-name':''}">${displayName(mon)}</h3><span>Lv.${mon.level}</span></div>
     ${mon.nickname?`<p class="species-mini">${sp.name}</p>`:''}<p>${sp.role||sp.battleType}</p>
-    <div class="chips"><span>${mon.gender}</span><span>P${mon.potential}</span><span>${speciesElementLabel(sp)}</span><span>${mon.trait}</span>${mon.isAlpha?'<span class="alpha-chip">⚑ ALPHA</span>':''}${sp.rarity==='Mythic'?'<span class="mythic-chip">MYTHIC</span>':''}</div></div>`;
+    <div class="chips"><span>${mon.gender}</span><span>P${mon.potential}</span><span>${speciesElementLabel(sp)}</span><span>${mon.trait}</span>${mon.isAlpha?'<span class="alpha-chip">⚑ ALPHA</span>':''}${isGodSpecies(sp)?'<span class="god-grade-tag">✦ GOD ✦</span>':sp.rarity==='Mythic'?'<span class="mythic-chip">MYTHIC</span>':''}</div></div>`;
   setMonsterImage(el.querySelector('img'),mon.slug,monsterArtKind(mon));
   el.onclick=()=>{if(Date.now()<suppressCollectionClickUntil)return;openDetail(mon.id);};
   return el;
+}
+// v0.15.85: permanent, per-Pen sorting. Filters never decide the saved order.
+function validCollectionPenUndo(index){
+  const saved=state.collectionPenSortUndo?.[index],current=state.collectionPens?.[index];
+  if(!saved||!Array.isArray(current)||!Array.isArray(saved.before)||!Array.isArray(saved.after))return null;
+  if(current.length!==saved.after.length||saved.before.length!==current.length)return null;
+  if(saved.after.some((id,i)=>current[i]!==id))return null;
+  if(new Set(saved.before).size!==current.length||saved.before.some(id=>!current.includes(id)))return null;
+  return saved;
+}
+function renderCollectionAutoSort(){
+  const button=document.getElementById('collectionPenAutoSortUndo');
+  if(button)button.disabled=!validCollectionPenUndo(currentCollectionPen);
+  const apply=document.getElementById('collectionPenAutoSortApply');
+  if(apply)apply.disabled=!(state.collectionPens?.[currentCollectionPen]?.length>1);
+}
+function autoSortCollectionPen(index,method){
+  const current=state.collectionPens?.[index];
+  if(!Array.isArray(current)||current.length<2)return false;
+  if(!['gender','level','species','element'].includes(method))return false;
+  const monsters=new Map(state.monsters.map(mon=>[mon.id,mon]));
+  const speciesNumbers=new Map(Object.keys(state.species).map((slug,i)=>[slug,i]));
+  const groupGender={Female:0,Male:1,Intersex:2};
+  const original=current.slice(),positions=new Map(original.map((id,i)=>[id,i]));
+  const spNum=mon=>speciesNumbers.get(mon?.slug)??Number.MAX_SAFE_INTEGER;
+  const elNum=el=>{const index=ELEMENTS.indexOf(el);return index<0?ELEMENTS.length:index;};
+  const elements=mon=>speciesElements(state.species[mon?.slug]||{});
+  const sorted=original.slice().sort((aId,bId)=>{
+    const a=monsters.get(aId),b=monsters.get(bId);
+    if(!a||!b)return (a?0:1)-(b?0:1)||positions.get(aId)-positions.get(bId);
+    let compare=0;
+    if(method==='gender')compare=(groupGender[a.gender]??3)-(groupGender[b.gender]??3);
+    else if(method==='level')compare=Number(b.level||1)-Number(a.level||1)||Number(b.potential||1)-Number(a.potential||1);
+    else if(method==='species')compare=spNum(a)-spNum(b);
+    else if(method==='element'){
+      const ea=elements(a),eb=elements(b);
+      compare=elNum(ea[0])-elNum(eb[0])||(ea[1]?elNum(ea[1]):-1)-(eb[1]?elNum(eb[1]):-1)||spNum(a)-spNum(b);
+    }
+    return compare||positions.get(aId)-positions.get(bId);
+  });
+  if(sorted.every((id,i)=>id===original[i]))return false;
+  state.collectionPens[index]=sorted;
+  if(!Array.isArray(state.collectionPenSortUndo))state.collectionPenSortUndo=Array.from({length:MAX_COLLECTION_PENS},()=>null);
+  state.collectionPenSortUndo[index]={before:original,after:sorted.slice()};
+  return true;
+}
+function applyCollectionPenSort(){
+  const index=currentCollectionPen,method=document.getElementById('collectionPenAutoSort').value;
+  const status=document.getElementById('collectionPenAutoSortStatus');
+  if(!autoSortCollectionPen(index,method)){
+    if(status)status.textContent=`Pen ${index+1} is already in that order (or has fewer than 2 monsters).`;
+    renderCollectionAutoSort();return;
+  }
+  save();renderCollection();
+  if(status)status.textContent=`Pen ${index+1} sorted and saved. Undo restores its previous order.`;
+}
+function undoCollectionPenSort(){
+  const index=currentCollectionPen,saved=validCollectionPenUndo(index);
+  const status=document.getElementById('collectionPenAutoSortStatus');
+  if(!saved){if(status)status.textContent='There is no previous Auto Sort to undo for this Pen.';renderCollectionAutoSort();return;}
+  state.collectionPens[index]=saved.before.slice();
+  state.collectionPenSortUndo[index]=null;
+  save();renderCollection();
+  if(status)status.textContent=`Restored Pen ${index+1}'s previous arrangement.`;
 }
 function renderCollectionPenTabs(){
   currentCollectionPen=Math.max(0,Math.min(state.unlockedCollectionPens-1,Number(currentCollectionPen||0)));
@@ -4270,13 +4399,13 @@ function renderCollectionPenTabs(){
   for(let i=0;i<state.unlockedCollectionPens;i++){
     const b=document.createElement('button');b.type='button';b.className='collection-pen-tab'+(i===currentCollectionPen?' active':'');b.dataset.collectionPen=String(i);
     b.innerHTML=`<strong>Pen ${i+1}</strong><span>${collectionPenCount(i)}/${COLLECTION_PEN_CAPACITY}</span>`;
-    b.addEventListener('click',()=>{currentCollectionPen=i;renderCollection();});box.appendChild(b);
+    b.addEventListener('click',()=>{currentCollectionPen=i;const status=document.getElementById('collectionPenAutoSortStatus');if(status)status.textContent='';renderCollection();});box.appendChild(b);
   }
   document.getElementById('collectionPenCapacity').textContent=`${collectionPenCount(currentCollectionPen)} / ${COLLECTION_PEN_CAPACITY}`;
   document.getElementById('collectionPenLabel').textContent=`Pen ${currentCollectionPen+1} • ${state.unlockedCollectionPens}/${MAX_COLLECTION_PENS} unlocked`;
 }
 function renderCollection(){
-  renderCollectionPenTabs();
+  renderCollectionPenTabs();renderCollectionAutoSort();
   const q=document.getElementById('search').value.trim().toLowerCase(),mode=document.getElementById('filter').value;
   const order=state.collectionPens?.[currentCollectionPen]||[];
   const byId=new Map(state.monsters.map(mon=>[mon.id,mon]));
@@ -4380,7 +4509,7 @@ async function openDetail(id){
   const mon=state.monsters.find(m=>m.id===id),sp=speciesOf(mon);if(!mon||!sp)return;
   const sameMonster=selectedMonsterId===id;selectedMonsterId=id;if(!sameMonster)currentMonsterDetailPane='info';
   await setMonsterImage(document.getElementById('detailArt'),mon.slug,monsterArtKind(mon));
-  document.getElementById('detailName').textContent=displayName(mon);document.getElementById('detailSpecies').textContent=`${sp.name}${mon.isPrismatic?' • ✦ PRISMATIC':''}${mon.isAlpha?' • ⚑ ALPHA':''}${sp.rarity==='Mythic'?' • MYTHIC':''}`;
+  document.getElementById('detailName').textContent=displayName(mon);document.getElementById('detailName').classList.toggle('god-rgb-name',isGodSpecies(sp));document.getElementById('detailSpecies').classList.toggle('god-rgb-name',isGodSpecies(sp));document.getElementById('detailSpecies').textContent=`${sp.name}${mon.isPrismatic?' • ✦ PRISMATIC':''}${mon.isAlpha?' • ⚑ ALPHA':''}${isGodSpecies(sp)?' • ✦ GOD ✦':sp.rarity==='Mythic'?' • MYTHIC':''}`;
   document.getElementById('detailRole').textContent=`${sp.role||sp.battleType} • ${sp.battleType}`;document.getElementById('detailLevel').textContent=mon.level;
   document.getElementById('detailGender').textContent=mon.gender;document.getElementById('detailPotential').textContent=`P${mon.potential}`;
   const favoriteBtn=document.getElementById('labFavoriteMonster');favoriteBtn.textContent=mon.favorite?'★':'☆';favoriteBtn.setAttribute('aria-pressed',mon.favorite?'true':'false');favoriteBtn.title=mon.favorite?'Remove from breeding favorites':'Add to breeding favorites';
@@ -4512,8 +4641,8 @@ function labPairPreview(){const host=document.getElementById('labPairPreview'),{
  if(!mom||!dad){host.innerHTML='<p>Choose both parents to see their genetic possibilities and breeding duration.</p>';return;}
  const motherSp=speciesOf(mom),recipe=findCrossbreed(mom.slug,dad.slug),cross=recipe?.[1],potential=Number(mom.potential||1),seconds=Math.max(60,Math.min(18000,Number((cross||motherSp)?.breedSeconds||60))),ratio=prismaticChanceForParents(mom,dad)*100;
  const discovered=!!(recipe&&(state.monsters.some(m=>m.slug===recipe[0])||(state.discoveredSpecies||[]).includes(recipe[0])));
- const traitChance=['Massive','Wild','Elite','Packbound','Myth','Shamed'].includes(dad.trait)?'30% Alpha Trait inheritance':(['Sovereign','Calamitous','Ageless','Oracular','Unbound'].includes(dad.trait)?'30% only if offspring Mythic':'Father’s Trait inherited');
- host.innerHTML=`<div class="lab-genetic-grid"><div><small>Breeding Time</small><strong>${fmtTime(seconds*1000)}</strong></div><div><small>Potential</small><strong>P${potential} <span>(${potential<12?'5% P'+(potential+1):'P12 max'})</span></strong></div><div><small>Prismatic Chance</small><strong>${ratio.toFixed(2)}%</strong></div><div><small>Trait Inheritance</small><strong>${labSafe(traitChance)}</strong></div></div><div class="lab-genetic-message">${recipe?`✦ ${discovered?labSafe(cross.name):'Unknown Genetic Resonance'} · ${Number(cross.crossbreedChance||0)}% Crossbreed chance${discovered?'':' · identity hidden'}${discovered?'<img class="lab-cross-silhouette" alt="Discovered Crossbreed silhouette">':''}`:'Standard offspring: '+labSafe(motherSp?.name||'Mother species')}</div><p>Attack Slot 1: ${labSafe(attackOf(mom.attacks?.[0])?.name||'None')} + ${labSafe(attackOf(dad.attacks?.[0])?.name||'None')}. ${recipe?'Successful Crossbreeds replace Slot 1 with their own signature attack.':''} Reversing roles changes normal offspring and inheritance.</p>`;
+ const traitChance=cross&&isGodSpecies(cross)?'5% GOD-exclusive trait on GOD hatch':GOD_TRAITS[dad.trait]?'GOD trait cannot pass to regular offspring':ALPHA_TRAITS[dad.trait]?'30% Alpha Trait inheritance':MYTHIC_TRAITS[dad.trait]?'30% only if offspring Mythic':'Father’s Trait inherited';
+ host.innerHTML=`<div class="lab-genetic-grid"><div><small>Breeding Time</small><strong>${fmtTime(seconds*1000)}</strong></div><div><small>Potential</small><strong>P${potential} <span>(${potential<12?'5% P'+(potential+1):'P12 max'})</span></strong></div><div><small>Prismatic Chance</small><strong>${ratio.toFixed(2)}%</strong></div><div><small>Trait Inheritance</small><strong>${labSafe(traitChance)}</strong></div></div><div class="lab-genetic-message">${recipe?`✦ ${discovered?labSafe(cross.name):'Unknown Genetic Resonance'} · ${isGodSpecies(cross)?GOD_CROSSBREED_CHANCE:Number(cross.crossbreedChance||0)}% Crossbreed chance${discovered?'':' · identity hidden'}${discovered?'<img class="lab-cross-silhouette" alt="Discovered Crossbreed silhouette">':''}`:'Standard offspring: '+labSafe(motherSp?.name||'Mother species')}</div><p>Attack Slot 1: ${labSafe(attackOf(mom.attacks?.[0])?.name||'None')} + ${labSafe(attackOf(dad.attacks?.[0])?.name||'None')}. ${recipe?'Successful Crossbreeds replace Slot 1 with their own signature attack.':''} Reversing roles changes normal offspring and inheritance.</p>`;
  if(recipe&&discovered){const img=host.querySelector('.lab-cross-silhouette');if(img)setMonsterImage(img,recipe[0],'base');}
 }
 async function renderParentPreviews(){
@@ -4547,7 +4676,7 @@ function seasonalCrossbreedAvailable(sp){
 function pairKey(a,b){return [String(a||''),String(b||'')].sort().join('::');}
 function findCrossbreed(a,b){
   const key=pairKey(a,b);
-  return Object.entries(state.species).find(([slug,sp])=>sp.isCrossbreed&&sp.parents?.length===2&&pairKey(sp.parents[0],sp.parents[1])===key&&seasonalCrossbreedAvailable(sp));
+  return Object.entries(state.species).find(([slug,sp])=>sp.isCrossbreed&&sp.parents?.length===2&&pairKey(sp.parents[0],sp.parents[1])===key&&seasonalCrossbreedAvailable(sp)&&(!isGodSpecies(sp)||(isMythicSpecies(state.species[a])&&isMythicSpecies(state.species[b]))));
 }
 function nextUniqueEggId(){
   let id='';
@@ -4558,7 +4687,7 @@ function buildPendingBreedingEgg(mother,father){
   if(!mother||!father)return null;
   let targetSlug=mother.slug;
   const match=findCrossbreed(mother.slug,father.slug);
-  if(match){const [crossSlug,crossSp]=match;if(Math.random()*100<Number(crossSp.crossbreedChance||0))targetSlug=crossSlug;}
+  if(match){const [crossSlug,crossSp]=match;const chance=isGodSpecies(crossSp)?GOD_CROSSBREED_CHANCE:Number(crossSp.crossbreedChance||0);if(Math.random()*100<chance)targetSlug=crossSlug;}
   const sp=state.species[targetSlug];if(!sp)return null;
   const inherited=[mother.attacks?.[0],father.attacks?.[0]].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,2);
   const inheritedAttacks=sp.isCrossbreed?[sp.signatureAttackId,father.attacks?.[0]].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,2):inherited;
@@ -4612,6 +4741,13 @@ function renderBreedingPens(){
   const mom=labMon(p.motherId),dad=labMon(p.fatherId),total=Math.max(1000,Number(p.finishAt||now)-Number(p.startedAt||now)),fraction=Math.min(1,Math.max(0,(now-Number(p.startedAt||now))/total)),ready=breedingPenStatus(p,now)==='ready',phase=ready?3:fraction>.75?2:fraction>.35?1:0;card.classList.add(ready?'ready':'occupied');
   card.innerHTML=`<div class="lab-pen-head"><strong>Pen ${i+1}</strong><span>${ready?'♥ Egg Ready':'Nest in Progress'}</span></div><div class="lab-nest-scene phase-${phase}"><img class="lab-nest-parent mom" alt="Mother"><span class="lab-nest-hearts">♥</span><div class="lab-nest-egg ${ready?'wiggling':''}">🥚</div><img class="lab-nest-parent dad" alt="Father"></div><div class="lab-breed-names"><span>${labSafe(mom?displayName(mom):'Unknown')}</span><span>×</span><span>${labSafe(dad?displayName(dad):'Unknown')}</span></div><div class="lab-progress"><span style="width:${Math.round(fraction*100)}%" data-breed-progress="${i}"></span></div><div class="breeding-pen-timer ${ready?'ready':''}" data-breeding-pen-timer="${i}">${ready?'READY':fmtTime(Number(p.finishAt)-now)}</div><div class="lab-nest-actions">${ready?`<button class="primary collect-breed-egg" type="button" data-breed-action="collect" data-pen-index="${i}">Collect Egg 🥚</button>`:`<button class="ghost small" type="button" data-breed-action="check" data-pen-index="${i}">♡ Check On Pair</button><button class="ghost small" type="button" data-breed-action="catalyst" data-pen-index="${i}" ${p.catalystUsed||!Number(state.inventory.hormone_catalyst||0)?'disabled':''}>Catalyst ×${Number(state.inventory.hormone_catalyst||0)}</button>`}</div>`;
   box.appendChild(card);if(mom)setMonsterImage(card.querySelector('.mom'),mom.slug,monsterArtKind(mom));if(dad)setMonsterImage(card.querySelector('.dad'),dad.slug,monsterArtKind(dad));
+  // Only reveal the rare result once the timer finishes; keep other breeding eggs mysterious.
+  if(ready&&isGodSpecies(state.species[p.pendingEgg?.slug])){
+    const nestEgg=card.querySelector('.lab-nest-egg'),pending=p.pendingEgg;
+    eggVisual(pending.slug,'god-nest-egg-image','breeding',pending).then(markup=>{
+      if(nestEgg?.isConnected&&state.breedingPens[i]?.pendingEgg?.id===pending.id){nestEgg.innerHTML=markup;nestEgg.classList.add('custom-god-egg');}
+    });
+  }
  }
  document.getElementById('labBreedingSetup').classList.toggle('hidden',!labSelectedPenFree());updateBreedStartState();updateLabBadges();
 }
@@ -4710,7 +4846,9 @@ async function renderIncubators(renderVersion=null){
  }frag.appendChild(tile);}
  if(renderVersion!==null&&renderVersion!==uiRenderVersion)return;box.replaceChildren(frag);document.getElementById('nurseryReadySummary').textContent=`${readyN} ready to hatch · ${state.eggs.filter(e=>e.status==='waiting').length} eggs in storage`;updateLabBadges();
 }
-function openLabEggPicker(slotIndex,preselectId=null){if(slotIndex<0||slotIndex>=state.unlockedIncubators||state.incubators[slotIndex].eggId)return;labTargetIncubator=slotIndex;const d=document.getElementById('labEggPicker');document.getElementById('labEggPickerHeading').textContent=`Incubator ${slotIndex+1} • Choose an Egg`;const eggs=state.eggs.filter(e=>e.status==='waiting').sort((a,b)=>a.id===preselectId?-1:b.id===preselectId?1:0),box=document.getElementById('labEggPickerResults');box.replaceChildren();if(!eggs.length){box.innerHTML='<div class="empty-card">No stored eggs yet. Collect a breeding egg or find one while exploring.</div>';}for(const e of eggs){const b=document.createElement('button');b.type='button';b.className='lab-picker-egg'+(preselectId===e.id?' suggested':'');b.innerHTML=`<div class="egg-visual">🥚</div><strong>${labSafe(labEggName(e))}</strong><small>${labSafe(labEggSourceGroup(e))} · ${fmtTime(labHatchSeconds(e)*1000)}</small>`;b.addEventListener('click',()=>{if(putInIncubator(e.id,labTargetIncubator)){d.close();labTargetIncubator=null;}});box.appendChild(b);}d.showModal();}
+function openLabEggPicker(slotIndex,preselectId=null){if(slotIndex<0||slotIndex>=state.unlockedIncubators||state.incubators[slotIndex].eggId)return;labTargetIncubator=slotIndex;const d=document.getElementById('labEggPicker');document.getElementById('labEggPickerHeading').textContent=`Incubator ${slotIndex+1} • Choose an Egg`;const eggs=state.eggs.filter(e=>e.status==='waiting').sort((a,b)=>a.id===preselectId?-1:b.id===preselectId?1:0),box=document.getElementById('labEggPickerResults');box.replaceChildren();if(!eggs.length){box.innerHTML='<div class="empty-card">No stored eggs yet. Collect a breeding egg or find one while exploring.</div>';}for(const e of eggs){const b=document.createElement('button');b.type='button';b.className='lab-picker-egg'+(preselectId===e.id?' suggested':'');b.innerHTML=`<div class="egg-visual">🥚</div><strong>${labSafe(labEggName(e))}</strong><small>${labSafe(labEggSourceGroup(e))} · ${fmtTime(labHatchSeconds(e)*1000)}</small>`;
+  if(isGodSpecies(state.species[e.slug]))eggVisual(e.slug,'egg-image',e.source||'generic',e).then(markup=>{if(b.isConnected)b.querySelector('.egg-visual').innerHTML=markup;});
+  b.addEventListener('click',()=>{if(putInIncubator(e.id,labTargetIncubator)){d.close();labTargetIncubator=null;}});box.appendChild(b);}d.showModal();}
 async function openIncubatorDetail(slotIndex){
   const slot=state.incubators[slotIndex];
   if(!slot?.eggId)return;
@@ -4791,7 +4929,7 @@ function hatchEgg(slotIndex){
 
   state.monsters.push({
     id,slug:egg.slug,level:1,xp:0,gender:hatchGender(),potential:egg.potentialOverride??egg.motherPotential??mother?.potential??1,
-    trait:egg.inheritedTrait||rollTrait(),nickname:'',attacks,isPrismatic:!!egg.isPrismatic,
+    trait:rollGodBirthTrait(sp,egg.inheritedTrait||rollTrait()),nickname:'',attacks,isPrismatic:!!egg.isPrismatic,
     parents:{mother:egg.motherId||null,father:egg.fatherId||null},origin:egg.source==='reconstruction'?'Reconstruction Lab':undefined
   });
   currentCollectionPen=placeMonsterInCollection(id);
@@ -5753,7 +5891,7 @@ async function renderArchive(){
       card.innerHTML=`<div class="archive-art"><img alt="Undiscovered monster silhouette"></div><div class="archive-copy"><div class="archive-title"><h3>????</h3><span>????</span></div><p>????</p><div class="chips"><span>????</span><span>P1 BST ????</span><span>P12 BST ????</span></div><small>Signature: ???? • Obtain: ????</small></div>`;
     }else{
       const p12=statsFor(sp,12),sig=attackOf(sp.signatureAttackId);
-      card.innerHTML=`<div class="archive-art"><img alt="${sp.name}"></div><div class="archive-copy"><div class="archive-title"><h3>${sp.name}</h3><span>${speciesElementLabel(sp)}</span></div><p>${sp.role||sp.battleType}</p><div class="chips"><span>${sp.battleType}</span><span>P1 BST ${sp.p1bst}</span><span>P12 BST ${p12.bst}</span></div><small>Signature: ${sig?.name||'None'} • Obtain: ${sp.obtain}${sp.obtain==='Random Battle Reward'?` • Zones: ${normalZonesForElement(sp.element).map(day=>ZONES[day].name).join(', ')||'Chaos Wastes only'}`:''}</small>${sp.rarity==='Mythic'?'<div class="mythic-tag">MYTHIC</div>':''}${sp.isCrossbreed?`<div class="cross-tag">${sp.rarity==='Mythic'?'Mythic Crossbreed':'Crossbreed'} • ${sp.crossbreedChance}%${sp.seasonalEventFamily?' • Seasonal Event Recipe':''}</div>`:''}</div>`;
+      card.innerHTML=`<div class="archive-art"><img alt="${sp.name}"></div><div class="archive-copy"><div class="archive-title"><h3 class="${isGodSpecies(sp)?'god-rgb-name':''}">${sp.name}</h3><span>${speciesElementLabel(sp)}</span></div><p>${sp.role||sp.battleType}</p><div class="chips"><span>${sp.battleType}</span><span>P1 BST ${sp.p1bst}</span><span>P12 BST ${p12.bst}</span></div><small>Signature: ${sig?.name||'None'} • Obtain: ${sp.obtain}${sp.obtain==='Random Battle Reward'?` • Zones: ${normalZonesForElement(sp.element).map(day=>ZONES[day].name).join(', ')||'Chaos Wastes only'}`:''}</small>${isGodSpecies(sp)?'<div class="god-grade-tag">✦ GOD ✦</div>':sp.rarity==='Mythic'?'<div class="mythic-tag">MYTHIC</div>':''}${sp.isCrossbreed?`<div class="cross-tag">${isGodSpecies(sp)?'GOD Crossbreed':sp.rarity==='Mythic'?'Mythic Crossbreed':'Crossbreed'} • ${isGodSpecies(sp)?GOD_CROSSBREED_CHANCE:sp.crossbreedChance}%${sp.seasonalEventFamily?' • Seasonal Event Recipe':''}</div>`:''}</div>`;
     }
     setMonsterImage(card.querySelector('img'),slug,'base');box.appendChild(card);
   }
@@ -5796,6 +5934,7 @@ function speciesMatchesRosterFilter(sp,filter='all'){
   if(filter==='published')return !sp.builtin&&!!sp.published;
   if(filter==='draft')return !sp.builtin&&!sp.published;
   if(filter==='mythic')return sp.rarity==='Mythic'||!!sp.isMythic;
+  if(filter==='god')return isGodSpecies(sp);
   return true;
 }
 function sortSpeciesEntries(entries,sort='name'){
@@ -5839,7 +5978,7 @@ function renderRegistry(){
     filterSummary.textContent=`Showing ${entries.length} of ${Object.keys(state.species).length}${bits.length?` • ${bits.join(' • ')}`:''}`;
   }
   if(!entries.length){box.innerHTML='<div class="registry-empty">No monsters match these filters.</div>';return;}
-  entries.forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong>${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?' • BUILT-IN':` • ${sp.published?'PUBLISHED':'DRAFT'}`}${sp.rarity==='Mythic'||sp.isMythic?' • MYTHIC':''}${sp.mythicTempleOnly?' • 🏛 TEMPLE ONLY':''}</span>`;b.onclick=()=>{if(admin2CanLeave('species',true))loadSpeciesIntoForm(slug);};box.appendChild(b);});
+  entries.forEach(([slug,sp])=>{const b=document.createElement('button');b.type='button';b.className='registry-item';b.innerHTML=`<strong class="${isGodSpecies(sp)?'god-rgb-name':''}">${sp.name}</strong><span>${sp.battleType} • ${speciesElementLabel(sp)} • P1 ${sp.p1bst}${sp.builtin?' • BUILT-IN':` • ${sp.published?'PUBLISHED':'DRAFT'}`}${isGodSpecies(sp)?' • ✦ GOD ✦':sp.rarity==='Mythic'||sp.isMythic?' • MYTHIC':''}${sp.mythicTempleOnly?' • 🏛 TEMPLE ONLY':''}</span>`;b.onclick=()=>{if(admin2CanLeave('species',true))loadSpeciesIntoForm(slug);};box.appendChild(b);});
 }
 function populateParentDropdowns(excludeSlug=''){
   const opts=Object.entries(state.species).filter(([slug])=>slug!==excludeSlug).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
@@ -5851,7 +5990,7 @@ function newSpeciesForm(){
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=sp.rarity==='Mythic'?'Mythic':'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('huntingRarity').value=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon';document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=['Mythic','GOD'].includes(sp.rarity)?sp.rarity:'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('huntingRarity').value=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon';document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
   for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
@@ -5868,7 +6007,12 @@ function updateAutoZonePreview(){
 }
 
 function updateAdminConditional(){
+  const god=document.getElementById('speciesRarity').value==='GOD';
+  if(god)document.getElementById('isCrossbreed').checked=true;
   const cross=document.getElementById('isCrossbreed').checked;
+  const chanceInput=document.getElementById('crossbreedChance');
+  if(god){chanceInput.value=String(GOD_CROSSBREED_CHANCE);chanceInput.disabled=true;}
+  else {chanceInput.disabled=false;if(Number(chanceInput.value)<1)chanceInput.value=15;}
   const templeCheck=document.getElementById('mythicTempleOnly');
   const mythic=document.getElementById('speciesRarity').value==='Mythic';
   const templeAllowed=!cross&&mythic;
@@ -5895,13 +6039,14 @@ function updateAdminConditional(){
   // disabled. Older/custom non-Crossbreeds commonly store chance=0, so leaving the
   // hidden min=1 input enabled could silently block the entire Save Monster submit.
   crossbreedFields.querySelectorAll('input,select').forEach(el=>{el.disabled=!cross;});
+  chanceInput.disabled=!cross||god;
   document.getElementById('shopPriceWrap').classList.toggle('hidden',!shop);
   document.getElementById('shopPriceLabel').textContent=halloweenShop?'Halloween shop egg price':winterShop?'Winter shop egg price':'Shop egg price';
   document.getElementById('shopPriceHelp').textContent=halloweenShop?'Price in Halloween Fangs.':winterShop?'Price in Snowflakes.':'Price in normal currency.';
-  const eggArtAllowed=shop||obtainSelect.value==='Reconstruction Lab Only';
+  const eggArtAllowed=god||shop||obtainSelect.value==='Reconstruction Lab Only';
   document.getElementById('eggArtCard').classList.toggle('soft-disabled',!eggArtAllowed);
   document.getElementById('eggArt').disabled=!eggArtAllowed;
-  document.getElementById('eggArtHelp').textContent=eggArtAllowed?'Used for eggs produced by this species, including Reconstruction Lab eggs.':'Available for shop-egg and Reconstruction Lab Only species.';
+  document.getElementById('eggArtHelp').textContent=god?'GOD-exclusive egg art: shown when successful Mythic × Mythic breeding creates this GOD egg, in storage and throughout incubation.':eggArtAllowed?'Used for eggs produced by this species, including Reconstruction Lab eggs.':'Available for shop-egg, Reconstruction Lab Only, and GOD-grade species.';
   document.getElementById('encounterDaysWrap').classList.toggle('hidden',!wild);
   document.getElementById('breedTimerLabel').textContent=fmtDuration(document.getElementById('breedTimer').value);
   document.getElementById('hatchTimerLabel').textContent=fmtDuration(document.getElementById('hatchTimer').value);
@@ -5917,10 +6062,15 @@ async function saveSpeciesForm(e){
   e.preventDefault();const oldSlug=document.getElementById('editSlug').value,name=document.getElementById('speciesName').value.trim();if(!name)return;let slug=oldSlug||slugify(name);if(!oldSlug&&state.species[slug])slug=`${slug}-${Date.now().toString().slice(-5)}`;
   const isCross=document.getElementById('isCrossbreed').checked,pa=document.getElementById('parentA').value,pb=document.getElementById('parentB').value;
   const primaryElement=document.getElementById('speciesElement').value,secondaryElement=document.getElementById('speciesElement2').value;
-  const crossChance=Number(document.getElementById('crossbreedChance').value||0);
+  const crossChance=document.getElementById('speciesRarity').value==='GOD'?GOD_CROSSBREED_CHANCE:Number(document.getElementById('crossbreedChance').value||0);
   if(isCross&&(!pa||!pb||pa===pb)){document.getElementById('adminMessage').textContent='Crossbreeds need two different parent species.';return;}
   if(isCross&&(!secondaryElement||secondaryElement===primaryElement)){document.getElementById('adminMessage').textContent='Crossbreeds need two different Elements.';return;}
-  const rarity=document.getElementById('speciesRarity').value||'Standard',minCrossChance=rarity==='Mythic'?1:10;if(isCross&&(crossChance<minCrossChance||crossChance>20)){document.getElementById('adminMessage').textContent=`${rarity==='Mythic'?'Mythic':'Standard'} Crossbreed chance must be between ${minCrossChance}% and 20%.`;return;}
+  const rarity=document.getElementById('speciesRarity').value||'Standard',minCrossChance=rarity==='GOD'?GOD_CROSSBREED_CHANCE:rarity==='Mythic'?1:10;
+  if(rarity==='GOD'){
+    if(!isCross){document.getElementById('adminMessage').textContent='GOD grade must be a Crossbreed.';return;}
+    if(!isMythicSpecies(state.species[pa])||!isMythicSpecies(state.species[pb])){document.getElementById('adminMessage').textContent='GOD grade needs TWO Mythic parent species (not GOD parents).';return;}
+  }
+  if(isCross&&(crossChance<minCrossChance||crossChance>20)){document.getElementById('adminMessage').textContent=`${rarity} Crossbreed chance must be between ${minCrossChance}% and 20%.`;return;}
   const templeOnly=document.getElementById('mythicTempleOnly').checked;
   if(templeOnly&&(isCross||rarity!=='Mythic')){document.getElementById('adminMessage').textContent='Mythic Temple Only requires Mythic rarity and a non-Crossbreed monster.';return;}
   const obtain=isCross?'Breeding Only':templeOnly?'Mythic Temple Only':document.getElementById('obtainMethod').value;
@@ -5941,13 +6091,13 @@ function grantTestCopy(){
   const slug=document.getElementById('editSlug').value,sp=state.species[slug];if(!slug||!sp){document.getElementById('adminMessage').textContent='Save the species first.';return;}
   if(!collectionHasOpenSlot()){document.getElementById('adminMessage').textContent='All unlocked Collection Pens are full. Unlock another Pen first.';return;}
   if(!confirm(`Grant a test copy of "${sp.name}" to your Collection?`))return;
-  const id=uid('M',state.nextMonsterNum++);state.monsters.push({id,slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean)});placeMonsterInCollection(id);save();renderAll();document.getElementById('adminMessage').textContent=`Added one ${sp.name} to Collection.`;
+  const id=uid('M',state.nextMonsterNum++);state.monsters.push({id,slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollGodBirthTrait(sp,rollTrait()),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean)});placeMonsterInCollection(id);save();renderAll();document.getElementById('adminMessage').textContent=`Added one ${sp.name} to Collection.`;
 }
 function grantPrismaticTestCopy(){
   const slug=document.getElementById('editSlug').value,sp=state.species[slug];if(!slug||!sp){document.getElementById('adminMessage').textContent='Save the species first.';return;}
   if(!collectionHasOpenSlot()){document.getElementById('adminMessage').textContent='All unlocked Collection Pens are full. Unlock another Pen first.';return;}
   if(!confirm(`Grant a Prismatic test copy of "${sp.name}" to your Collection?`))return;
-  const id=uid('M',state.nextMonsterNum++);state.monsters.push({id,slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:true});placeMonsterInCollection(id);save();renderAll();document.getElementById('adminMessage').textContent=`Added one Prismatic ${sp.name} to Collection for testing.`;
+  const id=uid('M',state.nextMonsterNum++);state.monsters.push({id,slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollGodBirthTrait(sp,rollTrait()),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:true});placeMonsterInCollection(id);save();renderAll();document.getElementById('adminMessage').textContent=`Added one Prismatic ${sp.name} to Collection for testing.`;
 }
 async function deleteCurrentSpecies(){
   const slug=document.getElementById('editSlug').value,sp=state.species[slug];if(!slug||!sp||sp.builtin)return;if(Object.values(state.trials||{}).some(t=>(t.lineup||[]).some(slot=>slot.slug===slug))){document.getElementById('adminMessage').textContent='This monster is still assigned to a Trial lineup.';return;}const owned=state.monsters.filter(m=>m.slug===slug).length,eggs=state.eggs.filter(e=>e.slug===slug).length;
@@ -8153,7 +8303,8 @@ function performMove(attackerSide,moveId,defenderSide){
 
   const critical=Math.random()*100<attackCritChance(move,attacker,attackerSide==='player');
   const calc=calculateBattleDamage(attacker,defender,move,sessionStatus(attackerSide),sessionStatus(defenderSide),critical);
-  const damage=calc.damage;
+  const resisted=hasGodTrait(defender,'Invincible');
+  const damage=resisted?Math.max(1,Math.ceil(calc.damage*(1-GOD_INVINCIBLE_RESISTANCE))):calc.damage;
   const effClass=effectivenessClass(calc.effectiveness);
   const effLabel=effectivenessLabel(calc.effectiveness);
 
@@ -8162,6 +8313,7 @@ function performMove(attackerSide,moveId,defenderSide){
   setSessionHP(defenderSide,Math.max(0,defenderHpBefore-damage));
   let logLine=`${sideLabel(attackerSide)} used ${move.name} for ${damage} damage.`;
   if(critical)logLine+=' CRITICAL HIT!';
+  if(resisted)logLine+=' GOD Invincible resisted half the damage!';
   if(effClass==='super')logLine+=` ${effLabel}!`;
   else if(effClass==='resist')logLine+=` The attack was ${effLabel.toLowerCase()}.`;
   battleSession.log.push(logLine);
@@ -8206,7 +8358,7 @@ function performMove(attackerSide,moveId,defenderSide){
     }
   }
 
-  const effectText=effClass==='neutral'?'':`${effLabel} • `;
+  const effectText=(resisted?'GOD RESIST • ':'')+(effClass==='neutral'?'':`${effLabel} • `);
   const followups=[];
   if(lifeStealRecovered>0)followups.push({kind:'heal',main:`DRAIN +${lifeStealRecovered}`,sub:`${move.name} • Life Steal ${Math.round(lifeStealPct)}%`,targetSide:attackerSide});
   if(dodgeGranted>0)followups.push({kind:'status',main:'STRIDE VEIL',sub:`${Math.round(dodgeGranted)}% dodge on the next incoming attack`,targetSide:attackerSide});
@@ -8344,6 +8496,26 @@ async function resolveAnimatedMove(attackerSide,moveId,defenderSide){
     await showBattleFeedback(followup);
   }
 }
+async function resolveGodEndTurn(){
+  // Apply once per battle round; survives items, misses, and failed fleeing.
+  for(const side of ['player','enemy']){
+    if(checkBattleEnd())return;
+    const mon=sessionMon(side),opp=side==='player'?'enemy':'player';
+    if(hasGodTrait(mon,'Divine One')&&sessionHP(side)>0){
+      const before=sessionHP(side),max=battleStatsFor(mon).hp;
+      setSessionHP(side,Math.min(max,before+15));
+      const healed=sessionHP(side)-before;
+      if(healed){battleSession.log.push(`${sideLabel(side)} restored ${healed} HP with Divine One.`);await refreshBattleUI();await showBattleFeedback({kind:'heal',main:`DIVINE ONE +${healed}`,sub:'GOD regeneration',targetSide:side});}
+    }
+    if(hasGodTrait(mon,'Calamitous')&&sessionHP(side)>0&&sessionHP(opp)>0){
+      const lost=Math.min(10,sessionHP(opp));
+      setSessionHP(opp,sessionHP(opp)-lost);
+      battleSession.log.push(`${sideLabel(opp)} lost ${lost} HP to Calamitous.`);
+      await refreshBattleUI();await showBattleFeedback({kind:'status',main:`CALAMITOUS -${lost}`,sub:'GOD aura',targetSide:opp});
+    }
+    if(checkBattleEnd())return;
+  }
+}
 async function resolveStatusTicks(){
   for(const side of ['player','enemy']){
     if(checkBattleEnd())return;
@@ -8360,6 +8532,7 @@ async function resolveStatusTicks(){
       return;
     }
   }
+  if(!checkBattleEnd())await resolveGodEndTurn();
 }
 
 async function chooseBattleAttack(moveId){
@@ -8384,8 +8557,11 @@ async function chooseBattleAttack(moveId){
   const order=playerFirst
     ? [['player',moveId,'enemy'],['enemy',foeMove,'player']]
     : [['enemy',foeMove,'player'],['player',moveId,'enemy']];
+  // Each Light Speed action is a true second move with independent accuracy,
+  // criticals, status triggers and a faint check before the extra strike.
+  const actionOrder=order.flatMap(([side,move,target])=>hasGodTrait(sessionMon(side),'Light Speed')?[[side,move,target],[side,move,target]]:[[side,move,target]]);
 
-  for(const [attacker,move,defender] of order){
+  for(const [attacker,move,defender] of actionOrder){
     if(checkBattleEnd())break;
     await resolveAnimatedMove(attacker,move,defender);
     await refreshBattleUI();
@@ -8457,7 +8633,8 @@ async function useBattleHealingItem(itemId){
 
   if(!checkBattleEnd()){
     await wait(220);
-    await resolveAnimatedMove('enemy',enemyMoveId(),'player');
+    const foeMove=enemyMoveId();await resolveAnimatedMove('enemy',foeMove,'player');
+    if(!checkBattleEnd()&&hasGodTrait(sessionMon('enemy'),'Light Speed'))await resolveAnimatedMove('enemy',foeMove,'player');
   }
   if(!checkBattleEnd())await resolveStatusTicks();
 
@@ -8486,7 +8663,8 @@ async function attemptFlee(){
     await showBattleFeedback({kind:'miss',main:'FLEE FAILED',sub:'The wild monster closes in'});
     if(!checkBattleEnd()){
       await wait(220);
-      await resolveAnimatedMove('enemy',enemyMoveId(),'player');
+      const foeMove=enemyMoveId();await resolveAnimatedMove('enemy',foeMove,'player');
+      if(!checkBattleEnd()&&hasGodTrait(sessionMon('enemy'),'Light Speed'))await resolveAnimatedMove('enemy',foeMove,'player');
     }
     if(!checkBattleEnd())await resolveStatusTicks();
   }
@@ -8585,8 +8763,12 @@ async function refreshBattleUI(){
   const screenLabel=document.getElementById('battleScreenLabel'),enemyLabel=document.getElementById('battleEnemyLabel');
   if(screenLabel)screenLabel.textContent=isTrial?`${state.trials?.[battleSession.trialId]?.name||'Trial'} • ${battleSession.trialMode==='hard'?'Hard':'Normal'} • ${Number(battleSession.trialIndex||0)+1}/3`:isGauntlet?`Wild Gauntlet • Stage ${battleSession.gauntletStage}`:isEvent?'Spooky Halloween • Maze Encounter':battleSession.mode==='alpha-hunt'?'Alpha Den':battleSession.mode==='mythic-temple'?'Ancient Mythic Temple':'Wild Encounter';
   if(enemyLabel)enemyLabel.textContent=isTrial?'TRIAL':isGauntlet?'GAUNTLET':isEvent?'EVENT':battleSession.mode==='alpha-hunt'?'ALPHA':battleSession.mode==='mythic-temple'?'MYTHIC':'WILD';
+  document.getElementById('battlePlayerName').classList.toggle('god-rgb-name',isGodSpecies(speciesOf(player)));
+  document.getElementById('battleEnemyName').classList.toggle('god-rgb-name',isGodSpecies(speciesOf(enemy)));
   document.getElementById('battlePlayerName').textContent=`${player.isPrismatic?'✦ ':''}${displayName(player)}`;
   document.getElementById('battleEnemyName').textContent=`${enemy.isPrismatic?'✦ Prismatic ':''}${isTrial?speciesOf(enemy).name:isGauntlet?speciesOf(enemy).name:isEvent?`Event ${speciesOf(enemy).name}`:battleSession.mode==='alpha-hunt'?`⚑ Alpha ${speciesOf(enemy).name}`:battleSession.mode==='mythic-temple'?`Mythic ${speciesOf(enemy).name}`:`Wild ${speciesOf(enemy).name}`}`;
+  if(isGodSpecies(speciesOf(player))){const tag=document.createElement('span');tag.className='god-grade-tag battle-god-tag';tag.textContent='✦ GOD ✦';document.getElementById('battlePlayerName').append(' ',tag);}
+  if(isGodSpecies(speciesOf(enemy))){const tag=document.createElement('span');tag.className='god-grade-tag battle-god-tag';tag.textContent='✦ GOD ✦';document.getElementById('battleEnemyName').append(' ',tag);}
   document.getElementById('battlePlayerMeta').textContent=`Lv.${player.level} • P${player.potential} • ${player.trait} • ${speciesElementLabel(speciesOf(player))}`;
   document.getElementById('battleEnemyMeta').textContent=`Lv.${enemy.level} • P${enemy.potential} • ${enemy.trait} • ${speciesElementLabel(speciesOf(enemy))}`;
 
@@ -8936,6 +9118,8 @@ document.getElementById('habitatGrid').addEventListener('change',e=>{if(e.target
 document.getElementById('habitatGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-habitat-pet]');if(btn)petHabitatMonster(btn.dataset.habitatPet,btn);});
 document.getElementById('habitatVisitShop').addEventListener('click',()=>switchTab('shop-supplies'));
 document.getElementById('moveMonsterPen').addEventListener('click',moveSelectedMonsterPen);
+document.getElementById('collectionPenAutoSortApply').addEventListener('click',applyCollectionPenSort);
+document.getElementById('collectionPenAutoSortUndo').addEventListener('click',undoCollectionPenSort);
 let collectionHoldTimer=null,collectionDrag=null;
 const collectionGrid=document.getElementById('grid');
 function clearCollectionReorderClasses(){collectionGrid.querySelectorAll('.reorder-source,.reorder-target').forEach(el=>el.classList.remove('reorder-source','reorder-target'));}
@@ -9409,7 +9593,7 @@ function admin2SyncTimers(fromMinutes=false){
 function admin2ApplyTemplate(key){
  if(!key)return;
  if(admin2El('editSlug').value){alert('Templates are for NEW monsters. Click New Monster first, or use Duplicate Settings to start a fresh draft.');admin2El('admin2SpeciesTemplate').value='';return;}
- const templates={speed:{battle:'Speed',bst:290,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:30,hatch:45},brute:{battle:'Brute',bst:305,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:35,hatch:50},defender:{battle:'Defender',bst:300,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:35,hatch:50},mythic:{battle:'Brute',bst:500,rarity:'Mythic',cross:false,obtain:'Random Battle Reward',breed:180,hatch:240},crossbreed:{battle:'Brute',bst:350,rarity:'Standard',cross:true,obtain:'Breeding Only',breed:60,hatch:75},event:{battle:'Speed',bst:300,rarity:'Standard',cross:false,obtain:'Halloween Event Shop Egg',breed:40,hatch:60}};
+ const templates={god:{battle:'Brute',bst:640,rarity:'GOD',cross:true,obtain:'Breeding Only',breed:300,hatch:300},speed:{battle:'Speed',bst:290,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:30,hatch:45},brute:{battle:'Brute',bst:305,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:35,hatch:50},defender:{battle:'Defender',bst:300,rarity:'Standard',cross:false,obtain:'Random Battle Reward',breed:35,hatch:50},mythic:{battle:'Brute',bst:500,rarity:'Mythic',cross:false,obtain:'Random Battle Reward',breed:180,hatch:240},crossbreed:{battle:'Brute',bst:350,rarity:'Standard',cross:true,obtain:'Breeding Only',breed:60,hatch:75},event:{battle:'Speed',bst:300,rarity:'Standard',cross:false,obtain:'Halloween Event Shop Egg',breed:40,hatch:60}};
  const t=templates[key];if(!t)return;
  admin2El('battleType').value=t.battle;admin2El('p1bst').value=t.bst;admin2El('speciesRarity').value=t.rarity;admin2El('isCrossbreed').checked=t.cross;admin2El('obtainMethod').value=t.obtain;
  admin2El('breedTimer').value=t.breed*60;admin2El('hatchTimer').value=t.hatch*60;

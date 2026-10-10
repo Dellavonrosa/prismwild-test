@@ -442,7 +442,7 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .inventory-balance{border:1px solid var(--line);background:#0d121a;border-radius:14px;padding:10px 14px;min-width:130px;text-align:right}
 .inventory-balance>span{display:block;color:var(--muted);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
 .inventory-currency{justify-content:flex-end;font-size:1.05rem;font-weight:900;color:var(--gold)}
-.field-find-icon{display:block;object-fit:contain;image-rendering:pixelated;background:transparent!important}
+.field-find-icon{display:block;object-fit:contain;image-rendering:pixelated;background-color:transparent}
 .shop-icon-art .field-find-icon.icon-lg{width:58px;height:58px}
 .explore-supplies .field-find-icon.icon-md{width:38px;height:38px}
 .narrative-field-icon{width:88px;height:88px;margin:auto}
@@ -463,7 +463,9 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .trail-sign-card small{color:var(--muted);line-height:1.45}
 .trail-sign-glyph{font-size:1.4rem;color:var(--cyan)}
 @media(max-width:760px){.inventory-heading{align-items:flex-start;flex-direction:column}.inventory-balance{text-align:left}.trail-choice-grid{grid-template-columns:1fr}}
-.field-find-icon.sheet-icon{background-image:none!important;background-size:auto!important;background-position:initial!important}
+/* Hide inherited atlas art for uncustomized field-find icons only.
+   Uploaded Sprite Workshop artwork must remain visible. */
+.field-find-icon.sheet-icon:not(.custom-sprite-active){background-image:none!important;background-size:auto!important;background-position:initial!important}
 
 /* v0.8.0 — Account Progress, Daily Requests, Wild Gauntlet */
 .account-top-chip{min-width:170px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(10,14,24,.72);display:grid;gap:5px}
@@ -1399,3 +1401,33 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .recon-materials{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:20px 0}.recon-ingredient{display:flex;gap:12px;align-items:center;border:1px solid #624b4b;border-radius:12px;background:#2a242e;padding:12px;min-width:0}.recon-ingredient.ready{background:#1d3434;border-color:#54755f}.recon-ingredient-icon{font-size:1.6rem;min-width:45px}.recon-material-icon{min-width:42px;min-height:42px;display:inline-flex;align-items:center;justify-content:center}.recon-ingredient>div:last-child{display:flex;flex-direction:column;min-width:0;gap:5px}.recon-ingredient strong{font-size:.82rem;overflow-wrap:anywhere}.recon-ingredient small{font-size:.71rem;color:#b7c5c9}.recon-checkout{display:flex;gap:20px;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #436068;flex-wrap:wrap}.recon-checkout>div{display:flex;flex-direction:column;gap:6px}.recon-checkout small{font-size:.75rem;color:#b4c9cb}.recon-checkout button{min-height:45px}.recon-message{color:#b6e1bd;min-height:1.2rem;font-size:.85rem;margin-top:12px}
 .recon-admin-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:18px}.recon-admin-columns .admin-form{min-width:0}.recon-admin-columns .admin-form h3{margin:3px 0 14px}.recon-admin-ingredients{display:grid;gap:8px;margin:10px 0 13px}.recon-admin-ingredients>label{display:grid;grid-template-columns:85px minmax(0,1fr) 78px;align-items:center;gap:9px;font-size:.79rem}.recon-admin-ingredients input{width:100%;min-width:0}.recon-admin-ingredients select{width:100%;min-width:0}.recon-admin-actions{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}.recon-admin-list{display:grid;gap:9px;margin-top:8px}.recon-admin-list button{display:grid;gap:4px;min-width:0;text-align:left;background:#213541;color:#e7f1f4;border:1px solid #406472;border-radius:9px;padding:12px;cursor:pointer}.recon-admin-list button:hover{border-color:#b1d8ac}.recon-admin-list small{color:#aac0ca;overflow-wrap:anywhere}.recon-admin-columns textarea{width:100%}
 @media(max-width:900px){.recon-admin-columns{grid-template-columns:1fr}}@media(max-width:720px){.recon-materials{grid-template-columns:1fr}.recon-detail-head{align-items:stretch}.recon-checkout{align-items:stretch}.recon-checkout button{width:100%}.recon-admin-ingredients>label{grid-template-columns:1fr 70px}.recon-admin-ingredients>label select{grid-column:1}.recon-admin-ingredients>label input{grid-column:2}.recon-recipe-grid{grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))}}
+
+/* v0.15.84 GOD rarity: prismatic spectrum cycles only on GOD names and tags. */
+@keyframes god-prism-shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.god-rgb-name,.god-grade-tag{
+  background-image:linear-gradient(110deg,#ff5e98 0%,#ffe393 18%,#a9fda0 34%,#65dbff 51%,#a99bff 69%,#ff77e4 86%,#ff5e98 100%)!important;
+  background-size:300% 100%!important;
+  background-clip:text!important;-webkit-background-clip:text!important;
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
+  animation:god-prism-shift 4s linear infinite;
+  font-weight:900;
+  filter:drop-shadow(0 0 5px rgba(164,126,255,.32));
+}
+.god-grade-tag{display:inline-block;border:1px solid rgba(190,148,255,.54)!important;border-radius:999px;padding:3px 8px;
+  letter-spacing:.10em;background-color:rgba(34,17,62,.48);font-size:.72em;line-height:1.4;vertical-align:middle}
+.god-grade-tag.battle-god-tag{font-size:.46em;margin-left:.25em;white-space:nowrap;vertical-align:middle}
+@media(prefers-reduced-motion:reduce){.god-rgb-name,.god-grade-tag{animation:none;background-position:50% 50%!important}}
+
+/* GOD-grade breeding eggs use their species-specific Custom Egg Art. */
+.lab-nest-egg.custom-god-egg{display:grid;place-items:center;width:50px;height:52px;bottom:9px}
+.lab-nest-egg .god-nest-egg-image{width:46px;height:46px;object-fit:contain;image-rendering:pixelated}
+
+/* v0.15.85 Collection Pen permanent Auto Sort + per-Pen undo */
+.collection-autosort-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 18px;margin:0 0 10px;padding:12px 15px;border:1px solid var(--line);background:rgba(18,24,36,.72);border-radius:14px}
+.collection-autosort-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.collection-autosort-controls label{font-size:.8rem;font-weight:800;color:var(--cyan);white-space:nowrap}
+.collection-autosort-controls select{max-width:320px;padding:9px 12px}
+.collection-autosort-controls button{padding:9px 12px;white-space:nowrap}
+.collection-autosort-controls button:disabled{opacity:.43;cursor:not-allowed}
+.collection-autosort-status{font-size:.74rem;color:var(--muted);flex:1;min-width:165px;text-align:right}
+@media(max-width:760px){.collection-autosort-bar{align-items:stretch;flex-direction:column}.collection-autosort-controls{align-items:stretch}.collection-autosort-controls select{flex:1;min-width:165px;max-width:none}.collection-autosort-status{text-align:left;min-width:0}}
