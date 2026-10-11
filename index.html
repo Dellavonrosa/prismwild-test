@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.86e</title>
-<link rel="stylesheet" href="styles.css?v=0.15.86e-dash-smooth-scroll">
+<title>Prismwild Prototype v0.15.86f</title>
+<link rel="stylesheet" href="styles.css?v=0.15.86f-keeper-save-transfer">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86e</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86f</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -249,6 +249,18 @@
           <button id="resetLocalProgress" class="danger" type="button">Reset Local Progress</button>
         </div>
         <p id="keeperAccountMessage" class="keeper-account-message">This prototype stores the account in this browser. Player/Admin roles here are for testing and are not server-secure.</p>
+      </section>
+      <section class="keeper-save-transfer" aria-labelledby="keeperSaveTitle">
+        <div class="eyebrow">KEEPER SAVE TRANSFER</div>
+        <h3 id="keeperSaveTitle">Take Your Monsters With You</h3>
+        <p>Moving from computer to phone? Export your Keeper save, send the file to your other device, then import it there. Your collection, eggs, inventory, currency, and progress come along.</p>
+        <div class="keeper-save-actions">
+          <button id="keeperSaveExport" class="primary" type="button">⬇ Export Keeper Save</button>
+          <label class="ghost file-label keeper-save-import-label">⬆ Import Keeper Save<input id="keeperSaveImport" type="file" accept=".json,application/json" aria-label="Choose a Keeper save JSON file"></label>
+        </div>
+        <label class="keeper-save-art-option"><input id="keeperSaveIncludeArt" type="checkbox" checked><span>Include locally uploaded artwork (larger backup, recommended)</span></label>
+        <p class="keeper-save-warning"><strong>Import replaces the Keeper currently saved in this browser.</strong> Export that save first if you want to keep it. Saves do not sync automatically between devices.</p>
+        <p id="keeperSaveMessage" class="keeper-save-message" role="status" aria-live="polite"></p>
       </section>
       <div class="profile-hero">
         <div class="profile-level-card"><span>ACCOUNT LEVEL</span><strong id="profileAccountLevel">Lv. 1</strong><div class="account-xp-track"><div id="profileAccountXpFill" class="account-xp-fill"></div></div><small id="profileAccountXpText">0 / 100 XP</small></div>
@@ -6942,6 +6954,161 @@ async function importAdminFile(file){
   }catch(e){document.getElementById('adminMessage').textContent='Import failed: '+e.message;}
 }
 
+
+// ---------- Portable Keeper Save Transfer (v0.15.86f) ----------
+// A Keeper save is intentionally separate from the Admin/Live Content publisher.
+// Local play data lives in localStorage; player-uploaded artwork lives in IndexedDB.
+const KEEPER_SAVE_FORMAT='prismwild-keeper-save';
+const KEEPER_SAVE_VERSION=1;
+const KEEPER_SAVE_MAX_FILE_BYTES=240*1024*1024;
+const KEEPER_SAVE_MAX_ASSET_BYTES=18*1024*1024;
+let keeperSaveTransferBusy=false;
+function keeperSaveStatus(message,failed=false){
+  const el=document.getElementById('keeperSaveMessage');
+  if(el){el.textContent=message;el.classList.toggle('error',failed);}
+}
+function keeperSaveControlsBusy(busy){
+  keeperSaveTransferBusy=busy;
+  const exportButton=document.getElementById('keeperSaveExport');
+  if(exportButton)exportButton.disabled=busy;
+  const input=document.getElementById('keeperSaveImport');
+  if(input)input.disabled=busy;
+}
+function keeperSaveImageBlobToDataURL(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result));
+    reader.onerror=()=>reject(reader.error||new Error('Could not read a local image.'));
+    reader.readAsDataURL(blob);
+  });
+}
+function keeperSaveAssetKeys(){
+  return new Promise((resolve,reject)=>{
+    if(!assetDB){reject(new Error('Local art storage is not available.'));return;}
+    const keys=[];
+    const transaction=assetDB.transaction(STORE,'readonly');
+    const cursor=transaction.objectStore(STORE).openKeyCursor();
+    cursor.onsuccess=()=>{const row=cursor.result;if(row){keys.push(String(row.key));row.continue();}};
+    transaction.oncomplete=()=>resolve(keys);
+    transaction.onerror=()=>reject(transaction.error||new Error('Could not list local artwork.'));
+  });
+}
+function keeperSaveAssetKeyAllowed(key){
+  return typeof key==='string'&&key.length<=190&&/^(?:[a-z0-9_-]+:(?:base|prismatic|egg)|sprite:[a-z0-9_-]+|trial:[a-z0-9_-]+:(?:captain|badge)|artifact:[a-z0-9_-]+:icon)$/i.test(key);
+}
+async function keeperSaveGatherAssets(){
+  const output={};
+  for(const key of await keeperSaveAssetKeys()){
+    if(!keeperSaveAssetKeyAllowed(key))continue;
+    const blob=await getAssetBlob(key);
+    if(!(blob instanceof Blob)||!/^image\/(?:png|jpeg|webp)$/.test(blob.type)||blob.size>KEEPER_SAVE_MAX_ASSET_BYTES)continue;
+    output[key]=await keeperSaveImageBlobToDataURL(blob);
+  }
+  return output;
+}
+function keeperSaveDownload(data,name){
+  const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+async function exportKeeperSave(){
+  if(keeperSaveTransferBusy)return;
+  if(eventTestSession){keeperSaveStatus('Please exit the Event Test Sandbox before exporting a real Keeper save.',true);return;}
+  keeperSaveControlsBusy(true);keeperSaveStatus('Gathering your Keeper progress and artwork…');
+  try{
+    // Use in-memory state so the latest changes are included, even if the last save was moments ago.
+    const progress=JSON.parse(JSON.stringify(state));
+    const withArt=!!document.getElementById('keeperSaveIncludeArt')?.checked;
+    const assets=withArt?await keeperSaveGatherAssets():{};
+    const payload={format:KEEPER_SAVE_FORMAT,version:KEEPER_SAVE_VERSION,exportedAt:new Date().toISOString(),sourceBuild:'v0.15.86f',keeperName:String(progress.account?.keeperName||'Keeper'),includesLocalArtwork:withArt,state:progress,assets};
+    const safeName=String(progress.account?.keeperName||'Keeper').replace(/[^a-z0-9_-]+/gi,'_').slice(0,32)||'Keeper';
+    keeperSaveDownload(payload,`Prismwild_Keeper_${safeName}_${new Date().toISOString().slice(0,10)}.json`);
+    keeperSaveStatus(`Export ready for ${payload.keeperName}: ${progress.monsters?.length||0} monsters, ${progress.eggs?.length||0} eggs${withArt?`, ${Object.keys(assets).length} local art files`:''}. Send this JSON file to the other device.`);
+  }catch(error){keeperSaveStatus('Export failed: '+(error?.message||String(error)),true);}
+  finally{keeperSaveControlsBusy(false);}
+}
+function keeperSaveValidateState(value){
+  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('This file does not contain a valid Keeper save.');
+  if(!Array.isArray(value.monsters)||!Array.isArray(value.eggs)||!Array.isArray(value.collectionPens)||!Array.isArray(value.incubators)||!value.account||typeof value.account!=='object'||!value.inventory||typeof value.inventory!=='object'||!value.species||typeof value.species!=='object'||!value.attacks||typeof value.attacks!=='object')throw new Error('Required Keeper progress is missing or damaged.');
+  if(value.monsters.length>20000||value.eggs.length>20000||Object.keys(value.species).length>10000)throw new Error('This save contains an unreasonable amount of data.');
+  if(value.monsters.some(m=>!m||typeof m!=='object'||typeof m.id!=='string'||typeof m.slug!=='string'))throw new Error('The monster records are invalid.');
+}
+function keeperSaveDecodedAssets(assets){
+  if(!assets||typeof assets!=='object'||Array.isArray(assets))throw new Error('Artwork section is invalid.');
+  const entries=Object.entries(assets);
+  if(entries.length>3000)throw new Error('Too many uploaded artwork entries.');
+  const result=[];
+  for(const [key,value] of entries){
+    if(!keeperSaveAssetKeyAllowed(key))throw new Error('Unexpected artwork key in save file.');
+    if(typeof value!=='string'||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(value))throw new Error('Invalid artwork in save file.');
+    // dataURLToBlob is the existing safe data-URL decoder used by Admin imports.
+    const blob=dataURLToBlob(value);
+    result.push({key,blob});
+  }
+  return result;
+}
+function keeperSavePutAssetsInOneTransaction(entries){
+  return new Promise((resolve,reject)=>{
+    if(!entries.length){resolve();return;}
+    if(!assetDB){reject(new Error('This browser cannot store custom artwork.'));return;}
+    const tx=assetDB.transaction(STORE,'readwrite');
+    const store=tx.objectStore(STORE);
+    for(const {key,blob} of entries)store.put(blob,key);
+    tx.oncomplete=()=>{
+      for(const {key} of entries){if(assetUrlCache[key]){URL.revokeObjectURL(assetUrlCache[key]);delete assetUrlCache[key];}}
+      resolve();
+    };
+    tx.onerror=()=>reject(tx.error||new Error('Could not save transferred artwork.'));
+    tx.onabort=()=>reject(tx.error||new Error('Artwork import was canceled.'));
+  });
+}
+async function importKeeperSave(file){
+  if(keeperSaveTransferBusy||!file)return;
+  if(eventTestSession){keeperSaveStatus('Exit the Event Test Sandbox before importing your Keeper save.',true);return;}
+  keeperSaveControlsBusy(true);keeperSaveStatus('Reading Keeper save…');
+  try{
+    if(file.size>KEEPER_SAVE_MAX_FILE_BYTES)throw new Error('Save file is too large for the mobile transfer tool.');
+    const payload=JSON.parse(await file.text());
+    if(payload?.format!==KEEPER_SAVE_FORMAT||payload.version!==KEEPER_SAVE_VERSION)throw new Error('Choose a Keeper Save exported from Prismwild, not an Admin Data backup.');
+    keeperSaveValidateState(payload.state);
+    const entries=keeperSaveDecodedAssets(payload.assets||{});
+    for(const entry of entries){entry.blob=await entry.blob;if(!(entry.blob instanceof Blob)||entry.blob.size>KEEPER_SAVE_MAX_ASSET_BYTES||!/^image\/(?:png|jpeg|webp)$/.test(entry.blob.type))throw new Error('An uploaded picture is invalid or too large.');}
+    const keeper=String(payload.state.account?.keeperName||'Keeper').slice(0,50);
+    const count=payload.state.monsters.length;
+    const current=String(state.account?.keeperName||'Keeper').slice(0,50);
+    if(!confirm(`Import ${keeper}'s save (${count} monsters)?\n\nThis REPLACES ${current}'s current progress in this browser. Export your existing save first if you want to keep it.\n\nContinue?`)){
+      keeperSaveStatus('Import canceled. Your current save was not changed.');return;
+    }
+    // Commit game progress only once its artwork has been saved successfully.
+    // If localStorage is unavailable/full, stop before changing the live JS state.
+    const oldRaw=localStorage.getItem('monsterGame_v06');
+    const incoming=JSON.stringify(payload.state);
+    // Stage the replacement in localStorage before mutating artwork, avoiding
+    // a successful art import followed by an out-of-space state write.
+    const stagingKey='prismwild_keeper_transfer_staging';
+    try{localStorage.setItem(stagingKey,incoming);}catch(e){throw new Error('Not enough browser storage for this Keeper save. '+(e?.message||''));}
+    try{
+      await keeperSavePutAssetsInOneTransaction(entries);
+      localStorage.setItem('monsterGame_v06',incoming);
+    }catch(error){
+      // At this point game state has not changed; the asset transaction is atomic.
+      // State can be restored if localStorage rejects the final set.
+      if(oldRaw!==null)localStorage.setItem('monsterGame_v06',oldRaw);
+      else localStorage.removeItem('monsterGame_v06');
+      throw error;
+    }finally{localStorage.removeItem(stagingKey);}
+    keeperSaveStatus(`Imported ${keeper}'s save. Reloading with ${count} monsters…`);
+    window.location.reload();
+  }catch(error){keeperSaveStatus('Import failed: '+(error?.message||String(error)),true);}
+  finally{keeperSaveControlsBusy(false);}
+}
+document.getElementById('keeperSaveExport').addEventListener('click',exportKeeperSave);
+document.getElementById('keeperSaveImport').addEventListener('change',e=>{
+  const file=e.target.files?.[0];if(file)importKeeperSave(file);
+  e.target.value='';
+});
 
 // ---------- Landing Page ----------
 function landingDateLabel(){return new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});}

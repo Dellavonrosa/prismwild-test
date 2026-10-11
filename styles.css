@@ -1509,3 +1509,15 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .dash-hint{text-align:center;color:#abbdd0;font-size:.84rem;line-height:1.5;margin:8px 0 12px}.dash-reward{background:rgba(45,70,80,.3);border:1px solid rgba(121,224,239,.24);border-radius:11px;padding:12px;color:#d1ecf3;text-align:center;min-height:22px}
 .dash-rewards-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.dash-rewards-info>div{background:rgba(16,22,33,.9);padding:14px;border:1px solid var(--line);border-radius:12px}.dash-rewards-info strong{display:block;color:#eeeafc;margin-bottom:7px}.dash-rewards-info span{color:#c2c8da;line-height:1.5}.dash-rewards-info>small{grid-column:1/-1;color:#aeb8cd}
 @media(max-width:650px){.dash-header{align-items:stretch;flex-direction:column}.dash-best{align-items:center}.dash-rewards-info{grid-template-columns:1fr}.dash-actions button{flex:1;min-width:105px}#monsterDashCanvas{border-radius:6px}.dash-toolbar{font-size:.73rem}}
+
+/* v0.15.86f • Portable Keeper save transfer */
+.keeper-save-transfer{margin:16px 0 22px;padding:20px;border:1px solid rgba(117,228,255,.33);border-radius:17px;background:linear-gradient(145deg,rgba(18,30,47,.97),rgba(21,20,35,.96));box-shadow:var(--shadow)}
+.keeper-save-transfer h3{margin:6px 0 8px;font-size:1.25rem}.keeper-save-transfer p{color:var(--muted);line-height:1.5;max-width:780px}
+.keeper-save-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0 10px}
+.keeper-save-actions .file-label{display:inline-flex;align-items:center;justify-content:center;min-height:42px;cursor:pointer}
+.keeper-save-art-option{display:flex;align-items:center;gap:9px;color:var(--ink);font-size:.82rem;cursor:pointer;line-height:1.4}
+.keeper-save-art-option input{width:auto;flex:none}
+.keeper-save-warning{font-size:.79rem;padding:11px 12px;border-radius:10px;background:rgba(255,200,96,.07);border:1px solid rgba(255,200,96,.22)}
+.keeper-save-warning strong{color:var(--gold)}
+.keeper-save-message{min-height:18px;font-size:.82rem;color:var(--cyan)!important}.keeper-save-message.error{color:#ff9c9c!important}
+@media(max-width:600px){.keeper-save-actions{flex-direction:column;align-items:stretch}.keeper-save-actions button,.keeper-save-actions .file-label{width:100%;text-align:center}}
