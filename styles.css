@@ -1431,3 +1431,68 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 .collection-autosort-controls button:disabled{opacity:.43;cursor:not-allowed}
 .collection-autosort-status{font-size:.74rem;color:var(--muted);flex:1;min-width:165px;text-align:right}
 @media(max-width:760px){.collection-autosort-bar{align-items:stretch;flex-direction:column}.collection-autosort-controls{align-items:stretch}.collection-autosort-controls select{flex:1;min-width:165px;max-width:none}.collection-autosort-status{text-align:left;min-width:0}}
+/* v0.15.86 • Reusable Event Workshop and simultaneous festival navigation */
+.event-workshop2{display:grid;gap:14px;margin:0 0 24px;padding:18px;border:1px solid rgba(170,142,224,.34);border-radius:15px;background:linear-gradient(145deg,rgba(66,45,93,.23),rgba(17,21,35,.14))}
+.event-workshop2 .dialogue-library-heading{margin-top:8px}
+.event-workshop2 input,.event-workshop2 select,.event-workshop2 textarea{min-width:0;max-width:100%;width:100%}
+.event-workshop2 .check-row input{width:auto}
+.event-multi-selector{padding:16px 18px;margin-bottom:18px;border:1px solid rgba(150,166,205,.25);border-radius:14px;background:rgba(20,25,40,.72)}
+.event-multi-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.event-multi-buttons button{border:1px solid rgba(160,170,200,.35);background:rgba(45,50,70,.7);padding:10px 15px;border-radius:10px;color:inherit;cursor:pointer;font:inherit}
+.event-multi-buttons button.selected{border-color:#c3a8ff;background:rgba(127,79,185,.32);box-shadow:inset 0 0 0 1px rgba(195,168,255,.20)}
+@media(max-width:700px){.event-workshop2{padding:12px}.event-multi-buttons button{flex:1 1 45%;min-width:0}}
+.event-test-sandbox{margin:18px 0;padding:14px 16px;border-radius:13px;border:1px solid rgba(106,220,224,.35);background:rgba(47,107,128,.09)}
+.event-test-sandbox strong{display:block;margin-bottom:4px}.event-test-sandbox p{margin:4px 0 12px;color:var(--muted,#aeb6c9)}.event-test-sandbox small{display:block;margin-top:10px;color:#8acde1}
+
+/* v0.15.86a: Friendlier Event Workshop layout */
+.event-workshop-simple{max-width:100%;padding:15px 18px}
+.event-quick-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:18px 0}
+.event-quick-row>label{flex:1;min-width:210px}
+.event-quick-row button{white-space:nowrap}
+.event-editor-step{padding:18px;margin:15px 0;border:1px solid rgba(138,170,217,.23);border-radius:15px;background:rgba(15,23,38,.5)}
+.event-step-head{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.event-step-head>span{display:grid;place-items:center;border-radius:50%;width:32px;height:32px;flex-shrink:0;color:#0d1726;background:linear-gradient(135deg,#77ddff,#a48dff);font-weight:900}
+.event-step-head h4{margin:0;font-size:1rem}.event-step-head p{margin:3px 0 0;color:var(--muted);font-size:.79rem}
+.event-upload-label{display:grid;gap:7px;margin-top:12px;max-width:100%}
+.event-sprite-preview{display:flex;align-items:center;gap:16px;margin:10px 0;padding:12px;background:rgba(255,255,255,.035);border-radius:12px}
+.event-sprite-preview small{display:block;color:var(--muted);font-size:.78rem;margin-top:3px}
+.event-sprite-preview-art{width:76px;height:76px;flex-shrink:0;display:grid;place-items:center;background:rgba(7,12,25,.6);border:1px solid var(--line);border-radius:12px;font-size:32px;overflow:hidden}
+.event-sprite-preview-art img,.event-sprite-preview-art .event-editor-sprite{height:100%;width:100%;object-fit:contain;image-rendering:pixelated;background-size:contain;background-repeat:no-repeat;background-position:center}
+.event-egg-actions{display:grid;gap:10px;margin-top:12px}
+.event-picker-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);min-width:0}
+.event-picker-row>div{min-width:0}.event-picker-row strong,.event-picker-row small{display:block}.event-picker-row small{margin-top:4px;color:var(--muted);font-size:.72rem}.event-picker-row button{flex-shrink:0}
+.event-advanced-settings{margin-top:12px;padding:10px 13px;border:1px solid rgba(140,169,205,.25);border-radius:11px}.event-advanced-settings summary{cursor:pointer;color:#96ddff;font-weight:700;font-size:.8rem}.event-advanced-settings .form-grid{margin-top:12px}
+.event-workshop-shop{margin-top:17px;padding:14px;border-radius:12px;background:rgba(255,255,255,.025)}
+.event-egg-dialog{position:fixed;inset:0;z-index:1800;background:rgba(2,5,12,.8);display:flex;align-items:center;justify-content:center;padding:12px}
+.event-egg-dialog.hidden{display:none}
+.event-egg-dialog-panel{width:min(680px,96vw);max-height:90vh;display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid #55728e;border-radius:18px;background:#111b2b;box-shadow:0 22px 75px rgba(0,0,0,.6)}
+.event-egg-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.event-egg-dialog-heading h3{margin:0}
+.event-egg-dialog-panel p{margin:0;color:var(--muted);font-size:.8rem}
+.event-egg-dialog-list{overflow-y:auto;flex:1;min-height:100px;max-height:56vh;border:1px solid var(--line);border-radius:10px}
+.event-egg-entry{padding:9px 12px;border-bottom:1px solid rgba(185,205,235,.1);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.event-egg-entry:last-child{border-bottom:0}
+.event-egg-entry>label:first-child{display:flex;align-items:center;gap:9px;min-width:0;flex:1;cursor:pointer}
+.event-egg-entry>label:first-child span{font-weight:700;font-size:.83rem}
+.event-egg-entry small{color:var(--muted);font-size:.7rem}
+.event-egg-weight{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:.72rem}
+.event-egg-weight input{max-width:85px;min-width:55px;padding:6px}
+@media(max-width:680px){.event-quick-row>label{flex-basis:100%}.event-picker-row{flex-wrap:wrap}.event-egg-entry{align-items:start;flex-direction:column}}
+
+/* v0.15.86b: Calendar prizes belong inside the event wizard, not the test controls. */
+.event-calendar-setup{margin-top:18px;padding:14px;border:1px solid rgba(140,169,205,.3);border-radius:12px;background:rgba(82,113,160,.07)}
+.event-calendar-setup h4{margin:0;font-size:.94rem}
+.event-calendar-setup .dialogue-library-heading{margin-bottom:10px}
+.event-calendar-setup-status{align-self:center;margin:0;color:var(--muted);font-size:.81rem;line-height:1.5}
+.event-workshop-simple .event-calendar-builder{margin-top:12px;padding:15px;border:1px solid rgba(125,202,255,.33);border-radius:12px;background:rgba(12,21,37,.7)}
+.event-workshop-simple .event-calendar-builder .form-grid{margin-top:13px}
+.event-calendar-list-heading{margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.83rem}
+.event-calendar-list-heading span{color:var(--muted);font-size:.76rem}
+.event-calendar-edit-status{min-height:1.2em;margin:8px 0 0;color:#93dfff;font-size:.82rem}
+.event-workshop-simple .event-calendar-admin-list{grid-template-columns:repeat(4,minmax(0,1fr));max-height:330px}
+.event-workshop-simple .event-calendar-admin-row{min-width:0}
+.event-workshop-simple .event-calendar-admin-row.selected{border-color:#80d9ff;box-shadow:0 0 0 1px rgba(128,217,255,.35);background:rgba(102,170,228,.12)}
+@media(max-width:780px){.event-workshop-simple .event-calendar-admin-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.event-workshop-simple .event-calendar-admin-list{grid-template-columns:1fr}}
+
+/* v0.15.86c: hint for optional keyboard controls, no change to touch controls */
+.explore-keyboard-tip{display:block;margin:.45rem auto 0;color:var(--muted,#b7c5d7);font-size:.8rem;text-align:center;letter-spacing:.025em}

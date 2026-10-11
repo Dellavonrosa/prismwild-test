@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.85a</title>
-<link rel="stylesheet" href="styles.css?v=0.15.85a-excavation-sprites">
+<title>Prismwild Prototype v0.15.86c</title>
+<link rel="stylesheet" href="styles.css?v=0.15.86c-daily-egg-keyboard">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.85a</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86c</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -923,9 +923,93 @@
 
       <div id="eventAdminPane" class="hidden">
         <div class="event-admin-panel">
-          <div class="section-title"><span>❄️</span><div><h3>Event Workshop &amp; Tester</h3><p>Build reusable daily reward calendars, including event-currency gifts, preview event timing, and test persistent event state without changing your computer clock.</p></div></div>
-          <div class="form-grid three">
-            <label>Event<select id="eventAdminSelect"></select></label>
+          <div class="section-title"><span>❄️</span><div><h3>Event Workshop &amp; Tester</h3><p>Create events in four simple steps. Use the Test Chamber to preview without changing your real save.</p></div></div>
+
+          <div class="event-workshop2 event-workshop-simple" id="eventWorkshop2">
+            <div class="dialogue-library-heading"><div><div class="eyebrow">EVENT WORKSHOP</div><h3>Make an Event</h3></div><small>Choose what players see. The game handles the technical IDs.</small></div>
+            <div class="event-quick-row">
+              <label>Open an Event<select id="eventWSelect"></select></label>
+              <button id="eventWNew" class="ghost" type="button">+ New Event</button>
+              <button id="eventWDuplicate" class="ghost" type="button">Duplicate</button>
+              <button id="eventWSaveQuick" class="primary" type="button">Save Draft / Changes</button>
+            </div>
+            <section class="event-editor-step"><div class="event-step-head"><span>1</span><div><h4>Event Details</h4><p>Give your event a name, schedule, and picture.</p></div></div>
+              <div class="form-grid two">
+                <label>Event Name<input id="eventWName" maxlength="100" placeholder="Moonlit Festival"></label>
+                <label class="event-icon-input">Icon / Emoji<input id="eventWIcon" maxlength="8" value="✦"></label>
+              </div>
+              <label class="single-field">Description<textarea id="eventWDescription" rows="2" maxlength="500"></textarea></label>
+              <div class="form-grid two"><label>Starts<input id="eventWStart" type="datetime-local"></label><label>Ends<input id="eventWEnd" type="datetime-local"></label></div>
+              <label class="event-upload-label">Event Sprite (PNG)
+                <input id="eventWArtUpload" type="file" accept="image/png,image/webp,image/jpeg">
+              </label>
+              <div class="event-sprite-preview"><div id="eventWArtPreview" class="event-sprite-preview-art">✦</div><div><strong>Event Artwork</strong><small>Upload a square image here. It will be saved and included in Live Content when you publish.</small></div></div>
+            </section>
+            <section class="event-editor-step"><div class="event-step-head"><span>2</span><div><h4>Minigame &amp; Monsters</h4><p>Choose the activity, then pick any eligible monster by name.</p></div></div>
+              <label class="single-field">What will players play?<select id="eventWActivity"><option value="none">Shop &amp; Calendar Only</option><option value="maze">Haunted Maze</option><option value="memory">Monster Memory</option></select></label>
+              <div class="event-egg-actions">
+                <div id="eventWMazePickerRow" class="event-picker-row hidden"><div><strong>Maze Monsters</strong><small id="eventWMazeSummary">No monsters chosen</small></div><button id="eventWMazePick" class="ghost" type="button">Choose Monsters</button></div>
+                <div id="eventWEggPickerRow" class="event-picker-row hidden"><div><strong>Mystery Egg Pool</strong><small id="eventWEggSummary">No monsters chosen</small><small>Give each monster a relative weight; higher numbers make it more likely.</small></div><button id="eventWEggPick" class="ghost" type="button">Choose Eggs &amp; Odds</button></div>
+              </div>
+              <input id="eventWMazeSpecies" type="hidden"><input id="eventWEggPool" type="hidden">
+              <details class="event-advanced-settings"><summary>Advanced Minigame Settings (optional)</summary><div class="form-grid two">
+                <label>Currency per memory match<input id="eventWPairReward" type="number" min="0" max="10000" value="2"></label>
+                <label>Memory failures before cooldown<input id="eventWFails" type="number" min="1" max="20" value="3"></label>
+              </div></details>
+            </section>
+            <section class="event-editor-step"><div class="event-step-head"><span>3</span><div><h4>Currency &amp; Prizes</h4><p>Set your event money and add rewards to its shop.</p></div></div>
+              <div class="form-grid two"><label>Currency Name<input id="eventWCurrency" maxlength="60" value="Tokens"></label><label>Currency Icon<input id="eventWCurrencyIcon" maxlength="8" value="◆"></label></div>
+              <label class="event-upload-label">Currency Sprite (optional)<input id="eventWCurrencyUpload" type="file" accept="image/png,image/webp,image/jpeg"></label><small>Upload a currency picture directly, or use the emoji icon above.</small>
+              <details class="event-advanced-settings"><summary>Sprite Registry Options (optional)</summary><div class="form-grid two"><label>Currency Sprite<select id="eventWCurrencySprite"></select></label><label>Existing Event Sprite<select id="eventWSprite"></select></label></div></details>
+              <div class="event-workshop-shop">
+                <div class="dialogue-library-heading"><div><div class="eyebrow">EVENT SHOP</div><h4>Shop Rewards</h4></div><small>Save the event before adding rewards.</small></div>
+                <div class="form-grid two"><label>Edit Shop Reward<select id="eventWShopSelect"></select></label><label>Prize Name<input id="eventWShopName" maxlength="100" placeholder="Mystery Egg"></label></div>
+                <div class="form-grid two"><label>Prize Type<select id="eventWShopType"><option value="item">Item</option><option value="egg">Monster Egg</option><option value="scroll">Attack Scroll</option><option value="randomWildEgg">Random Wild Egg</option></select></label><label id="eventWShopNormalReward">Select Prize<select id="eventWShopReward"></select></label>
+                  <div id="eventWShopEggPickerRow" class="event-picker-row hidden"><div><strong>Monster Egg</strong><small id="eventWShopEggSummary">Choose a monster</small></div><button id="eventWShopEggPick" class="ghost" type="button">Choose Monster</button></div>
+                </div>
+                <div class="form-grid two"><label>Price (event currency)<input id="eventWShopCost" type="number" min="0" value="25"></label><label>Purchase Limit (0 = unlimited)<input id="eventWShopLimit" type="number" min="0" value="0"></label></div>
+                <label class="single-field">Shop Description<input id="eventWShopDesc" maxlength="240"></label>
+                <div class="admin-actions"><button type="button" id="eventWShopSave" class="primary">Save Shop Reward</button><button type="button" id="eventWShopDelete" class="danger">Remove Shop Reward</button></div>
+                <p id="eventWShopMessage" class="admin-message"></p>
+              </div>
+              <div class="event-calendar-setup">
+                <div class="dialogue-library-heading"><div><div class="eyebrow">DAILY GIFTS</div><h4>Daily Gift Calendar</h4></div><small>Choose exactly what players receive on each day.</small></div>
+                <div class="form-grid two"><label>How many reward days?<input id="eventWCalendarDays" type="number" min="0" max="62" value="0"><small>0 = no gift calendar</small></label><p id="eventCalendarSetupStatus" class="event-calendar-setup-status">Save your event to start assigning prizes.</p></div>
+              </div>
+          <div id="eventCalendarBuilder" class="event-calendar-builder hidden">
+            <div class="dialogue-library-heading"><div><div class="eyebrow">PICK DAILY PRIZES</div><h3>Choose a Prize for Each Day</h3></div><small>Click a day below, choose a reward, and save it.</small></div>
+            <div class="form-grid three">
+              <label>Selected Day<input id="eventCalendarDay" type="number" min="1" max="25" step="1" value="1"></label>
+              <label>What should players receive?<select id="eventCalendarRewardType"><option value="money">Money</option><option value="eventCurrency">Event Currency</option><option value="item">Item</option><option value="egg">Egg</option><option value="monster">Monster</option></select></label>
+              <label id="eventCalendarAmountWrap">Amount / quantity<input id="eventCalendarAmount" type="number" min="1" step="1" value="100"></label>
+              <label id="eventCalendarItemWrap" class="hidden">Item (choose by name)<select id="eventCalendarItem"></select></label>
+              <label id="eventCalendarSpeciesWrap" class="hidden">Monster (choose by name)<select id="eventCalendarSpecies"></select></label>
+            </div>
+            <label class="check-row"><input id="eventCalendarCatchUp" type="checkbox" checked><span>Allow earlier unlocked days to be claimed later during the event</span></label>
+            <div class="admin-actions">
+              <button id="saveEventCalendarDay" class="primary" type="button">Save This Day’s Prize</button>
+              <button id="clearEventCalendarDay" class="ghost" type="button">Remove Day’s Prize</button>
+            </div>
+            <p id="eventCalendarEditStatus" class="event-calendar-edit-status" aria-live="polite"></p>
+            <div class="event-calendar-list-heading"><strong>Calendar Days</strong><span id="eventCalendarConfiguredCount">0 / 0 assigned</span></div>
+            <div id="eventCalendarAdminList" class="event-calendar-admin-list"></div>
+          </div>
+            </section>
+            <section class="event-editor-step"><div class="event-step-head"><span>4</span><div><h4>Save, Test &amp; Publish</h4><p>Work on drafts safely; publish only when ready.</p></div></div>
+              <div class="form-grid two"><label class="check-row"><input id="eventWEnabled" type="checkbox"><span>Enabled on its scheduled dates</span></label><label class="check-row"><input id="eventWPublished" type="checkbox"><span>Include in Live Content export</span></label></div>
+              <div class="admin-actions"><button id="eventWSave" class="primary" type="button">Save Event</button><button id="eventWDelete" class="danger" type="button">Delete Custom Event</button></div>
+              <p id="eventWMessage" class="admin-message"></p>
+            </section>
+          </div>
+          <div class="event-egg-dialog hidden" id="eventWEggDialog" role="dialog" aria-modal="true" aria-labelledby="eventWEggDialogTitle">
+            <div class="event-egg-dialog-panel"><div class="event-egg-dialog-heading"><h3 id="eventWEggDialogTitle">Choose Monsters</h3><button type="button" class="ghost" id="eventWEggDialogClose">✕ Close</button></div>
+              <p id="eventWEggDialogHelp">Choose monsters by name.</p><input type="search" id="eventWEggSearch" placeholder="Search monsters by name..."><div id="eventWEggDialogList" class="event-egg-dialog-list"></div>
+              <div class="admin-actions"><button id="eventWEggDialogDone" class="primary" type="button">Use Selected Monsters</button><button id="eventWEggDialogCancel" class="ghost" type="button">Cancel</button></div>
+            </div>
+          </div>
+            <div class="event-test-sandbox"><strong>Isolated Event Test Chamber</strong><p>Test event rewards and minigames against a temporary copy of your save. Changes vanish when you exit or refresh.</p><div class="admin-actions"><button id="eventWTestStart" class="primary" type="button">Start Sandbox (Selected Event)</button><button id="eventWTestExit" class="ghost" type="button" disabled>Exit Without Saving</button></div><small id="eventWTestStatus">Live save protected. Tester controls require Sandbox mode.</small></div>
+            <div class="form-grid three">
+              <label>Event<select id="eventAdminSelect"></select></label>
             <label>Availability override<select id="eventAdminOverride"><option value="auto">Automatic date rules</option><option value="active">Force Active</option><option value="inactive">Force Inactive</option></select></label>
             <label>Calendar test day<input id="eventAdminTestDay" type="number" min="0" max="62" step="1" value="0"><small>0 = real date. Test-only and never published.</small></label>
           </div>
@@ -938,24 +1022,9 @@
             <button id="eventClearMemoryCooldown" class="ghost hidden" type="button">Clear Memory Cooldown</button>
           </div>
 
-          <div id="eventCalendarBuilder" class="event-calendar-builder hidden">
-            <div class="dialogue-library-heading"><div><div class="eyebrow">PUBLISHABLE EVENT CONTENT</div><h3>Daily Event Calendar</h3></div><small>These prizes are included in Export Live Package.</small></div>
-            <div class="form-grid three">
-              <label>Calendar day<input id="eventCalendarDay" type="number" min="1" max="25" step="1" value="1"></label>
-              <label>Reward type<select id="eventCalendarRewardType"><option value="money">Money</option><option value="eventCurrency">Event Currency</option><option value="item">Item</option><option value="egg">Egg</option><option value="monster">Monster</option></select></label>
-              <label id="eventCalendarAmountWrap">Amount / quantity<input id="eventCalendarAmount" type="number" min="1" step="1" value="100"></label>
-              <label id="eventCalendarItemWrap" class="hidden">Item<select id="eventCalendarItem"></select></label>
-              <label id="eventCalendarSpeciesWrap" class="hidden">Species<select id="eventCalendarSpecies"></select></label>
-            </div>
-            <label class="check-row"><input id="eventCalendarCatchUp" type="checkbox" checked><span>Allow earlier unlocked days to be claimed later during the event</span></label>
-            <div class="admin-actions">
-              <button id="saveEventCalendarDay" class="primary" type="button">Save Day Prize</button>
-              <button id="clearEventCalendarDay" class="ghost" type="button">Clear Day Prize</button>
-            </div>
-            <div id="eventCalendarAdminList" class="event-calendar-admin-list"></div>
-          </div>
 
-          <div class="note-card event-backend-note"><strong>Reusable backend</strong><p>Events still live in <code>EVENT_DEFS</code>, while day-by-day Calendar prizes live in a publishable content layer. Winter uses the reusable 4×4 monster-memory activity: eight pairs, three failed matches before a 3-minute lockout, and a one-hour lockout after a completed board. Monster Workshop species marked <strong>Winter Event Shop Egg</strong> automatically join the Snowflake Shop, species marked <strong>Winter Mystery Egg</strong> automatically join the Mystery Egg pool, and Crossbreeds can be marked <strong>Winter Event only</strong>.</p></div>
+
+          <div class="note-card event-backend-note"><strong>Reusable backend</strong><p>Custom Event definitions, shops and Calendar prizes now live in the publishable content layer; built-in Halloween and Winter are preserved as reusable templates. Winter uses the reusable 4×4 monster-memory activity: eight pairs, three failed matches before a 3-minute lockout, and a one-hour lockout after a completed board. Monster Workshop species marked <strong>Winter Event Shop Egg</strong> automatically join the Snowflake Shop, species marked <strong>Winter Mystery Egg</strong> automatically join the Mystery Egg pool, and Crossbreeds can be marked <strong>Winter Event only</strong>.</p></div>
           <p id="eventAdminMessage" class="admin-message"></p>
         </div>
       </div>
@@ -1051,7 +1120,7 @@
             <div class="maze-legend"><span><b>◆</b> You</span><span><b>S</b> Start</span><span><b>🏛</b> Mythic Temple</span><span><b>🐾</b> Alpha clue</span><span><b>⚑</b> Alpha den</span><span><b>🔐</b> Hidden Vault</span><span>Fog hides unexplored paths</span></div>
           </div>
           <div class="maze-side">
-            <div id="exploreMazeControls" class="maze-control-pad"></div>
+            <div id="exploreMazeControls" class="maze-control-pad"></div><small class="explore-keyboard-tip">Use arrow keys or WASD to move</small>
             <div class="maze-status"><strong id="exploreMazeStatus">Explore freely.</strong><p id="exploreMazeMessage">Pick a direction and see what the wilds are hiding.</p><small id="exploreTempleChance">Mythic Temple chance: 1%</small><small id="exploreAlphaStatus">Alpha tracking: No trail found</small><small id="exploreDiscoveryCount">Discoveries: 0</small><small id="exploreRelicCount">Keeper Tablet: 0 / 3</small><small id="exploreVaultStatus">Hidden vault: Uncharted</small></div>
             <button id="leaveExplore" class="ghost small" type="button">End Expedition</button>
             <div id="vaultAdminTools" class="vault-admin-tools hidden"><small>ADMIN TEST • Reveals current maze</small><select id="vaultTestPuzzle" aria-label="Vault puzzle type"><option value="random">Random puzzle</option><option value="runes">Memory Seal</option><option value="locks">Elemental Locks</option><option value="plates">Pressure Plates</option></select><button id="vaultAdminTest" class="ghost small" type="button">Test Hidden Vault</button></div>
@@ -2023,6 +2092,85 @@ const EVENT_DEFS={
   spring_event_2027:{id:'spring_event_2027',family:'spring_event',name:'Spring Event',icon:'🌱',spriteKey:'spring_event',available:false,start:'2027-04-01T00:00:00',end:'2027-05-01T00:00:00',description:'Planning slot for a future event.',currency:{name:'Event Currency',icon:'◆',spriteKey:'event_currency_generic'},activity:null,shop:[]}
 };
 
+
+// EVENT WORKSHOP 2.0: Built-ins stay intact. Only Admin-authored definitions
+// are published and merged, without touching player event progress.
+const BASE_EVENT_DEFS=JSON.parse(JSON.stringify(EVENT_DEFS));
+const EVENT_ACTIVITY_TEMPLATES={maze:'The Haunted Maze',memory:'Monster Memory',none:'Event Shop & Calendar'};
+let selectedEventId='';
+function eventText(s,max=240){return String(s??'').replace(/[<>\\]/g,'').slice(0,max);}
+function eventEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function eventValidDate(date){return typeof date==='string'&&date.length>=16&&Number.isFinite(new Date(date).getTime());}
+function eventNormalizeDefinition(raw,id){
+  if(!raw||typeof raw!=='object'||!/^[a-z0-9_-]{4,80}$/.test(id))return null;
+  const fallback=BASE_EVENT_DEFS[id],type=['maze','memory','none'].includes(raw.activity?.type)?raw.activity.type:'none';
+  if(!eventValidDate(raw.start)||!eventValidDate(raw.end)||new Date(raw.start)>=new Date(raw.end))return null;
+  const num=(value,defaultValue,min,max)=>Math.min(max,Math.max(min,Number.isFinite(Number(value))?Number(value):defaultValue));
+  const src=raw.activity||{};
+  const activity=type==='none'?{type:'none',name:'Event Shop'}:type==='memory'?{
+    type:'memory',name:eventText(src.name||'Monster Memory',80),size:4,pairReward:num(src.pairReward,2,0,10000),
+    maxFails:num(src.maxFails,3,1,20),failCooldownMs:num(src.failCooldownMs,180000,1000,86400000),clearCooldownMs:num(src.clearCooldownMs,3600000,1000,86400000),
+    memorySpecies:Array.isArray(src.memorySpecies)?src.memorySpecies.map(x=>eventText(x,80)).slice(0,30):[],
+    mysteryEggPool:Array.isArray(src.mysteryEggPool)?src.mysteryEggPool.map(x=>eventText(x,80)).slice(0,100):[],
+    mysteryEggWeights:src.mysteryEggWeights&&typeof src.mysteryEggWeights==='object'?Object.fromEntries(Object.entries(src.mysteryEggWeights).filter(([slug])=>Array.isArray(src.mysteryEggPool)&&src.mysteryEggPool.includes(slug)).map(([slug,weight])=>[eventText(slug,80),num(weight,1,1,10000)])): {},
+    eggPoolExplicit:src.eggPoolExplicit===true,
+    mysteryEggLabel:eventText(src.mysteryEggLabel||'Mystery Egg',80)
+  }:{type:'maze',name:eventText(src.name||'Event Maze',80),size:Math.round(num(src.size,7,3,15)),
+    startSteps:num(src.startSteps,10,0,100),maxSteps:num(src.maxSteps,20,1,100),regenAmount:num(src.regenAmount,5,1,100),regenMs:num(src.regenMs,3600000,60000,604800000),
+    eventSpecies:Array.isArray(src.eventSpecies)?src.eventSpecies.map(x=>eventText(x,80)).slice(0,100):[],
+    rareEggPool:Array.isArray(src.rareEggPool)?src.rareEggPool.map(x=>eventText(x,80)).slice(0,100):[],
+    rareEggWeights:src.rareEggWeights&&typeof src.rareEggWeights==='object'?Object.fromEntries(Object.entries(src.rareEggWeights).filter(([slug])=>Array.isArray(src.rareEggPool)&&src.rareEggPool.includes(slug)).map(([slug,weight])=>[eventText(slug,80),num(weight,1,1,10000)])): {},
+    encounterChance:num(src.encounterChance,.20,0,1),fangChance:num(src.fangChance,.15,0,1),tradeFindChance:num(src.tradeFindChance,.08,0,1),
+    rareItemChance:num(src.rareItemChance,.02,0,1),rareEggChance:num(src.rareEggChance,.005,0,1),mazeClearEggChance:num(src.mazeClearEggChance,.10,0,1)};
+  const shop=(Array.isArray(raw.shop)?raw.shop:[]).slice(0,80).map(entry=>{
+    if(!entry?.reward||!['item','scroll','egg','randomWildEgg'].includes(entry.reward.type))return null;
+    const reward={type:entry.reward.type};
+    if(reward.type==='egg')reward.slug=eventText(entry.reward.slug,90);
+    else if(reward.type==='item'||reward.type==='scroll'){reward.id=eventText(entry.reward.id,90);reward.qty=Math.round(num(entry.reward.qty,1,1,99));}
+    if((reward.type==='egg'&&!reward.slug)||(reward.id!==undefined&&!reward.id))return null;
+    return {id:eventText(entry.id,95),name:eventText(entry.name,100),category:eventText(entry.category||'Event Reward',70),
+      description:eventText(entry.description||'',240),cost:Math.round(num(entry.cost,1,0,100000000)),limit:entry.limit===null?null:Math.round(num(entry.limit,0,0,999999)),reward};
+  }).filter(x=>x&&x.id&&x.name);
+  return {id,family:eventText(raw.family||id,90),name:eventText(raw.name||'Unnamed Event',100),description:eventText(raw.description||'',500),
+    icon:eventText(raw.icon||'✦',8),spriteKey:eventText(raw.spriteKey||'event_currency_generic',90),available:raw.available===true,published:raw.published===true,
+    start:raw.start,end:raw.end,currency:{name:eventText(raw.currency?.name||'Tokens',60),icon:eventText(raw.currency?.icon||'◆',8),spriteKey:eventText(raw.currency?.spriteKey||'event_currency_generic',90)},
+    activity,shop,
+    ...(raw.calendar&&Number(raw.calendar.days)>0?{calendar:{start:String(raw.calendar.start||raw.start.slice(0,10)).slice(0,10),days:Math.round(num(raw.calendar.days,25,1,62))}}:{})};
+}
+function eventRegisterArtSprite(key,title='Event'){
+  if(!/^event_(?:art|coin)_[a-z0-9_-]{4,100}$/.test(String(key||'')))return;
+  if(!SPRITE_DEFS[key])SPRITE_DEFS[key]={name:`${String(title).slice(0,60)} Artwork`,category:'Seasonal Events',kind:'glyph',fallback:'✦'};
+  else SPRITE_DEFS[key].name=`${String(title).slice(0,60)} Artwork`;
+}
+function eventRegisterArtFromDefinitions(definitions){
+  for(const def of Object.values(definitions||{})){if(def?.spriteKey)eventRegisterArtSprite(def.spriteKey,def.name);if(def?.currency?.spriteKey)eventRegisterArtSprite(def.currency.spriteKey,def.currency.name||def.name);}
+}
+function normalizeEventDefinitions(){
+  const saved=state.eventDefinitions&&typeof state.eventDefinitions==='object'?state.eventDefinitions:{};
+  state.eventDefinitions={};
+  for(const id of Object.keys(EVENT_DEFS))if(!BASE_EVENT_DEFS[id])delete EVENT_DEFS[id];
+  for(const [id,def] of Object.entries(BASE_EVENT_DEFS))EVENT_DEFS[id]=JSON.parse(JSON.stringify(def));
+  for(const [id,raw] of Object.entries(saved)){
+    const def=eventNormalizeDefinition(raw,id);if(!def)continue;
+    state.eventDefinitions[id]=def;EVENT_DEFS[id]=def;eventRegisterArtSprite(def.spriteKey,def.name);eventRegisterArtSprite(def.currency?.spriteKey,def.currency?.name||def.name);
+    if(def.calendar&&!state.eventCalendars?.[id]){
+      state.eventCalendars=state.eventCalendars||{};
+      state.eventCalendars[id]={start:def.calendar.start,days:def.calendar.days,catchUp:true,entries:{}};
+    }
+  }
+}
+function eventActiveList(){return Object.values(EVENT_DEFS).filter(def=>eventIsActive(def)).sort((a,b)=>a.name.localeCompare(b.name));}
+function selectedEvent(){const list=eventActiveList();return list.find(def=>def.id===selectedEventId)||list[0]||null;}
+function eventActivitySupported(def){return ['maze','memory','none'].includes(def?.activity?.type||'none');}
+function eventRewardAvailable(reward){
+  if(!reward)return false;
+  if(reward.type==='item')return !!ITEM_SHOP.find(x=>x.id===reward.id);
+  if(reward.type==='scroll')return !!(state.attacks?.[reward.id]);
+  if(reward.type==='egg')return !!state.species?.[reward.slug]&&state.species[reward.slug].rarity!=='GOD';
+  if(reward.type==='randomWildEgg')return Object.values(state.species||{}).some(sp=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed&&sp.rarity!=='GOD');
+  return false;
+}
+
 const DEFAULT_EVENT_CALENDARS={
   winter_event_2026:{start:'2026-12-01',days:25,catchUp:true,entries:{1:{type:'eventCurrency',amount:50}}}
 };
@@ -2030,7 +2178,8 @@ function cloneEventCalendars(){return JSON.parse(JSON.stringify(DEFAULT_EVENT_CA
 function normalizeEventCalendars(){
   const defaults=cloneEventCalendars(),saved=state.eventCalendars&&typeof state.eventCalendars==='object'?state.eventCalendars:{};
   state.eventCalendars={...defaults,...saved};
-  for(const [eventId,base] of Object.entries(defaults)){
+  for(const [id,def] of Object.entries(EVENT_DEFS))if(def.calendar&&!state.eventCalendars[id])state.eventCalendars[id]={start:def.calendar.start,days:def.calendar.days,catchUp:true,entries:{}};
+  for(const [eventId,base] of Object.entries({...defaults,...Object.fromEntries(Object.entries(EVENT_DEFS).filter(([,d])=>d.calendar).map(([id,d])=>[id,{start:d.calendar.start,days:d.calendar.days,catchUp:true,entries:{}}]))})){
     const cur=state.eventCalendars[eventId]&&typeof state.eventCalendars[eventId]==='object'?state.eventCalendars[eventId]:{};
     cur.start=String(cur.start||base.start);const maxDays=Math.max(1,Number(base.days||31));cur.days=Math.max(1,Math.min(maxDays,Number(cur.days||base.days||maxDays)));cur.catchUp=cur.catchUp!==false;cur.entries=cur.entries&&typeof cur.entries==='object'?cur.entries:{};
     for(const key of Object.keys(cur.entries)){const day=Number(key);if(!Number.isFinite(day)||day<1||day>cur.days)delete cur.entries[key];}
@@ -2700,7 +2849,7 @@ function reconstructSelectedEgg(){
 function renderReconstructionAdmin(){
   if(!isAdminAccount())return;
   const species=document.getElementById('reconRecipeSpecies'),selectedSpecies=species.value;
-  species.innerHTML='<option value="">Select a monster…</option>'+Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${labSafe(slug)}">${labSafe(sp.name)}${sp.rarity==='Mythic'||sp.isMythic?' (Mythic)':''}${!sp.builtin&&!sp.published?' [Draft]':''}</option>`).join('');species.value=selectedSpecies;
+  species.innerHTML='<option value="">Select a monster…</option>'+Object.entries(state.species).filter(([,sp])=>sp.rarity!=='GOD').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${labSafe(slug)}">${labSafe(sp.name)}${sp.rarity==='Mythic'||sp.isMythic?' (Mythic)':''}${!sp.builtin&&!sp.published?' [Draft]':''}</option>`).join('');species.value=selectedSpecies;
   const items=Object.entries(TRADE_GOODS).filter(([,v])=>Number(v.sellValue)>=0).sort((a,b)=>a[1].name.localeCompare(b[1].name));
   const fullItems=[...items,...ITEM_SHOP.filter(x=>x.id).map(x=>[x.id,{name:x.name}]),['ancient_pages',{name:'Ancient Pages'}]];
   for(let i=0;i<3;i++){const select=document.getElementById(`reconItem${i}`),old=select.value;select.innerHTML='<option value="">Choose an item…</option>'+fullItems.map(([id,info])=>`<option value="${labSafe(id)}">${labSafe(info.name)}</option>`).join('');select.value=old;}
@@ -2742,6 +2891,7 @@ function defaultState(){
     accountLevel:1,accountXp:0,
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
+    dailyMysteryEggPurchasedOn:'',
     blackMarket:null,
     donations:null,donationSettings:defaultDonationSettings(),
     lottery:{nextFreeAt:0,lastResult:''},lotteryEggPool:[],ancientEggPool:[],relicJournal:{unlocked:false},artifactCatalog:defaultArtifactCatalog(),artifactJournal:{pending:[],owned:{},completedSets:0,lastMessage:''},
@@ -2750,7 +2900,7 @@ function defaultState(){
     liveContentRevision:'',liveContentManifest:{},
     landingFeed:cloneLandingFeed(),
     silverwindDialogue:cloneSilverwindDialogue(),
-    eventWallets:{},eventStates:{},eventOverrides:{},eventTestDays:{},eventCalendars:cloneEventCalendars(),discoveredSpecies:[],
+    eventWallets:{},eventStates:{},eventOverrides:{},eventTestDays:{},eventCalendars:cloneEventCalendars(),eventDefinitions:{},discoveredSpecies:[],
     chaosWeekKey:null,chaosElements:[],
     unlockedIncubators:1,incubators:Array.from({length:5},(_,i)=>({slot:i,eggId:null,finishAt:null})),
     nextMonsterNum:1,nextEggNum:1
@@ -2882,6 +3032,7 @@ function normalizeState(){
   state.species=state.species||{};
   state.attacks=state.attacks||{};
   state.inventory=state.inventory||{};
+  state.dailyMysteryEggPurchasedOn=typeof state.dailyMysteryEggPurchasedOn==='string'?state.dailyMysteryEggPurchasedOn:'';
   normalizeReconstructionState();
   state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
   state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
@@ -3074,6 +3225,7 @@ function normalizeState(){
   state.eventStates=state.eventStates||{};
   state.eventOverrides=state.eventOverrides||{};
   state.eventTestDays=state.eventTestDays||{};
+  normalizeEventDefinitions();
   normalizeEventCalendars();
   state.discoveredSpecies=Array.isArray(state.discoveredSpecies)?state.discoveredSpecies:[];
   for(const mon of state.monsters){if(mon?.slug&&!state.discoveredSpecies.includes(mon.slug))state.discoveredSpecies.push(mon.slug);}
@@ -3103,8 +3255,34 @@ function applyBuildMigrations(){
   }
 }
 let state=load();
+// Event Test Chamber: swap the live in-memory state for a disposable copy.
+let eventTestSession=null,eventTestEpoch=0;
+function eventTestBegin(){
+  if(!isAdminAccount()||eventTestSession)return;
+  const id=eventWActiveId()||document.getElementById('eventAdminSelect')?.value,def=EVENT_DEFS[id];
+  if(!def)return;
+  eventTestSession={liveState:state};eventTestEpoch++;
+  state=JSON.parse(JSON.stringify(state));
+  if(state.eventDefinitions[id])state.eventDefinitions[id].available=true;
+  else if(BASE_EVENT_DEFS[id])state.eventDefinitions[id]={...JSON.parse(JSON.stringify(BASE_EVENT_DEFS[id])),available:true,published:false};
+  normalizeEventDefinitions();
+  state.eventOverrides[id]='active';state.eventTestDays[id]=1;selectedEventId=id;
+  renderEventAdmin();renderEventTestStatus();renderAll();
+}
+function eventTestEnd(){
+  if(!eventTestSession)return;
+  eventTestEpoch++;state=eventTestSession.liveState;eventTestSession=null;
+  normalizeEventDefinitions();selectedEventId='';renderEventAdmin();renderEventTestStatus();renderAll();
+}
+function renderEventTestStatus(){
+  const isTest=!!eventTestSession,status=document.getElementById('eventWTestStatus');
+  if(status)status.textContent=isTest?'SANDBOX ACTIVE • Game actions are temporary and NOT saved. Exit to restore your exact previous game.':'Live save protected. Tester controls require Sandbox mode.';
+  const start=document.getElementById('eventWTestStart'),end=document.getElementById('eventWTestExit');
+  if(start)start.disabled=isTest;if(end)end.disabled=!isTest;
+}
+
 normalizeState();
-function save(){localStorage.setItem('monsterGame_v06',JSON.stringify(state));}
+function save(){if(eventTestSession)return;localStorage.setItem('monsterGame_v06',JSON.stringify(state));}
 function isAdminAccount(){return state.account?.role==='admin';}
 function starterSafeTrait(){const pool=Object.entries(TRAITS).filter(([name])=>!['Pristine','Legendary','Awful'].includes(name));const total=pool.reduce((sum,[,t])=>sum+t.weight,0);let roll=Math.random()*total;for(const [name,t] of pool){roll-=t.weight;if(roll<=0)return name;}return 'Boring';}
 function starterSpeciesPool(){return Object.entries(state.species).filter(([slug,sp])=>!STARTER_SLUGS.includes(slug)&&!sp.isCrossbreed&&!sp.seasonalEventFamily&&sp.obtain==='Random Battle Reward'&&!/event|halloween|haunted/i.test(String(sp.obtain||'')));}
@@ -3321,7 +3499,7 @@ function eventStatusLabel(def){
   if(override==='active')return 'ACTIVE • ADMIN OVERRIDE';
   if(override==='inactive')return 'INACTIVE • ADMIN OVERRIDE';
   const status=eventDateStatus(def);
-  if(status==='active')return def.available?'ACTIVE':'PLANNED';
+  if(status==='active')return def.available?'ACTIVE':'DRAFT / DISABLED';
   if(status==='upcoming')return def.available?'UPCOMING':'PLANNED';
   return 'ENDED';
 }
@@ -3424,14 +3602,15 @@ function calendarRewardIcon(reward,def=null){
 }
 function grantEventCalendarReward(def,reward){
   if(!reward)return {ok:false,label:'No prize configured'};
+  if(!['money','eventCurrency','item','egg','monster'].includes(reward.type))return {ok:false,label:'Unsupported prize'};
   if(reward.type==='money'){const amount=Math.max(0,Number(reward.amount||0));state.currency+=amount;return {ok:true,label:`${money(amount)} currency`};}
   if(reward.type==='eventCurrency'){const amount=Math.max(0,Number(reward.amount||0));addEventCurrency(def,amount);return {ok:true,label:`${amount} ${def.currency.name}`};}
   if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);if(!item)return {ok:false,label:'Missing item'};const qty=Math.max(1,Number(reward.qty||1));state.inventory[reward.id]=(state.inventory[reward.id]||0)+qty;return {ok:true,label:`${item.name} ×${qty}`};}
   if(reward.type==='egg'){
-    const sp=state.species[reward.slug];if(!sp)return {ok:false,label:'Missing egg species'};const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug:reward.slug,speciesName:sp.name,displayName:`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-calendar:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {ok:true,label:`${sp.name} Egg`};
+    const sp=state.species[reward.slug];if(!sp||sp.rarity==='GOD')return {ok:false,label:'Invalid event egg species'};const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug:reward.slug,speciesName:sp.name,displayName:`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-calendar:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {ok:true,label:`${sp.name} Egg`};
   }
   if(reward.type==='monster'){
-    const sp=state.species[reward.slug];if(!sp)return {ok:false,label:'Missing monster species'};if(!collectionHasOpenSlot())return {ok:false,label:'No open Collection Pen slot'};
+    const sp=state.species[reward.slug];if(!sp||sp.rarity==='GOD')return {ok:false,label:'Invalid event monster species'};if(!collectionHasOpenSlot())return {ok:false,label:'No open Collection Pen slot'};
     const id=uid('M',state.nextMonsterNum++),mon={id,slug:reward.slug,level:1,xp:0,gender:hatchGender(),potential:1,trait:rollTrait(),nickname:'',attacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:false,faintedUntil:0,parents:null,eventReward:def.id};
     state.monsters.push(mon);placeMonsterInCollection(id);if(!state.discoveredSpecies.includes(reward.slug))state.discoveredSpecies.push(reward.slug);return {ok:true,label:sp.name};
   }
@@ -3442,7 +3621,7 @@ function claimEventCalendarDay(eventId,day){
   const reward=cfg.entries?.[day];if(!reward||es.calendarClaims[day])return;
   const current=eventCalendarDay(def),unlocked=cfg.catchUp?day<=current:day===current;if(!unlocked)return;
   const result=grantEventCalendarReward(def,reward);if(!result.ok){alert(result.label);return;}
-  es.calendarClaims[day]={claimedAt:Date.now(),label:result.label};es.lastMessage=`Winter Calendar Day ${day}: received ${result.label}.`;save();renderAll();
+  es.calendarClaims[day]={claimedAt:Date.now(),label:result.label};es.lastMessage=`${def.name} Day ${day}: received ${result.label}.`;save();renderAll();
 }
 function renderDailyEventCalendar(def){
   const cfg=eventDailyCalendar(def);if(!cfg)return '';
@@ -3452,7 +3631,7 @@ function renderDailyEventCalendar(def){
     const cls=['event-day-tile',claimed?'claimed':'',unlocked&&reward&&!claimed?'claimable':'',future?'future':'',!reward?'unconfigured':''].filter(Boolean).join(' ');
     return `<button class="${cls}" type="button" data-event-calendar-claim="${day}" ${!unlocked||!reward||claimed?'disabled':''}><span class="event-day-number">Day ${day}</span><span class="event-day-prize">${calendarRewardIcon(reward,def)}<small>${claimed?'CLAIMED':calendarRewardLabel(reward,def)}</small></span></button>`;
   }).join('');
-  return `<section class="event-daily-calendar"><div class="event-section-heading"><div><div class="eyebrow">DAILY GIFTS</div><h3>Winter Gift Calendar</h3><p>${cfg.catchUp?'Unlocked days remain claimable until the event ends.':'Only today’s gift can be claimed.'}</p></div><div class="calendar-day-marker"><span>Current Day</span><strong>${current||'—'} / ${cfg.days}</strong></div></div><div class="event-day-grid">${cells}</div></section>`;
+  return `<section class="event-daily-calendar"><div class="event-section-heading"><div><div class="eyebrow">DAILY GIFTS</div><h3>${eventEscape(def.name)} Gift Calendar</h3><p>${cfg.catchUp?'Unlocked days remain claimable until the event ends.':'Only today’s gift can be claimed.'}</p></div><div class="calendar-day-marker"><span>Current Day</span><strong>${current||'—'} / ${cfg.days}</strong></div></div><div class="event-day-grid">${cells}</div></section>`;
 }
 function memorySpeciesPool(def){
   const configured=(def?.activity?.memorySpecies||[]).filter(slug=>state.species[slug]),seen=new Set(configured),pool=[...configured];
@@ -3471,43 +3650,60 @@ function memoryCooldownText(memory){const ms=Math.max(0,Number(memory?.cooldownU
 function winterMysteryEggSpecies(def){
   const pool=[],seen=new Set();
   for(const slug of def?.activity?.mysteryEggPool||[]){if(state.species[slug]&&!seen.has(slug)){seen.add(slug);pool.push(slug);}}
-  for(const [slug,sp] of Object.entries(state.species)){if(sp.obtain==='Winter Mystery Egg'&&!sp.isCrossbreed&&!seen.has(slug)){seen.add(slug);pool.push(slug);}}
+  if(!def?.activity?.eggPoolExplicit)for(const [slug,sp] of Object.entries(state.species)){if(def?.family==='winter_event'&&sp.obtain==='Winter Mystery Egg'&&!sp.isCrossbreed&&!seen.has(slug)){seen.add(slug);pool.push(slug);}}
   return pool;
 }
+function eventWeightedSpeciesPick(pool,weights={}){
+  const options=pool.filter(slug=>state.species[slug]&&state.species[slug].rarity!=='GOD');
+  if(!options.length)return null;
+  const total=options.reduce((n,slug)=>n+Math.max(1,Math.min(10000,Number(weights[slug])||1)),0);
+  let roll=Math.random()*total;
+  for(const slug of options){roll-=Math.max(1,Math.min(10000,Number(weights[slug])||1));if(roll<0)return slug;}
+  return options[options.length-1];
+}
 function grantWinterMysteryEgg(def){
-  let pool=winterMysteryEggSpecies(def);if(!pool.length)pool=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed).map(([slug])=>slug);if(!pool.length)return null;
-  const slug=randomChoice(pool),sp=state.species[slug],id=uid('E',state.nextEggNum++),label=def.activity?.mysteryEggLabel||'Winter Mystery Egg';state.eggs.push({id,slug,speciesName:sp.name,displayName:label,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-memory:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {id,slug,name:sp.name,label};
+  let pool=winterMysteryEggSpecies(def);if(!pool.length)pool=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed&&sp.rarity!=='GOD').map(([slug])=>slug);if(!pool.length)return null;
+  const slug=eventWeightedSpeciesPick(pool,def.activity?.mysteryEggWeights||{});if(!slug)return null;const sp=state.species[slug],id=uid('E',state.nextEggNum++),label=def.activity?.mysteryEggLabel||'Winter Mystery Egg';state.eggs.push({id,slug,speciesName:sp.name,displayName:label,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-memory:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {id,slug,name:sp.name,label};
 }
 function resetEventMemory(def,message='A fresh board has been shuffled.') {const es=eventStateFor(def);es.memory=freshMemoryBoard(def);es.memory.message=message;}
 function flipEventMemoryCard(eventId,index){
   const def=EVENT_DEFS[eventId],a=def?.activity,m=ensureMemoryGame(def);index=Number(index);if(!def||a?.type!=='memory'||!m||Date.now()<Number(m.cooldownUntil||0)||m.completed||m.open.length>=2||m.matched.includes(index)||m.open.includes(index)||!m.board[index])return;
-  m.open.push(index);if(m.open.length<2){save();renderAll();return;}renderAll();
+  m.open.push(index);
+  const activeCard=document.querySelector(`#eventContent [data-memory-card="${index}"]`);
+  if(activeCard)activeCard.classList.add('face-up');
+  if(m.open.length<2){save();return;}save();
   const [first,second]=m.open,matched=m.board[first]===m.board[second];
+  const testEpochAtFlip=eventTestEpoch;
   setTimeout(()=>{
+    if(testEpochAtFlip!==eventTestEpoch)return;
     const live=ensureMemoryGame(def);if(!live||live.open[0]!==first||live.open[1]!==second)return;
     if(matched){
       live.matched.push(first,second);live.open=[];const reward=Math.max(0,Number(a.pairReward||0));if(reward)addEventCurrency(def,reward);live.message=`Pair matched! +${reward} ${def.currency.name}.`;
       if(live.matched.length>=live.board.length){const egg=grantWinterMysteryEgg(def);live.completed=true;live.cooldownReason='complete';live.cooldownUntil=Date.now()+Math.max(1000,Number(a.clearCooldownMs||3600000));live.message=`Board complete! ${egg?`${egg.label} added to your Eggs.`:'Mystery Egg reward could not be created.'} A new board unlocks in one hour.`;}
     }else{
+      // Allow the face-down transition on the same cards before the wider page redraw.
+      for(const i of [first,second])document.querySelector(`#eventContent [data-memory-card="${i}"]`)?.classList.remove('face-up');
       live.open=[];live.fails++;const max=Math.max(1,Number(a.maxFails||3));if(live.fails>=max){live.cooldownReason='fails';live.cooldownUntil=Date.now()+Math.max(1000,Number(a.failCooldownMs||180000));live.message=`Three failed matches. The board is frozen for ${Math.max(1,Math.round(Number(a.failCooldownMs||180000)/60000))} minutes.`;}else live.message=`Not a match. ${max-live.fails} failed match${max-live.fails===1?'':'es'} remaining.`;
     }
-    save();renderAll();
+    save();
+    if(!matched)setTimeout(()=>renderAll(),190);
+    else renderAll();
   },650);
 }
 async function renderMemoryEventPage(host,def){
   const es=eventStateFor(def),a=def.activity,m=ensureMemoryGame(def),cooling=Date.now()<Number(m.cooldownUntil||0),matched=new Set(m.matched||[]),open=new Set(m.open||[]);
-  const cards=(m.board||[]).map((slug,i)=>{const face=matched.has(i)||open.has(i);return `<button class="memory-card ${face?'face-up':''} ${matched.has(i)?'matched':''}" type="button" data-memory-card="${i}" ${cooling||m.completed||matched.has(i)?'disabled':''}><span class="memory-card-back">❄</span><span class="memory-card-face"><img data-memory-slug="${slug}" alt="${state.species[slug]?.name||'Monster'}"><small>${state.species[slug]?.name||slug}</small></span></button>`;}).join('');
+  const cards=(m.board||[]).map((slug,i)=>{const face=matched.has(i)||open.has(i);return `<button class="memory-card ${face?'face-up':''} ${matched.has(i)?'matched':''}" type="button" data-memory-card="${i}" ${cooling||m.completed||matched.has(i)?'disabled':''}><span class="memory-card-back">${eventEscape(def.icon||'❄')}</span><span class="memory-card-face"><img data-memory-slug="${slug}" alt="${state.species[slug]?.name||'Monster'}"><small>${state.species[slug]?.name||slug}</small></span></button>`;}).join('');
   const failPips=Array.from({length:Math.max(1,Number(a.maxFails||3))},(_,i)=>`<span class="memory-fail-pip ${i<m.fails?'spent':''}">✕</span>`).join('');
   const shopItems=eventShopItems(def);
   const shop=(await Promise.all(shopItems.map(async item=>{const bought=Number(es.purchases[item.id]||0),limitText=item.limit?`${bought}/${item.limit} purchased`:'Unlimited',sold=item.limit&&bought>=item.limit,afford=eventCurrency(def)>=item.cost,visual=await eventShopRewardVisual(item);return `<div class="event-shop-card"><div class="event-shop-icon">${visual}</div><span class="shop-category">${item.category}</span><h4>${item.name}</h4><p>${item.description}</p><div class="event-shop-bottom"><span class="event-price">${eventCurrencySpriteMarkup(def,'event-currency-inline')} <strong>${item.cost}</strong></span><small>${limitText}</small><button data-event-buy="${item.id}" class="primary small" type="button" ${sold||!afford?'disabled':''}>${sold?'Sold Out':'Buy'}</button></div></div>`;}))).join('');
   const mysteryCount=winterMysteryEggSpecies(def).length;
   host.innerHTML=`<div class="event-hero winter-event-hero"><div><div class="eyebrow event-eyebrow">ACTIVE EVENT • ${glyphSpriteMarkup(def.spriteKey||'winter_event',def.icon||'❄️','event-title-sprite')}</div><h2>${def.name}</h2><p>${def.description}</p><div class="event-countdown" id="eventCountdown">${eventCountdown(def)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(def,'event-wallet-sprite')}</span><div><small>${def.currency.name}</small><strong>${eventCurrency(def)}</strong></div></div></div>
     ${renderDailyEventCalendar(def)}
-    <div class="event-columns winter-memory-layout"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT MINI-GAME</div><h3>${a.name}</h3><p>Match all eight monster pairs. Each pair earns ${a.pairReward} ${def.currency.name}; three misses trigger a 3-minute cooldown.</p></div><div class="memory-fail-bank"><span>Failed Matches</span><div>${failPips}</div><small>${m.fails} / ${a.maxFails}</small></div></div>
+    <div class="event-columns winter-memory-layout"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT MINI-GAME</div><h3>${a.name}</h3><p>Match all eight monster pairs. Each pair earns ${a.pairReward} ${def.currency.name}; ${a.maxFails} misses trigger a ${Math.max(1,Math.round(Number(a.failCooldownMs||180000)/60000))}-minute cooldown.</p></div><div class="memory-fail-bank"><span>Failed Matches</span><div>${failPips}</div><small>${m.fails} / ${a.maxFails}</small></div></div>
       <div class="memory-board-wrap"><div class="memory-board">${cards}</div>${cooling?`<div class="memory-cooldown"><strong>${m.cooldownReason==='complete'?'Board Complete':'Board Frozen'}</strong><span>${memoryCooldownText(m)}</span><small>${m.cooldownReason==='complete'?'A new set unlocks after the one-hour completion cooldown.':'A new set shuffles after the 3-minute cooldown.'}</small></div>`:''}</div>
-      <div class="memory-status"><strong>${m.completed?'WINTER SET COMPLETE':cooling?'COOLDOWN ACTIVE':'MATCH THE MONSTERS'}</strong><p>${m.message||'Find all eight matching monster pairs.'}</p></div>
-    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${a.mysteryEggLabel||'Winter Mystery Egg'}</h3><p>Clear all eight pairs before three failed matches to earn the seasonal Mystery Egg. Completing a set starts a one-hour cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('winter_mystery_egg','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
-    <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">WINTER SHOP</div><h3>Snowflake Exchange</h3><p>Spend Snowflakes earned from Winter Memory and seasonal rewards on exclusive Winter stock.</p></div></div><div class="event-shop-grid">${shop||'<div class="event-dev-note">No Winter Shop stock is registered yet.</div>'}</div></section>`;
+      <div class="memory-status"><strong>${m.completed?'MEMORY SET COMPLETE':cooling?'COOLDOWN ACTIVE':'MATCH THE MONSTERS'}</strong><p>${m.message||'Find all eight matching monster pairs.'}</p></div>
+    </section><aside class="event-side-stack"><div class="event-calendar-card"><div class="eyebrow">COMPLETION REWARD</div><h3>${mysteryCount?eventEscape(a.mysteryEggLabel||'Mystery Egg'):'Memory Mastery'}</h3><p>${mysteryCount?'Clear all eight pairs to earn an exclusive Mystery Egg.':'Clear all eight pairs to earn event currency.'} A completed set starts a cooldown.</p><div class="winter-egg-placeholder">${iconMarkup('winter_mystery_egg','sheet-icon winter-egg-icon')}<span>${mysteryCount===1?'1 exclusive species':`${mysteryCount} possible species`}</span></div></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
+    <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">WINTER SHOP</div><h3>${eventEscape(def.currency.name)} Exchange</h3><p>Spend your event currency on special rewards.</p></div></div><div class="event-shop-grid">${shop||'<div class="event-dev-note">No Winter Shop stock is registered yet.</div>'}</div></section>`;
   host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
   host.querySelectorAll('[data-memory-card]').forEach(btn=>btn.addEventListener('click',()=>flipEventMemoryCard(def.id,Number(btn.dataset.memoryCard))));
   host.querySelectorAll('[data-event-buy]').forEach(btn=>btn.addEventListener('click',()=>buyEventShopItem(def.id,btn.dataset.eventBuy)));
@@ -3554,13 +3750,14 @@ async function eventShopRewardVisual(item){
   if(r.type==='egg'&&r.slug)return eggVisual(r.slug,'event-shop-icon-sprite','event-shop');
   return eventRewardSpriteMarkup(item);
 }
-async function renderEventPage(){
+async function renderEventDetail(){
   const host=document.getElementById('eventContent');if(!host)return;
-  const active=activeEvent(),badge=document.getElementById('eventBadge');if(badge){badge.textContent=active?'LIVE':'—';badge.classList.toggle('event-live',!!active);}
+  const active=selectedEvent(),badge=document.getElementById('eventBadge');if(badge){badge.textContent=active?'LIVE':'—';badge.classList.toggle('event-live',!!active);}
   if(!active){
     host.innerHTML=`<div class="page-heading"><div class="eyebrow">SEASONAL EVENTS</div><h2>No active event</h2><p>The event framework is ready. Check the calendar for upcoming seasonal windows.</p></div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Upcoming & past events</h3>${renderEventCalendarHTML()}</div>`;hydrateSprites(host);return;
   }
   if(active.activity?.type==='memory'){await renderMemoryEventPage(host,active);return;}
+  if(active.activity?.type==='none'){await renderEventShopOnly(host,active);return;}
   const es=eventStateFor(active);refreshMazeSteps(active);const maze=ensureMaze(active),a=active.activity,activeMon=activeMonster(),healthy=activeMon&&!isMonsterFainted(activeMon);
   const dirs=[['N','↑'],['W','←'],['S','↓'],['E','→']];
   const movement=dirs.map(([d,g])=>`<button class="maze-dir ${d}" data-maze-move="${d}" type="button" ${maze.completed||!healthy||es.steps<=0||!mazeCanMove(maze,d)?'disabled':''}>${g}</button>`).join('');
@@ -3571,8 +3768,8 @@ async function renderEventPage(){
     <div class="event-columns"><section class="event-activity-card"><div class="event-section-heading"><div><div class="eyebrow">EVENT ACTIVITY</div><h3>${a.name}</h3><p>Escape a newly generated maze. Every successful move costs one Step and may uncover loot or an Event monster encounter.</p></div><div class="maze-step-bank"><span>Steps</span><strong>${es.steps} / ${a.maxSteps}</strong><small id="mazeRegenTimer">${mazeRegenText(active)}</small></div></div>
       <div class="maze-play-layout"><div>${renderMazeGrid(active,maze)}<div class="maze-legend"><span><b>◆</b> You</span><span>🚪 Exit</span><span>Fog hides unexplored halls</span></div></div><div class="maze-side"><div class="maze-control-pad">${movement}</div><div class="maze-status"><strong>${maze.completed?'ESCAPED!':healthy?'Find the exit.':'Healthy Active Monster required.'}</strong><p id="mazeMessage">${es.lastMessage||'The walls groan softly. Pick a direction.'}</p></div>${maze.completed?'<button id="newMazeAfterEscape" class="primary" type="button">Enter New Maze</button>':'<button id="abandonMaze" class="ghost small" type="button">Abandon & Generate New Maze</button>'}<div class="maze-run-stats"><span>Escapes</span><strong>${es.escapes}</strong></div>${halloweenMazeEncounterPool(active).length?`<div class="event-dev-note ready">${halloweenMazeEncounterPool(active).length} Event monster${halloweenMazeEncounterPool(active).length===1?'':'s'} registered in the maze.</div>`:'<div class="event-dev-note">No published monsters are currently tagged Halloween Maze Encounter.</div>'}</div></div>
     </section>
-    <aside class="event-side-stack"><div class="event-exchange-card"><div class="eyebrow">MAZE FINDS</div><h3>Exchange for Fangs</h3><p>These event finds are kept separately from normal Field Finds.</p>${finds}</div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
-    <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">EVENT SHOP</div><h3>Fang Exchange</h3><p>Spend Fangs gathered in the Haunted Maze on seasonal supplies and exclusive Halloween rewards.</p></div></div><div class="event-shop-grid">${shop}</div></section>`;
+    <aside class="event-side-stack"><div class="event-exchange-card"><div class="eyebrow">MAZE FINDS</div><h3>Exchange for ${eventEscape(active.currency.name)}</h3><p>These event finds are kept separately from normal Field Finds.</p>${finds}</div><div class="event-calendar-card"><div class="eyebrow">EVENT CALENDAR</div><h3>Seasonal schedule</h3>${renderEventCalendarHTML()}</div></aside></div>
+    <section class="event-shop-section"><div class="event-section-heading"><div><div class="eyebrow">EVENT SHOP</div><h3>${eventEscape(active.currency.name)} Exchange</h3><p>Spend event currency on special rewards.</p></div></div><div class="event-shop-grid">${shop}</div></section>`;
   host.querySelectorAll('[data-maze-move]').forEach(btn=>btn.addEventListener('click',()=>moveEventMaze(btn.dataset.mazeMove)));
   host.querySelectorAll('[data-exchange-one]').forEach(btn=>btn.addEventListener('click',()=>exchangeEventFind(active.id,btn.dataset.exchangeOne,false)));
   host.querySelectorAll('[data-exchange-all]').forEach(btn=>btn.addEventListener('click',()=>exchangeEventFind(active.id,btn.dataset.exchangeAll,true)));
@@ -3583,13 +3780,13 @@ async function renderEventPage(){
 }
 function exchangeEventFind(eventId,findId,all){
   const def=EVENT_DEFS[eventId],es=eventStateFor(def),info=EVENT_TRADE_GOODS[findId],qty=Number(es.finds[findId]||0);if(!def||!info||qty<1)return;
-  const count=all?qty:1;es.finds[findId]-=count;addEventCurrency(def,count*info.fangValue);es.lastMessage=`Exchanged ${info.name} ×${count} for ${count*info.fangValue} Fangs.`;save();renderAll();
+  const count=all?qty:1;es.finds[findId]-=count;addEventCurrency(def,count*info.fangValue);es.lastMessage=`Exchanged ${info.name} ×${count} for ${count*info.fangValue} ${def.currency.name}.`;save();renderAll();
 }
 function grantEventShopReward(def,reward){
   if(reward.type==='item'){state.inventory[reward.id]=(state.inventory[reward.id]||0)+Number(reward.qty||1);return eventShopRewardLabel({reward});}
   if(reward.type==='scroll'){state.inventory[`scroll:${reward.id}`]=(state.inventory[`scroll:${reward.id}`]||0)+Number(reward.qty||1);return eventShopRewardLabel({reward});}
   if(reward.type==='randomWildEgg'){
-    const pool=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed);if(!pool.length)return 'No eligible egg';const [slug,sp]=randomChoice(pool),id=uid('E',state.nextEggNum++);state.eggs.push({id,slug,speciesName:sp.name,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'event-shop',createdAt:Date.now(),status:'waiting',catalystUsed:false});return `${sp.name} Egg`;
+    const pool=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Random Battle Reward'&&!sp.isCrossbreed&&sp.rarity!=='GOD');if(!pool.length)return 'No eligible egg';const [slug,sp]=randomChoice(pool),id=uid('E',state.nextEggNum++);state.eggs.push({id,slug,speciesName:sp.name,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'event-shop',createdAt:Date.now(),status:'waiting',catalystUsed:false});return `${sp.name} Egg`;
   }
   if(reward.type==='egg'){
     const sp=state.species[reward.slug];if(!sp)return 'Missing event egg species';const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug:reward.slug,speciesName:sp.name,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'event-shop',createdAt:Date.now(),status:'waiting',catalystUsed:false});return `${sp.name} Egg`;
@@ -3597,19 +3794,19 @@ function grantEventShopReward(def,reward){
   return 'Event Reward';
 }
 function buyEventShopItem(eventId,itemId){
-  const def=EVENT_DEFS[eventId],es=eventStateFor(def),item=eventShopItems(def).find(x=>x.id===itemId);if(!def||!item)return;const bought=Number(es.purchases[item.id]||0);if(item.limit&&bought>=item.limit)return;if(eventCurrency(def)<item.cost)return;
+  const def=EVENT_DEFS[eventId],es=eventStateFor(def),item=eventShopItems(def).find(x=>x.id===itemId);if(!def||!item||!eventIsActive(def)||!eventRewardAvailable(item.reward))return;const bought=Number(es.purchases[item.id]||0);if(item.limit&&bought>=item.limit)return;if(eventCurrency(def)<item.cost)return;
   if(!confirm(`Spend ${item.cost} ${def.currency.name} on ${item.name}?`))return;
   addEventCurrency(def,-item.cost);es.purchases[item.id]=bought+1;const rewardName=grantEventShopReward(def,item.reward);es.lastMessage=`Bought ${item.name}. Received ${rewardName}.`;save();renderAll();
 }
 function grantRareEventEgg(def){
   const pool=(def?.activity?.rareEggPool||[]).filter(slug=>state.species[slug]);
   if(!pool.length)return null;
-  const slug=randomChoice(pool),sp=state.species[slug],id=uid('E',state.nextEggNum++);
+  const slug=eventWeightedSpeciesPick(pool,def.activity?.rareEggWeights||{});if(!slug)return null;const sp=state.species[slug],id=uid('E',state.nextEggNum++);
   state.eggs.push({id,slug,speciesName:sp.name,displayName:'Haunted Event Egg',motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'event-maze',createdAt:Date.now(),status:'waiting',catalystUsed:false});
   return {slug,name:sp.name,id};
 }
 function halloweenMazeEncounterPool(def){
-  const tagged=Object.entries(state.species||{}).filter(([,sp])=>sp&&!sp.isCrossbreed&&sp.obtain==='Halloween Maze Encounter'&&(sp.builtin||sp.published!==false)).map(([slug])=>slug);
+  const tagged=Object.entries(state.species||{}).filter(([,sp])=>def?.family==='spooky_halloween'&&sp&&!sp.isCrossbreed&&sp.obtain==='Halloween Maze Encounter'&&(sp.builtin||sp.published!==false)).map(([slug])=>slug);
   if(tagged.length)return tagged;
   return (def?.activity?.eventSpecies||[]).filter(slug=>state.species[slug]);
 }
@@ -3618,7 +3815,7 @@ function halloweenMazeEncounterWeight(def,slug){
   return Math.max(.001,Number(weights[slug]??a.defaultEventSpeciesWeight??40));
 }
 async function moveEventMaze(dir){
-  const def=activeEvent();if(!def||def.activity?.type!=='maze')return;const es=eventStateFor(def);refreshMazeSteps(def);const maze=ensureMaze(def),mon=activeMonster();if(maze.completed||es.steps<=0||!mon||isMonsterFainted(mon)||!mazeCanMove(maze,dir))return;
+  const def=selectedEvent();if(!def||def.activity?.type!=='maze')return;const es=eventStateFor(def);refreshMazeSteps(def);const maze=ensureMaze(def),mon=activeMonster();if(maze.completed||es.steps<=0||!mon||isMonsterFainted(mon)||!mazeCanMove(maze,dir))return;
   if(es.steps>=def.activity.maxSteps)es.stepUpdatedAt=Date.now();
   es.steps--;maze.pos=mazeDestination(maze,dir);if(!maze.visited.includes(maze.pos))maze.visited.push(maze.pos);revealMazeAround(maze);
   if(maze.pos===maze.exit){
@@ -3628,7 +3825,7 @@ async function moveEventMaze(dir){
     const levelRewards=grantAccountXP(25);
     const clearEggChance=Math.max(0,Math.min(1,Number(def.activity?.mazeClearEggChance||0)));
     const clearEgg=Math.random()<clearEggChance?grantRareEventEgg(def):null;
-    es.lastMessage=`You escaped the Haunted Maze! +10 Fangs and +25 Account XP.${clearEgg?' BONUS: Haunted Event Egg!':''}${levelRewards.length?' '+levelRewards.join(' • '):''}`;
+    es.lastMessage=`You escaped ${def.activity.name}! +10 ${def.currency.name} and +25 Account XP.${clearEgg?' BONUS: Haunted Event Egg!':''}${levelRewards.length?' '+levelRewards.join(' • '):''}`;
     save();renderAll();return;
   }
   const a=def.activity,roll=Math.random(),pool=halloweenMazeEncounterPool(def);
@@ -3644,20 +3841,72 @@ async function moveEventMaze(dir){
   let edge=eggChance;
   if(roll<edge){
     const egg=grantRareEventEgg(def);
-    es.lastMessage=egg?`Rare find! You discovered a Haunted Event Egg hidden in the maze.`:'A strange abandoned nest is empty.';
+    es.lastMessage=egg?`Rare find! You discovered an Event Egg hidden in the maze.`:'A strange abandoned nest is empty.';
   }else if(roll<(edge+=encounterChance)){
     if(pool.length){const slug=chooseEventSpecies();prepareEventBattle(slug,def.id);es.lastMessage=`A ${battleSession?.enemy?.isPrismatic?'Prismatic ':''}${state.species[slug].name} blocks the corridor!`;save();battleSession.started=true;await enterBattleScene({event:true});return;}
     es.lastMessage='Something scratches behind the walls... but no Event monsters have been registered yet.';
-  }else if(roll<(edge+=fangChance)){const amount=randomInt(1,3);addEventCurrency(def,amount);es.lastMessage=`You find ${amount} Fang${amount===1?'':'s'} wedged between the stones.`;
+  }else if(roll<(edge+=fangChance)){const amount=randomInt(1,3);addEventCurrency(def,amount);es.lastMessage=`You find ${amount} ${def.currency.name} wedged between the stones.`;
   }else if(roll<(edge+=tradeChance)){const id=randomChoice(Object.keys(EVENT_TRADE_GOODS)),info=EVENT_TRADE_GOODS[id];es.finds[id]=(es.finds[id]||0)+1;es.lastMessage=`You found ${info.name}. It can be exchanged for ${info.fangValue} Fang${info.fangValue===1?'':'s'}.`;
   }else if(roll<(edge+=rareItemChance)){const id=Math.random()<.7?'heal_gel':'incu_catalyst',item=ITEM_SHOP.find(x=>x.id===id);state.inventory[id]=(state.inventory[id]||0)+1;es.lastMessage=`Rare find! You recovered ${item.name} ×1.`;
   }else es.lastMessage=randomChoice(['The corridor is empty, but the walls seem to breathe.','A cold draft curls around the next corner. Nothing else moves.','You hear distant footsteps. They stop when you stop.','Dust stirs across the floor. The path remains quiet.']);
   save();renderAll();
 }
+
+async function renderEventShopOnly(host,def){
+  const es=eventStateFor(def),items=eventShopItems(def),shop=(await Promise.all(items.map(async item=>{
+    const bought=Number(es.purchases[item.id]||0),sold=item.limit&&bought>=item.limit,afford=eventCurrency(def)>=item.cost;
+    return `<div class="event-shop-card"><div class="event-shop-icon">${await eventShopRewardVisual(item)}</div><h4>${eventEscape(item.name)}</h4><p>${eventEscape(item.description)}</p><div class="event-shop-bottom"><strong>${item.cost} ${eventEscape(def.currency.name)}</strong><button class="primary small" type="button" data-event-buy="${eventEscape(item.id)}" ${sold||!afford||!eventRewardAvailable(item.reward)?'disabled':''}>${sold?'Sold Out':'Buy'}</button></div></div>`;
+  }))).join('');
+  host.innerHTML=`<div class="event-hero"><div><div class="eyebrow">ACTIVE EVENT</div><h2>${eventEscape(def.name)}</h2><p>${eventEscape(def.description)}</p><div class="event-countdown">${eventCountdown(def)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(def,'event-wallet-sprite')}</span><div><small>${eventEscape(def.currency.name)}</small><strong>${eventCurrency(def)}</strong></div></div></div>${renderDailyEventCalendar(def)}<section class="event-shop-section"><div class="event-section-heading"><h3>Event Shop</h3></div><div class="event-shop-grid">${shop||'<p>No stock yet.</p>'}</div></section>`;
+  host.querySelectorAll('[data-event-buy]').forEach(btn=>btn.addEventListener('click',()=>buyEventShopItem(def.id,btn.dataset.eventBuy)));
+  host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
+  hydrateSprites(host);
+}
+async function renderEventPage(){
+  await renderEventDetail();
+  const host=document.getElementById('eventContent');if(!host)return;
+  const live=eventActiveList(),selected=selectedEvent();
+  if(live.length>1){
+    const nav=document.createElement('nav');nav.className='event-multi-selector';nav.setAttribute('aria-label','Choose active event');
+    nav.innerHTML=`<div class="eyebrow">ACTIVE FESTIVALS • SELECT AN EVENT</div><div class="event-multi-buttons">${live.map(def=>`<button type="button" class="${def.id===selected?.id?'selected':''}" data-open-event="${eventEscape(def.id)}">${eventEscape(def.icon)} ${eventEscape(def.name)}</button>`).join('')}</div>`;
+    host.prepend(nav);
+    nav.querySelectorAll('[data-open-event]').forEach(btn=>btn.addEventListener('click',()=>{selectedEventId=btn.dataset.openEvent;renderEventPage();}));
+  }
+}
+
 function renderEventCalendarAdminList(def){
-  const host=document.getElementById('eventCalendarAdminList'),cfg=eventDailyCalendar(def);if(!host||!cfg){if(host)host.innerHTML='';return;}
-  host.innerHTML=Array.from({length:cfg.days},(_,i)=>i+1).map(day=>{const r=cfg.entries?.[day];return `<button type="button" class="event-calendar-admin-row ${r?'configured':''}" data-calendar-edit-day="${day}"><strong>Day ${day}</strong><span>${calendarRewardLabel(r,def)}</span></button>`;}).join('');
-  host.querySelectorAll('[data-calendar-edit-day]').forEach(btn=>btn.addEventListener('click',()=>{document.getElementById('eventCalendarDay').value=btn.dataset.calendarEditDay;loadEventCalendarDayEditor(def,Number(btn.dataset.calendarEditDay));}));
+  const host=document.getElementById('eventCalendarAdminList'),cfg=eventDailyCalendar(def);
+  if(!host||!cfg){if(host)host.innerHTML='';return;}
+  const selected=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value)||1));
+  const assigned=Object.keys(cfg.entries||{}).filter(day=>Number(day)>=1&&Number(day)<=cfg.days&&cfg.entries[day]).length;
+  document.getElementById('eventCalendarConfiguredCount').textContent=`${assigned} / ${cfg.days} prizes assigned`;
+  host.innerHTML=Array.from({length:cfg.days},(_,i)=>i+1).map(day=>{
+    const reward=cfg.entries?.[day],active=day===selected;
+    return `<button type="button" class="event-calendar-admin-row ${reward?'configured':''} ${active?'selected':''}" data-calendar-edit-day="${day}" aria-pressed="${active}"><strong>${reward?'✓ ':''}Day ${day}</strong><span>${eventEscape(calendarRewardLabel(reward,def))}</span></button>`;
+  }).join('');
+  host.querySelectorAll('[data-calendar-edit-day]').forEach(btn=>btn.addEventListener('click',()=>{
+    document.getElementById('eventCalendarDay').value=btn.dataset.calendarEditDay;
+    loadEventCalendarDayEditor(def,Number(btn.dataset.calendarEditDay));renderEventCalendarAdminList(def);
+  }));
+}
+function renderEventWCalendar(){
+  const msg=document.getElementById('eventCalendarEditStatus');if(msg)msg.textContent='';
+  const def=EVENT_DEFS[eventWActiveId()],builder=document.getElementById('eventCalendarBuilder'),status=document.getElementById('eventCalendarSetupStatus');
+  if(!builder||!status)return;
+  const requested=Math.min(62,Math.max(0,Math.trunc(Number(eventWEl('eventWCalendarDays').value)||0)));
+  const cfg=def?eventDailyCalendar(def):null;
+  const ready=!!def&&!!cfg&&requested>0&&cfg.days===requested;
+  builder.classList.toggle('hidden',!ready);
+  if(!requested){status.textContent='No calendar. Set a number of days if you want daily gifts.';return;}
+  if(!ready){status.textContent='Save Event first, then choose a prize for each day here.';return;}
+  status.textContent=`Editing ${def.name}. Pick a day below and save its reward. These prizes are saved separately from the test controls.`;
+  document.getElementById('eventCalendarDay').max=cfg.days;
+  document.getElementById('eventCalendarItem').innerHTML=ITEM_SHOP.map(item=>`<option value="${eventEscape(item.id)}">${eventEscape(item.name)}</option>`).join('');
+  document.getElementById('eventCalendarSpecies').innerHTML=eventWEligibleSpecies().map(([slug,sp])=>`<option value="${eventEscape(slug)}">${eventEscape(sp.name)}</option>`).join('');
+  document.querySelector('#eventCalendarRewardType option[value="eventCurrency"]').textContent=def.currency?.name||'Event Currency';
+  const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value)||1));
+  document.getElementById('eventCalendarDay').value=day;
+  loadEventCalendarDayEditor(def,day);renderEventCalendarAdminList(def);
 }
 function updateEventCalendarRewardFields(){
   const type=document.getElementById('eventCalendarRewardType')?.value||'money';document.getElementById('eventCalendarItemWrap')?.classList.toggle('hidden',type!=='item');document.getElementById('eventCalendarSpeciesWrap')?.classList.toggle('hidden',!['egg','monster'].includes(type));
@@ -3668,15 +3917,211 @@ function loadEventCalendarDayEditor(def,day){
   document.getElementById('eventCalendarCatchUp').checked=cfg.catchUp!==false;document.getElementById('eventCalendarRewardType').value=r?.type||'money';document.getElementById('eventCalendarAmount').value=r?.type==='item'?Math.max(1,Number(r.qty||1)):Math.max(1,Number(r?.amount||100));
   if(r?.id)document.getElementById('eventCalendarItem').value=r.id;if(r?.slug)document.getElementById('eventCalendarSpecies').value=r.slug;updateEventCalendarRewardFields();
 }
+
+let eventWEggDraftWeights={};
+let eventWEggPickerMode='';
+let eventWEggPickerSelection={};
+function eventWEligibleSpecies(){return Object.entries(state.species).filter(([,sp])=>sp&&sp.rarity!=='GOD'&&(sp.builtin||sp.published!==false)).sort((a,b)=>a[1].name.localeCompare(b[1].name));}
+function eventWPickerSummary(){
+  const maze=(eventWEl('eventWMazeSpecies')?.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const eggs=(eventWEl('eventWEggPool')?.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const label=list=>list.length?`${list.length} selected: ${list.slice(0,3).map(slug=>state.species[slug]?.name||slug).join(', ')}${list.length>3?'…':''}`:'No monsters selected';
+  eventWEl('eventWMazeSummary').textContent=label(maze);
+  eventWEl('eventWEggSummary').textContent=label(eggs);
+  eventWEl('eventWShopEggSummary').textContent=state.species[eventWEl('eventWShopReward').value]?.name||'Choose a monster';
+  const type=eventWEl('eventWActivity').value;
+  eventWEl('eventWMazePickerRow').classList.toggle('hidden',type!=='maze');
+  eventWEl('eventWEggPickerRow').classList.toggle('hidden',type==='none');
+  eventWEl('eventWShopEggPickerRow').classList.toggle('hidden',eventWEl('eventWShopType').value!=='egg');
+  eventWEl('eventWShopNormalReward').classList.toggle('hidden',eventWEl('eventWShopType').value==='egg');
+}
+function eventWPickerOpen(mode){
+  eventWEggPickerMode=mode;
+  const selected=mode==='shop'?[eventWEl('eventWShopReward').value]:mode==='maze'?(eventWEl('eventWMazeSpecies').value.split(',')):(eventWEl('eventWEggPool').value.split(','));
+  eventWEggPickerSelection=Object.fromEntries(selected.map(s=>s.trim()).filter(s=>state.species[s]).map(s=>[s,mode==='eggs'?Math.max(1,Number(eventWEggDraftWeights[s])||1):1]));
+  eventWEl('eventWEggDialogTitle').textContent=mode==='shop'?'Choose a Shop Egg':mode==='maze'?'Choose Maze Monsters':'Mystery Egg Monsters & Odds';
+  eventWEl('eventWEggDialogHelp').textContent=mode==='eggs'?'Choose monsters and their chance shares. For example, 75 and 25 gives 75% and 25% odds. The percentages calculate automatically.':mode==='shop'?'Choose the monster egg this shop reward will give.':'Choose monsters players can encounter in the maze.';
+  eventWEl('eventWEggDialog').classList.remove('hidden');eventWEl('eventWEggSearch').value='';eventWPickerRender();eventWEl('eventWEggSearch').focus();
+}
+function eventWPickerRender(){
+  const q=(eventWEl('eventWEggSearch').value||'').trim().toLowerCase(),items=eventWEligibleSpecies().filter(([,sp])=>sp.name.toLowerCase().includes(q));
+  const total=Object.values(eventWEggPickerSelection).reduce((a,n)=>a+Math.max(1,Number(n)||1),0);
+  eventWEl('eventWEggDialogList').innerHTML=items.map(([slug,sp])=>{
+    const on=eventWEggPickerSelection[slug]!==undefined,w=Math.max(1,Number(eventWEggPickerSelection[slug])||1),chance=total?((w/total)*100).toFixed(1):'0.0';
+    return `<div class="event-egg-entry"><label><input type="checkbox" data-event-pick="${eventEscape(slug)}" ${on?'checked':''}><span>${eventEscape(sp.name)}</span><small>${eventEscape(sp.element||'Monster')}</small></label>${eventWEggPickerMode==='eggs'&&on?`<label class="event-egg-weight">Chance Share <input type="number" min="1" max="10000" value="${w}" data-event-weight="${eventEscape(slug)}"><small>${chance}% chance</small></label>`:''}</div>`;
+  }).join('')||'<p>No matching monsters.</p>';
+  eventWEl('eventWEggDialogList').querySelectorAll('[data-event-pick]').forEach(box=>box.addEventListener('change',()=>{
+    if(eventWEggPickerMode==='shop')eventWEggPickerSelection={};
+    if(box.checked)eventWEggPickerSelection[box.dataset.eventPick]=1;else delete eventWEggPickerSelection[box.dataset.eventPick];
+    eventWPickerRender();
+  }));
+  eventWEl('eventWEggDialogList').querySelectorAll('[data-event-weight]').forEach(input=>input.addEventListener('change',()=>{
+    eventWEggPickerSelection[input.dataset.eventWeight]=Math.max(1,Math.min(10000,Math.round(Number(input.value)||1)));eventWPickerRender();
+  }));
+}
+function eventWPickerClose(saveSelection=false){
+  if(saveSelection){
+    const chosen=Object.keys(eventWEggPickerSelection);
+    if(eventWEggPickerMode==='shop'){
+      if(chosen[0])eventWEl('eventWShopReward').value=chosen[0];
+    }else if(eventWEggPickerMode==='maze')eventWEl('eventWMazeSpecies').value=chosen.join(',');
+    else if(eventWEggPickerMode==='eggs'){
+      eventWEl('eventWEggPool').value=chosen.join(',');eventWEggDraftWeights={...eventWEggPickerSelection};
+    }
+    eventWPickerSummary();
+  }
+  eventWEl('eventWEggDialog').classList.add('hidden');eventWEggPickerMode='';
+}
+function eventWPreviewArt(){
+  const el=eventWEl('eventWArtPreview'),file=eventWEl('eventWArtUpload').files?.[0];
+  if(file){if(eventWPreviewArt.url)URL.revokeObjectURL(eventWPreviewArt.url);eventWPreviewArt.url=URL.createObjectURL(file);el.innerHTML=`<img src="${eventWPreviewArt.url}" alt="Selected event artwork">`;return;}
+  const event=EVENT_DEFS[eventWEditingId],key=event?.spriteKey||eventWEl('eventWSprite').value;
+  el.innerHTML=glyphSpriteMarkup(key,event?.icon||eventWEl('eventWIcon').value||'✦','event-editor-sprite');hydrateSprites(el);
+}
+let eventWEditingId='';
+const eventWEl=id=>document.getElementById(id);
+function eventWMessage(txt){if(eventWEl('eventWMessage'))eventWEl('eventWMessage').textContent=txt;}
+function eventWActiveId(){return eventWEditingId||'';}
+function eventWActivityDefaults(type){
+  if(type==='maze')return JSON.parse(JSON.stringify(BASE_EVENT_DEFS.spooky_halloween_2026.activity));
+  if(type==='memory')return JSON.parse(JSON.stringify(BASE_EVENT_DEFS.winter_event_2026.activity));
+  return {type:'none',name:'Event Shop'};
+}
+function eventWNew(){
+  eventWEditingId='';
+  for(const id of ['eventWName','eventWDescription','eventWMazeSpecies','eventWEggPool'])eventWEl(id).value='';
+  eventWEggDraftWeights={};eventWEl('eventWArtUpload').value='';eventWEl('eventWCurrencyUpload').value='';eventWEl('eventWIcon').value='✦';eventWEl('eventWActivity').value='none';eventWEl('eventWCurrency').value='Tokens';eventWEl('eventWCurrencyIcon').value='◆';
+  eventWEl('eventWCurrencySprite').value='event_currency_generic';eventWEl('eventWSprite').value='event_currency_generic';
+  eventWEl('eventWPairReward').value=2;eventWEl('eventWFails').value=3;eventWEl('eventWCalendarDays').value=0;
+  const now=new Date(),start=new Date(now.getTime()+86400000),end=new Date(start.getTime()+3*86400000);
+  const local=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  eventWEl('eventWStart').value=local(start);eventWEl('eventWEnd').value=local(end);
+  eventWEl('eventWEnabled').checked=false;eventWEl('eventWPublished').checked=false;
+  renderEventWShopList();eventWPickerSummary();eventWPreviewArt();renderEventWCalendar();eventWMessage('New draft. Choose settings and Save Event to create it.');
+}
+function eventWLoad(id){
+  const def=EVENT_DEFS[id];if(!def)return eventWNew();eventWEditingId=id;
+  const set=(k,v)=>{const el=eventWEl(k);if(el)el.value=v??'';};
+  set('eventWName',def.name);set('eventWDescription',def.description);set('eventWIcon',def.icon);set('eventWStart',String(def.start).slice(0,16));set('eventWEnd',String(def.end).slice(0,16));
+  set('eventWActivity',def.activity?.type||'none');set('eventWCurrency',def.currency?.name);set('eventWCurrencyIcon',def.currency?.icon);
+  set('eventWCurrencySprite',def.currency?.spriteKey);set('eventWSprite',def.spriteKey);
+  set('eventWMazeSpecies',(def.activity?.eventSpecies||[]).join(', '));set('eventWEggPool',(def.activity?.mysteryEggPool||def.activity?.rareEggPool||[]).join(', '));eventWEggDraftWeights={...(def.activity?.mysteryEggWeights||def.activity?.rareEggWeights||{})};eventWEl('eventWArtUpload').value='';eventWEl('eventWCurrencyUpload').value='';
+  set('eventWPairReward',def.activity?.pairReward??2);set('eventWFails',def.activity?.maxFails??3);set('eventWCalendarDays',state.eventCalendars?.[id]?.days||def.calendar?.days||0);
+  eventWEl('eventWEnabled').checked=!!def.available;eventWEl('eventWPublished').checked=state.eventDefinitions[id]?.published===true;
+  eventWEl('eventWSelect').value=id;renderEventWShopList();eventWPickerSummary();eventWPreviewArt();renderEventWCalendar();eventWMessage(BASE_EVENT_DEFS[id]&&!state.eventDefinitions[id]?'Built-in template: Save makes an editable copy without changing the original fallback.':'Loaded event settings.');
+}
+function renderEventW(){
+  const select=eventWEl('eventWSelect');if(!select)return;
+  const old=eventWEditingId||select.value;
+  select.innerHTML='<option value="">New Event...</option>'+Object.values(EVENT_DEFS).sort((a,b)=>a.name.localeCompare(b.name)).map(def=>`<option value="${eventEscape(def.id)}">${eventEscape(def.name)}${state.eventDefinitions?.[def.id]?.published?' • LIVE':''}</option>`).join('');
+  for(const id of ['eventWSprite','eventWCurrencySprite']){
+    const el=eventWEl(id),saved=el.value;
+    el.innerHTML=Object.entries(SPRITE_DEFS).filter(([key,sp])=>sp.category==='Seasonal Events'||key==='event_currency_generic').map(([key,sp])=>`<option value="${eventEscape(key)}">${eventEscape(sp.name)} (${eventEscape(key)})</option>`).join('');
+    if(!el.options.length)el.innerHTML='<option value="event_currency_generic">Generic Currency</option>';
+    if(saved&&Array.from(el.options).some(x=>x.value===saved))el.value=saved;
+  }
+  if(old&&EVENT_DEFS[old]){select.value=old;eventWLoad(old);}else if(!eventWEl('eventWName').value)eventWNew();
+}
+async function eventWSave(){
+  if(!isAdminAccount())return;if(eventTestSession){eventWMessage('Exit Sandbox before editing and saving event definitions.');return;}
+  const id=eventWEditingId||'festival_'+slugify(eventWEl('eventWName').value).replace(/[^a-z0-9_-]/g,'').slice(0,45)+'_'+Math.random().toString(36).slice(2,6);
+  const prev=EVENT_DEFS[id],type=eventWEl('eventWActivity').value;
+  const activity=prev?.activity?.type===type?JSON.parse(JSON.stringify(prev.activity)):eventWActivityDefaults(type);
+  if(type==='memory'){
+    activity.pairReward=Number(eventWEl('eventWPairReward').value);activity.maxFails=Number(eventWEl('eventWFails').value);
+    activity.mysteryEggPool=eventWEl('eventWEggPool').value.split(',').map(s=>s.trim()).filter(Boolean);activity.eggPoolExplicit=true;activity.mysteryEggWeights=Object.fromEntries(activity.mysteryEggPool.map(slug=>[slug,Math.max(1,Number(eventWEggDraftWeights[slug])||1)]));
+  }else if(type==='maze'){
+    activity.eventSpecies=eventWEl('eventWMazeSpecies').value.split(',').map(s=>s.trim()).filter(Boolean);
+    activity.rareEggPool=eventWEl('eventWEggPool').value.split(',').map(s=>s.trim()).filter(Boolean);activity.rareEggWeights=Object.fromEntries(activity.rareEggPool.map(slug=>[slug,Math.max(1,Number(eventWEggDraftWeights[slug])||1)]));
+  }
+  const calDays=Math.min(62,Math.max(0,Math.trunc(Number(eventWEl('eventWCalendarDays').value)||0)));
+  const raw={id,family:prev?.family||id,name:eventWEl('eventWName').value.trim(),description:eventWEl('eventWDescription').value,
+    icon:eventWEl('eventWIcon').value||'✦',spriteKey:eventWEl('eventWArtUpload').files?.[0]?`event_art_${id}`:eventWEl('eventWSprite').value,start:eventWEl('eventWStart').value,end:eventWEl('eventWEnd').value,
+    available:eventWEl('eventWEnabled').checked,published:eventWEl('eventWPublished').checked,
+    currency:{name:eventWEl('eventWCurrency').value||'Tokens',icon:eventWEl('eventWCurrencyIcon').value||'◆',spriteKey:eventWEl('eventWCurrencyUpload').files?.[0]?`event_coin_${id}`:eventWEl('eventWCurrencySprite').value},
+    activity,shop:prev?.shop||[],...(calDays?{calendar:{start:eventWEl('eventWStart').value.slice(0,10),days:calDays}}:{})};
+  if(!raw.name){eventWMessage('Give the event a name first.');return;}
+  const def=eventNormalizeDefinition(raw,id);
+  if(!def){eventWMessage('Invalid dates or event settings. End must be after start.');return;}
+  if(def.activity.type==='maze'){
+    const x=def.activity;if(x.encounterChance+x.fangChance+x.tradeFindChance+x.rareItemChance+x.rareEggChance>1){eventWMessage('Maze probabilities exceed 100%. Adjust the template before publishing.');return;}
+  }
+  const artFile=eventWEl('eventWArtUpload').files?.[0];
+  if(artFile){
+    if(!/^image\/(png|jpeg|webp)$/.test(artFile.type)||artFile.size>5*1024*1024){eventWMessage('Choose a PNG, WebP or JPEG under 5 MB for event artwork.');return;}
+    eventRegisterArtSprite(def.spriteKey,def.name);
+    try{await putAsset(`sprite:${def.spriteKey}`,artFile);}catch(err){eventWMessage('Could not save the event picture: '+err.message);return;}
+  }
+  const currencyFile=eventWEl('eventWCurrencyUpload').files?.[0];
+  if(currencyFile){
+    if(!/^image\/(png|jpeg|webp)$/.test(currencyFile.type)||currencyFile.size>5*1024*1024){eventWMessage('Choose a PNG, WebP or JPEG under 5 MB for currency artwork.');return;}
+    eventRegisterArtSprite(def.currency.spriteKey,def.currency.name);
+    try{await putAsset(`sprite:${def.currency.spriteKey}`,currencyFile);}catch(err){eventWMessage('Could not save currency picture: '+err.message);return;}
+  }
+  state.eventDefinitions[id]=def;
+  if(calDays){
+    const cfg=state.eventCalendars[id]||{entries:{},catchUp:true};
+    cfg.start=def.calendar.start;cfg.days=calDays;for(const day of Object.keys(cfg.entries||{}))if(Number(day)>calDays)delete cfg.entries[day];state.eventCalendars[id]=cfg;
+  }else if(!BASE_EVENT_DEFS[id])delete state.eventCalendars[id];
+  normalizeEventDefinitions();normalizeEventCalendars();ensureEventState(def);save();
+  eventWEditingId=id;renderEventW();renderEventAdmin();eventWEl('eventAdminSelect').value=id;renderEventAdmin();eventWLoad(id);
+  eventWMessage(`Saved ${def.name}${def.published?' • included in next Live Content export':' as draft'}.`);
+}
+function eventWDuplicate(){if(eventTestSession)return eventWMessage('Exit Sandbox before duplicating events.');const id=eventWActiveId(),def=EVENT_DEFS[id];if(!def)return;
+  const newId='festival_'+slugify(def.name).slice(0,42)+'_'+Math.random().toString(36).slice(2,8);
+  const copy=JSON.parse(JSON.stringify(def));copy.id=newId;copy.family=newId;copy.name=def.name+' Copy';copy.available=false;copy.published=false;
+  state.eventDefinitions[newId]=eventNormalizeDefinition(copy,newId);
+  if(state.eventCalendars[id])state.eventCalendars[newId]=JSON.parse(JSON.stringify(state.eventCalendars[id]));
+  normalizeEventDefinitions();normalizeEventCalendars();save();eventWEditingId=newId;renderEventW();renderEventAdmin();eventWLoad(newId);eventWMessage('Duplicated as a disabled draft.');
+}
+function eventWDelete(){if(eventTestSession)return eventWMessage('Exit Sandbox before deleting events.');const id=eventWActiveId(),def=state.eventDefinitions[id];if(!def)return eventWMessage('This is an original built-in event. It cannot be deleted.');
+  if(!confirm(`Remove edited event ${def.name}? Historical player progress will be kept.`))return;
+  delete state.eventDefinitions[id];if(!BASE_EVENT_DEFS[id])delete state.eventCalendars[id];
+  normalizeEventDefinitions();normalizeEventCalendars();save();eventWEditingId='';renderEventW();renderEventAdmin();eventWNew();eventWMessage('Event definition removed. Stored player progress was left untouched.');
+}
+function renderEventWShopList(){
+  const id=eventWActiveId(),def=EVENT_DEFS[id],select=eventWEl('eventWShopSelect');if(!select)return;
+  select.innerHTML='<option value="">New Shop Reward...</option>'+(def?.shop||[]).map(item=>`<option value="${eventEscape(item.id)}">${eventEscape(item.name)} (${item.cost})</option>`).join('');
+  eventWShopLoad('');
+}
+function eventWShopRewardOptions(){
+  const type=eventWEl('eventWShopType').value,el=eventWEl('eventWShopReward'),previous=el.value;
+  const entries=type==='item'?ITEM_SHOP.map(x=>[x.id,x.name]):type==='egg'?Object.entries(state.species).filter(([,sp])=>sp.rarity!=='GOD').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>[slug,sp.name]):type==='scroll'?Object.entries(state.attacks).map(([id,a])=>[id,a.name]):[['wild','Random Wild Egg']];
+  el.innerHTML=entries.map(([id,name])=>`<option value="${eventEscape(id)}">${eventEscape(name)}</option>`).join('');if(entries.some(([id])=>id===previous))el.value=previous;
+  el.disabled=type==='randomWildEgg';eventWPickerSummary();
+}
+function eventWShopLoad(id){
+  const def=EVENT_DEFS[eventWActiveId()],item=def?.shop?.find(x=>x.id===id);
+  eventWEl('eventWShopSelect').value=item?.id||'';eventWEl('eventWShopName').value=item?.name||'';
+  eventWEl('eventWShopType').value=item?.reward?.type||'item';eventWShopRewardOptions();
+  if(item?.reward?.id||item?.reward?.slug)eventWEl('eventWShopReward').value=item.reward.id||item.reward.slug;
+  eventWEl('eventWShopCost').value=item?.cost??25;eventWEl('eventWShopLimit').value=item?.limit??0;eventWEl('eventWShopDesc').value=item?.description||'';eventWPickerSummary();
+}
+function eventWShopSave(){
+  if(!isAdminAccount())return;if(eventTestSession){eventWEl('eventWShopMessage').textContent='Exit Sandbox before editing shop definitions.';return;}const id=eventWActiveId(),def=state.eventDefinitions[id];
+  if(!def){eventWEl('eventWShopMessage').textContent='Save an editable Event first.';return;}
+  const oldId=eventWEl('eventWShopSelect').value,items=def.shop||[],type=eventWEl('eventWShopType').value;
+  const name=eventWEl('eventWShopName').value.trim(),ref=eventWEl('eventWShopReward').value;
+  const reward=type==='egg'?{type,slug:ref}:type==='randomWildEgg'?{type}:{type,id:ref,qty:1};
+  if(!name||!eventRewardAvailable(reward)){eventWEl('eventWShopMessage').textContent='Choose an existing eligible reward and a name.';return;}
+  const item={id:oldId||'event_item_'+Math.random().toString(36).slice(2,10),name,description:eventWEl('eventWShopDesc').value,category:'Event Reward',
+    cost:Math.max(0,Math.trunc(Number(eventWEl('eventWShopCost').value)||0)),limit:Math.max(0,Math.trunc(Number(eventWEl('eventWShopLimit').value)||0))||null,reward};
+  def.shop=items.filter(x=>x.id!==oldId).concat([item]);normalizeEventDefinitions();save();renderEventWShopList();eventWEl('eventWShopSelect').value=item.id;eventWShopLoad(item.id);
+  eventWEl('eventWShopMessage').textContent='Shop reward saved. Publish the Event and export Live Content to share it.';
+}
+function eventWShopDelete(){const id=eventWActiveId(),def=state.eventDefinitions[id],item=eventWEl('eventWShopSelect').value;
+  if(!isAdminAccount()||!def||!item)return;def.shop=def.shop.filter(x=>x.id!==item);normalizeEventDefinitions();save();renderEventWShopList();eventWEl('eventWShopMessage').textContent='Shop reward removed.';
+}
+
 function renderEventAdmin(){
-  const select=document.getElementById('eventAdminSelect');if(!select)return;const prev=select.value;select.innerHTML=Object.values(EVENT_DEFS).filter(x=>x.available).map(def=>`<option value="${def.id}">${def.name}</option>`).join('');if(prev&&EVENT_DEFS[prev]?.available)select.value=prev;const def=EVENT_DEFS[select.value]||Object.values(EVENT_DEFS).find(x=>x.available);if(!def)return;
+  renderEventTestStatus();
+  if(!eventWEditingId&&!eventWEl('eventWName')?.value)renderEventW();
+  const select=document.getElementById('eventAdminSelect');if(!select)return;const prev=select.value;select.innerHTML=Object.values(EVENT_DEFS).map(def=>`<option value="${eventEscape(def.id)}">${eventEscape(def.name)}</option>`).join('');if(prev&&EVENT_DEFS[prev])select.value=prev;const def=EVENT_DEFS[select.value]||Object.values(EVENT_DEFS)[0];if(!def)return;
   document.getElementById('eventAdminOverride').value=eventOverride(def);const eventCurrencyOption=document.querySelector('#eventCalendarRewardType option[value="eventCurrency"]');if(eventCurrencyOption)eventCurrencyOption.textContent=def.currency?.name||'Event Currency';const testDayInput=document.getElementById('eventAdminTestDay');testDayInput.value=Math.max(0,Number(state.eventTestDays?.[def.id]||0));
   const currencyBtn=document.getElementById('eventGrantFangs');currencyBtn.textContent=`Grant 25 ${def.currency?.name||'Event Currency'}`;
   const isMaze=def.activity?.type==='maze',isMemory=def.activity?.type==='memory';document.getElementById('eventGrantSteps').classList.toggle('hidden',!isMaze);document.getElementById('eventResetMaze').classList.toggle('hidden',!isMaze);document.getElementById('eventResetMemory').classList.toggle('hidden',!isMemory);document.getElementById('eventClearMemoryCooldown').classList.toggle('hidden',!isMemory);
-  const builder=document.getElementById('eventCalendarBuilder'),cfg=eventDailyCalendar(def);builder.classList.toggle('hidden',!cfg);testDayInput.max=cfg?cfg.days:62;if(Number(testDayInput.value)>Number(testDayInput.max))testDayInput.value=testDayInput.max;if(cfg){
-    document.getElementById('eventCalendarDay').max=cfg.days;document.getElementById('eventCalendarItem').innerHTML=ITEM_SHOP.map(item=>`<option value="${item.id}">${item.name}</option>`).join('');document.getElementById('eventCalendarSpecies').innerHTML=Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
-    const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));document.getElementById('eventCalendarDay').value=day;loadEventCalendarDayEditor(def,day);renderEventCalendarAdminList(def);
-  }
+  const cfg=eventDailyCalendar(def);testDayInput.max=cfg?cfg.days:62;
+  if(Number(testDayInput.value)>Number(testDayInput.max))testDayInput.value=testDayInput.max;
 }
 function accountXpToNext(level){return 100+(Math.max(1,Number(level||1))-1)*50;}
 function localDateKey(d=new Date()){
@@ -4801,6 +5246,7 @@ function collectEgg(slotIndex=0){
 }
 
 async function eggVisual(slug,sizeClass='egg-image',source='generic',egg=null){
+  if(source==='daily-wild-mystery')return iconMarkup('egg_wild',`sheet-icon ${sizeClass} egg-sheet-icon`);
   if(egg?.eggSpriteKey&&SPRITE_DEFS[egg.eggSpriteKey])return spriteFallbackMarkup(egg.eggSpriteKey,`sheet-icon ${sizeClass} recon-egg-code`);
   if(source==='event-maze')return imageSpriteMarkup('halloween_event_egg','assets/icons/halloween_event_egg.png',`${sizeClass} halloween-event-egg-icon`,'Haunted Event Egg');
   const custom=await imageSrc(slug,'egg');
@@ -4820,7 +5266,7 @@ function sellLooseEgg(eggId){
   save();
   renderAll();
 }
-function labEggSourceGroup(e){const src=String(e.source||'').toLowerCase();if(src==='breeding'||e.motherId)return'breeding';if(src==='wild')return'wild';if(src==='reconstruction')return'reconstruction';if(['shop','event-shop'].includes(src))return src==='shop'?'shop':'event';if(src.includes('expedition')||src==='prismatic')return'expedition';if(src.includes('event')||src.includes('halloween')||src.includes('winter'))return'event';return'special';}
+function labEggSourceGroup(e){const src=String(e.source||'').toLowerCase();if(src==='breeding'||e.motherId)return'breeding';if(src==='wild')return'wild';if(src==='reconstruction')return'reconstruction';if(src==='daily-wild-mystery')return 'shop';if(['shop','event-shop'].includes(src))return src==='shop'?'shop':'event';if(src.includes('expedition')||src==='prismatic')return'expedition';if(src.includes('event')||src.includes('halloween')||src.includes('winter'))return'event';return'special';}
 function labEggName(egg){if(!egg)return 'Unknown Egg';const sp=state.species[egg.slug],discovered=(state.discoveredSpecies||[]).includes(egg.slug)||state.monsters.some(m=>m.slug===egg.slug);if(sp?.isCrossbreed&&!discovered)return 'Mysterious Breeding Egg';return eggDisplayName(egg);}
 function labHatchSeconds(egg){return Math.max(60,Math.min(18000,Number(state.species[egg.slug]?.hatchSeconds||60)));}
 function labStoredEggs(){const q=document.getElementById('eggSearch').value.trim().toLowerCase(),src=document.getElementById('eggSourceFilter').value,sort=document.getElementById('eggSort').value;const eggs=state.eggs.filter(e=>e.status==='waiting'&&(src==='all'||labEggSourceGroup(e)===src)&&(!q||[eggDisplayName(e),e.id,e.source].some(x=>String(x||'').toLowerCase().includes(q))));return eggs.sort((a,b)=>sort==='name'?eggDisplayName(a).localeCompare(eggDisplayName(b)):sort==='time'?labHatchSeconds(a)-labHatchSeconds(b):sort==='old'?Number(a.createdAt||0)-Number(b.createdAt||0):Number(b.createdAt||0)-Number(a.createdAt||0));}
@@ -5442,8 +5888,13 @@ function buyHabitat(){
 async function renderShop(){
   const eggGrid=document.getElementById('eggShopGrid');
   eggGrid.innerHTML='';
+  // One affordable mystery egg each local day, drawn from today's ordinary wild encounters.
+  const mystery=document.createElement('button');
+  wireShopTile(mystery,'daily_wild_mystery','daily_wild_mystery');
+  mystery.innerHTML=shopTileShell('Daily Mystery Egg',dailyWildMysteryPurchased()?'Sold out today':`350 currency · 1 per day`,iconMarkup('egg_wild','sheet-icon icon-shop-tile'));
+  eggGrid.appendChild(mystery);
   const eggSpecies=Object.entries(state.species).filter(([,sp])=>sp.obtain==='Shop Egg');
-  if(!eggSpecies.length)eggGrid.innerHTML='<div class="empty-card">No Shop Egg species registered yet.</div>';
+  // Daily Mystery Egg remains available even when no dedicated Shop Egg species exist.
   for(const [slug,sp] of eggSpecies){
     const tile=document.createElement('button');
     wireShopTile(tile,'egg',slug);
@@ -5508,7 +5959,40 @@ async function renderShop(){
   if(!facilityOptions)fac.innerHTML='<div class="empty-card">All facility upgrades are unlocked.</div>';
 }
 
+const DAILY_WILD_MYSTERY_PRICE=350;
+function dailyWildMysteryPool(){
+  // Match ordinary random battles in the CURRENT daily zone. Never include event,
+  // Trial, Mythic Temple, crossbreed, or GOD-only monsters in the shop egg.
+  return eligibleWildSpecies().filter(([,sp])=>sp&&!sp.isCrossbreed&&!isGodSpecies(sp)&&sp.rarity!=='Mythic'&&(sp.builtin||sp.published!==false));
+}
+function dailyWildMysteryPurchased(){return state.dailyMysteryEggPurchasedOn===localDateKey();}
+function buyDailyWildMysteryEgg(){
+  const pool=dailyWildMysteryPool();
+  if(dailyWildMysteryPurchased()||state.currency<DAILY_WILD_MYSTERY_PRICE||!pool.length)return false;
+  const [slug,sp]=randomChoice(pool);
+  if(!state.species[slug])return false;
+  const egg={id:uid('E',state.nextEggNum++),slug,speciesName:sp.name,
+    displayName:'Daily Mystery Egg',motherId:null,fatherId:null,motherPotential:1,
+    inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),
+    isPrismatic:rollPrismatic(),source:'daily-wild-mystery',createdAt:Date.now(),
+    status:'waiting',catalystUsed:false};
+  state.eggs.push(egg);
+  state.currency-=DAILY_WILD_MYSTERY_PRICE;
+  state.dailyMysteryEggPurchasedOn=localDateKey();
+  save();renderAll();
+  return true;
+}
 async function shopSelectionFor(kind,id){
+  if(kind==='daily_wild_mystery'){
+    const bought=dailyWildMysteryPurchased(),pool=dailyWildMysteryPool(),price=DAILY_WILD_MYSTERY_PRICE;
+    return {kind,id,name:'Daily Mystery Egg',category:'Monster Egg',price,
+      description:"A mysterious egg containing one randomly selected monster from today's ordinary wild encounters. Its identity is revealed when it hatches.",
+      meta:[`Today's wild zone: ${currentZone().name}`,'1 egg per local day','Incubate to discover your monster'],
+      owned:bought?'Already purchased today · Resets tomorrow':'Available today · 1 remaining',
+      visual:iconMarkup('egg_wild','sheet-icon icon-shop-detail'),
+      canBuy:!bought&&pool.length>0&&state.currency>=price,
+      unavailableReason:bought?'Already Purchased Today':!pool.length?'No Wild Encounters Today':'Not Enough Currency'};
+  }
   if(kind==='egg'){
     const sp=state.species[id]; if(!sp)return null;
     const price=Number(sp.shopPrice||1000);
@@ -5618,7 +6102,7 @@ async function openShopDetail(kind,id){
   await hydrateSprites(modal);
   const buy=document.getElementById('shopPurchaseButton');
   buy.disabled=!selection.canBuy;
-  buy.innerHTML=selection.canBuy?`Purchase • ${currencyMarkup(selection.price)}`:'Not Enough Currency';
+  buy.innerHTML=selection.canBuy?`Purchase • ${currencyMarkup(selection.price)}`:(selection.unavailableReason||'Not Enough Currency');
   resetShopPurchaseConfirmation();
   if(!modal.open)modal.showModal();
 }
@@ -5641,7 +6125,8 @@ function confirmShopPurchase(){
   if(!s)return;
   document.getElementById('shopDetailModal').close();
   shopSelection=null;
-  if(s.kind==='egg')buySpeciesEgg(s.id);
+  if(s.kind==='daily_wild_mystery')buyDailyWildMysteryEgg();
+  else if(s.kind==='egg')buySpeciesEgg(s.id);
   else if(s.kind==='scroll')buyScroll(s.id);
   else if(s.kind==='item')buyItem(s.id);
   else if(s.kind==='incubator')buyIncubator();
@@ -6260,7 +6745,7 @@ async function buildLivePublishingPackage(){
     if(blob){const path=`assets/live/artifacts/${safeLiveFilePart(id,'artifact')}.${liveAssetExtension(blob)}`;artifactIcons[id]=path;files.push({name:path,data:blob});}
     else if(liveAssetRefs[key])artifactIcons[id]=liveAssetRefs[key];
   }
-  const pack={version:12,reconstructionRecipes:Object.fromEntries(Object.entries(state.reconstructionRecipes).filter(([,r])=>reconRecipeIsValid(r)&&(state.species[r.slug]?.builtin||state.species[r.slug]?.published))),reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
+  const pack={version:12,reconstructionRecipes:Object.fromEntries(Object.entries(state.reconstructionRecipes).filter(([,r])=>reconRecipeIsValid(r)&&(state.species[r.slug]?.builtin||state.species[r.slug]?.published))),reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:Object.fromEntries(Object.entries(state.eventCalendars||{}).filter(([id])=>!!BASE_EVENT_DEFS[id]||!!state.eventDefinitions?.[id]?.published)),eventDefinitions:Object.fromEntries(Object.entries(state.eventDefinitions||{}).filter(([,def])=>def.published)),lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
   return {pack,files};
 }
 function liveContentManifestFromPack(pack){
@@ -6274,6 +6759,7 @@ function liveContentManifestFromPack(pack){
     silvyDialogueLines:dialogueLines,
     news:(pack?.landingFeed?.news||[]).length,
     announcements:(pack?.landingFeed?.announcements||[]).length,
+    eventDefinitions:Object.keys(pack?.eventDefinitions||{}).length,
     calendarPrizes:Object.values(pack?.eventCalendars||{}).reduce((n,c)=>n+Object.keys(c?.entries||{}).length,0),
     trials:Object.keys(pack?.trialDefinitions||{}).length,
     lotteryPool:(pack?.lotteryEggPool||[]).length,
@@ -6286,7 +6772,7 @@ function liveContentManifestFromPack(pack){
 }
 function liveContentManifestLabel(manifest){
   const m=manifest||{};
-  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials • ${Number(m.lotteryPool||0)} lottery monsters • ${Number(m.artifacts||0)} artifacts • ${Number(m.reconstructionRecipes||0)} recipes • ${Number(m.reconstructionMaterials||0)} materials`;
+  return `${Number(m.species||0)} monsters • ${Number(m.attacks||0)} attacks • ${Number(m.sprites||0)} sprite overrides • ${Number(m.silvyDialogueLines||0)} Silvy lines • ${Number(m.news||0)} news • ${Number(m.announcements||0)} announcements • ${Number(m.eventDefinitions||0)} events • ${Number(m.calendarPrizes||0)} calendar prizes • ${Number(m.trials||0)} trials • ${Number(m.lotteryPool||0)} lottery monsters • ${Number(m.artifacts||0)} artifacts • ${Number(m.reconstructionRecipes||0)} recipes • ${Number(m.reconstructionMaterials||0)} materials`;
 }
 async function buildContentPack({publishedOnly=false}={}){
   const customSpecies={};
@@ -6302,9 +6788,24 @@ async function buildContentPack({publishedOnly=false}={}){
   // Dialogue, landing posts, Event Calendars, and Trials are content-layer data, not player save data.
   const trialDefinitions=JSON.parse(JSON.stringify(state.trials||{})),trialAssets={};for(const id of Object.keys(state.trials||{})){trialAssets[id]={};for(const kind of ['captain','badge']){const ref=await exportableAssetDataUrl(`trial:${id}:${kind}`);if(ref)trialAssets[id][kind]=ref;}}
   const artifactIcons={};for(const id of Object.keys(state.artifactCatalog||{})){if(state.artifactCatalog[id]?.iconRemoved)continue;const ref=await exportableAssetDataUrl(`artifact:${id}:icon`);if(ref)artifactIcons[id]=ref;}
-  return {version:12,reconstructionRecipes:state.reconstructionRecipes,reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
+  return {version:12,reconstructionRecipes:state.reconstructionRecipes,reconstructionMaterials:state.reconstructionMaterials,donationSettings:state.donationSettings,artifactCatalog:state.artifactCatalog,artifactIcons,customSpecies,customAttacks,customSprites,silverwindDialogue:state.silverwindDialogue,landingFeed:state.landingFeed,eventCalendars:state.eventCalendars,eventDefinitions:Object.fromEntries(Object.entries(state.eventDefinitions||{}).filter(([,def])=>!publishedOnly||def.published)),lotteryEggPool:(state.lotteryEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),ancientEggPool:(state.ancientEggPool||[]).filter(slug=>state.species[slug]&&(state.species[slug].builtin||state.species[slug].published)),trialDefinitions,trialAssets};
 }
 async function exportLiveContent(){
+  if(eventTestSession){alert('Exit the Event Test Sandbox before exporting Live Content.');return;}
+  const eventErrors=[];
+  for(const def of Object.values(state.eventDefinitions||{}).filter(x=>x.published)){
+    if(!eventNormalizeDefinition(def,def.id)){eventErrors.push(`${def.name||def.id}: invalid definition`);continue;}
+    const references=[...(def.shop||[]).map(x=>x.reward),...Object.values(state.eventCalendars?.[def.id]?.entries||{})];
+    for(const reward of references){
+      if(!reward)continue;
+      if(['egg','monster'].includes(reward.type)){
+        const sp=state.species[reward.slug];if(!sp||sp.rarity==='GOD'||(!sp.builtin&&!sp.published))eventErrors.push(`${def.name}: unpublished or invalid ${reward.type} species ${reward.slug}`);
+      }
+      if(reward.type==='scroll'){const attack=state.attacks[reward.id];if(!attack||(!attack.builtin&&!attack.published))eventErrors.push(`${def.name}: unpublished attack ${reward.id}`);}
+      if(reward.type==='item'&&!ITEM_SHOP.some(item=>item.id===reward.id))eventErrors.push(`${def.name}: missing item ${reward.id}`);
+    }
+  }
+  if(eventErrors.length){document.getElementById('adminMessage').textContent='Cannot export Event content: '+eventErrors.join(' • ');return;}
   const publishedSpecies=Object.entries(state.species).filter(([,sp])=>!sp.builtin&&sp.published);
   const missingAttackIds=[...new Set(publishedSpecies.map(([,sp])=>sp.signatureAttackId).filter(id=>id&&state.attacks[id]&&!state.attacks[id].builtin&&!state.attacks[id].published))];
   if(missingAttackIds.length){
@@ -6349,6 +6850,7 @@ async function applyLiveContent(data){
   // the content revision is already saved, because liveAssetRefs is in-memory only.
   liveAssetRefs={};
   for(const [slug,entry] of Object.entries(data.customSpecies||{}))for(const kind of ['base','prismatic','egg'])if(entry?.[kind]&&!String(entry[kind]).startsWith('data:'))liveAssetRefs[`${slug}:${kind}`]=entry[kind];
+  eventRegisterArtFromDefinitions(data.eventDefinitions);
   for(const [key,ref] of Object.entries(data.customSprites||{}))if(ref&&!String(ref).startsWith('data:'))liveAssetRefs[`sprite:${key}`]=ref;
   for(const [id,ref] of Object.entries(data.artifactIcons||{}))if(ref&&!data.artifactCatalog?.[id]?.iconRemoved&&!String(ref).startsWith('data:'))liveAssetRefs[`artifact:${id}:icon`]=ref;
   for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]&&!String(assets[kind]).startsWith('data:'))liveAssetRefs[`trial:${id}:${kind}`]=assets[kind];
@@ -6381,6 +6883,7 @@ async function applyLiveContent(data){
   return true;
 }
 async function exportAdmin(){
+  if(eventTestSession){alert('Exit the Event Test Sandbox before exporting an Admin backup.');return;}
   const pack=await buildContentPack({publishedOnly:false});
   const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='prismwild_admin_export_v01577.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -6389,12 +6892,14 @@ async function importAdminFile(file){
     const data=JSON.parse(await file.text());
     for(const [slug,entry] of Object.entries(data.customSpecies||{})){const wasPublished=!!state.species[slug]?.published;state.species[slug]={...entry.species,builtin:false,published:entry.species?.published===undefined?wasPublished:!!entry.species.published};for(const kind of ['base','prismatic','egg'])if(entry[kind]){const key=`${slug}:${kind}`,ref=entry[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}}
     for(const [id,a] of Object.entries(data.customAttacks||{})){const wasPublished=!!state.attacks[id]?.published;state.attacks[id]={...a,builtin:false,published:a?.published===undefined?wasPublished:!!a.published};}
+    eventRegisterArtFromDefinitions(data.eventDefinitions);
     for(const [key,ref] of Object.entries(data.customSprites||{})){if(SPRITE_DEFS[key]&&ref){if(String(ref).startsWith('data:'))await putAsset(`sprite:${key}`,await dataURLToBlob(ref));else liveAssetRefs[`sprite:${key}`]=ref;}}
     if(data.artifactCatalog){state.artifactCatalog=data.artifactCatalog;normalizeArtifactCatalog();}
     for(const [id,ref] of Object.entries(data.artifactIcons||{}))if(ref&&!state.artifactCatalog?.[id]?.iconRemoved){const key=`artifact:${id}:icon`;if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
     if(data.silverwindDialogue){state.silverwindDialogue=data.silverwindDialogue;normalizeSilverwindDialogue();}
     if(data.landingFeed){state.landingFeed=data.landingFeed;normalizeLandingFeed();}
-    if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
+    if(data.eventDefinitions){state.eventDefinitions={...state.eventDefinitions,...data.eventDefinitions};normalizeEventDefinitions();}
+   if(data.eventCalendars){state.eventCalendars=data.eventCalendars;normalizeEventCalendars();}
     if(data.donationSettings)state.donationSettings=normalizeDonationSettings(data.donationSettings);
   if(data.reconstructionMaterials){state.reconstructionMaterials=data.reconstructionMaterials;syncReconstructionMaterialRegistry();}
   if(data.reconstructionRecipes){state.reconstructionRecipes=data.reconstructionRecipes;normalizeReconstructionState();}
@@ -6402,7 +6907,7 @@ async function importAdminFile(file){
   if(Array.isArray(data.ancientEggPool))state.ancientEggPool=[...new Set(data.ancientEggPool.filter(slug=>typeof slug==='string'))];
     if(data.trialDefinitions){for(const [id,t] of Object.entries(data.trialDefinitions))state.trials[id]={...(state.trials[id]||{}),...t,builtin:!!BUILTIN_TRIALS[id]};}
     for(const [id,assets] of Object.entries(data.trialAssets||{}))for(const kind of ['captain','badge'])if(assets?.[kind]){const key=`trial:${id}:${kind}`,ref=assets[kind];if(String(ref).startsWith('data:'))await putAsset(key,await dataURLToBlob(ref));else liveAssetRefs[key]=ref;}
-    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();renderLotteryAdmin();renderAncientEggAdmin();renderArtifactAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, landing posts, Event Calendars, Silvy dialogue, and Trial data.';
+    normalizeState();save();renderAll();newSpeciesForm();newAttackForm();newTrialForm();loadSpriteIntoForm(selectedSpriteKey);renderDialogueAdmin();renderLotteryAdmin();renderAncientEggAdmin();renderArtifactAdmin();document.getElementById('adminMessage').textContent='Imported custom species, attacks, sprites, event definitions and calendars, Silvy dialogue, and Trial data.';
   }catch(e){document.getElementById('adminMessage').textContent='Import failed: '+e.message;}
 }
 
@@ -6486,7 +6991,7 @@ function populateSilverwindDialogueTargets(){
     target.innerHTML='<option value="general">General check-in chatter</option>';target.disabled=true;if(wrap)wrap.classList.add('dialogue-target-muted');
   }else if(context==='monster'){
     target.disabled=false;if(wrap)wrap.classList.remove('dialogue-target-muted');
-    target.innerHTML=Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
+    target.innerHTML=Object.entries(state.species).filter(([,sp])=>sp.rarity!=='GOD').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
   }else{
     target.disabled=false;if(wrap)wrap.classList.remove('dialogue-target-muted');
     target.innerHTML=Object.values(EVENT_DEFS).sort((a,b)=>a.name.localeCompare(b.name)).map(def=>`<option value="${def.id}">${def.name}</option>`).join('');
@@ -8806,7 +9311,7 @@ async function refreshBattleUI(){
       result.innerHTML=`<div class="eyebrow">GAUNTLET DEFEAT</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>Consolation: +${currencyMarkup(r.consolation,'currency-inline reward-currency')}</strong></div><button id="leaveBattle" class="primary" type="button">Back to Gauntlet</button>`;
       document.getElementById('leaveBattle').onclick=async()=>{battleSession=null;gauntletSession=null;gauntletMessageText=`Run ended. Consolation reward: ${r.consolation} currency.`;showBattleSubpage('gauntlet');await renderGauntletPage();renderAll();};
     }else if(r.type==='event-victory'){
-      result.innerHTML=`<div class="eyebrow">EVENT VICTORY</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>+${r.xp} Monster XP</strong><strong class="event-battle-currency">${eventCurrencySpriteMarkup(EVENT_DEFS.spooky_halloween_2026,'event-currency-inline')} +${r.fangs} Fangs</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.monsterReward?`<strong class="monster-reward">NEW EVENT MONSTER • ${r.monsterReward.isAlpha?'⚑ ALPHA ':''}${r.monsterReward.isPrismatic?'✦ PRISMATIC ':''}${r.monsterReward.name} Lv.${r.monsterReward.level}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Back to Haunted Maze</button>`;
+      result.innerHTML=`<div class="eyebrow">EVENT VICTORY</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>+${r.xp} Monster XP</strong><strong class="event-battle-currency">${eventCurrencySpriteMarkup(EVENT_DEFS[battleSession?.eventId]||EVENT_DEFS.spooky_halloween_2026,'event-currency-inline')} +${r.fangs} ${EVENT_DEFS[battleSession?.eventId]?.currency?.name||'Fangs'}</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.monsterReward?`<strong class="monster-reward">NEW EVENT MONSTER • ${r.monsterReward.isAlpha?'⚑ ALPHA ':''}${r.monsterReward.isPrismatic?'✦ PRISMATIC ':''}${r.monsterReward.name} Lv.${r.monsterReward.level}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Back to Haunted Maze</button>`;
       document.getElementById('leaveBattle').onclick=()=>{battleSession=null;switchTab('event');};
     }else{
       const backToEvent=isEvent,isExploreDefeat=!isEvent&&r.type==='defeat';
@@ -9379,17 +9884,58 @@ document.getElementById('silverwindDialogueTarget').addEventListener('change',()
 document.getElementById('saveSilverwindDialogue').addEventListener('click',saveSilverwindDialogueEntry);
 document.getElementById('cancelSilverwindDialogueEdit').addEventListener('click',()=>{clearSilverwindDialogueEditor();document.getElementById('silverwindDialogueMessage').textContent='';});
 
+document.getElementById('eventWTestStart').addEventListener('click',eventTestBegin);
+document.getElementById('eventWTestExit').addEventListener('click',eventTestEnd);
 document.getElementById('eventAdminSelect').addEventListener('change',()=>{document.getElementById('eventCalendarDay').value=1;renderEventAdmin();});
-document.getElementById('applyEventOverride').addEventListener('click',()=>{const id=document.getElementById('eventAdminSelect').value,mode=document.getElementById('eventAdminOverride').value;if(!EVENT_DEFS[id])return;state.eventOverrides[id]=mode;const cfg=eventDailyCalendar(EVENT_DEFS[id]),testMax=cfg?cfg.days:62;state.eventTestDays[id]=Math.max(0,Math.min(testMax,Number(document.getElementById('eventAdminTestDay').value||0)));save();document.getElementById('eventAdminMessage').textContent=`${EVENT_DEFS[id].name}: ${mode==='auto'?'automatic dates restored':mode==='active'?'forced active':'forced inactive'}${state.eventTestDays[id]?` • calendar test day ${state.eventTestDays[id]}`:''}.`;renderAll();});
-document.getElementById('eventGrantFangs').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(!def)return;addEventCurrency(def,25);save();document.getElementById('eventAdminMessage').textContent=`Granted 25 ${def.currency.name} for testing.`;renderAll();});
-document.getElementById('eventGrantSteps').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],es=eventStateFor(def);if(def?.activity?.type!=='maze')return;refreshMazeSteps(def);es.steps=Math.min(def.activity.maxSteps,es.steps+5);es.stepUpdatedAt=Date.now();save();document.getElementById('eventAdminMessage').textContent='Granted up to 5 Maze Steps for testing.';renderAll();});
-document.getElementById('eventResetMaze').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='maze')return;const es=eventStateFor(def);es.maze=generateMaze(def.activity.size||7);es.lastMessage='Maze reset from Admin.';save();document.getElementById('eventAdminMessage').textContent='Haunted Maze layout reset.';renderAll();});
-document.getElementById('eventResetMemory').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='memory')return;resetEventMemory(def,'Memory board reset from Admin.');save();document.getElementById('eventAdminMessage').textContent='Winter Memory board reset.';renderAll();});
-document.getElementById('eventClearMemoryCooldown').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],m=ensureMemoryGame(def);if(def?.activity?.type!=='memory'||!m)return;resetEventMemory(def,'Cooldown cleared from Admin. Fresh board ready.');save();document.getElementById('eventAdminMessage').textContent='Memory cooldown cleared and a fresh board was shuffled.';renderAll();});
+
+for(const [id,handler] of Object.entries({eventWNew:eventWNew,eventWDuplicate:eventWDuplicate,eventWSave:eventWSave,eventWDelete:eventWDelete,eventWShopSave:eventWShopSave,eventWShopDelete:eventWShopDelete}))eventWEl(id).addEventListener('click',handler);
+eventWEl('eventWSelect').addEventListener('change',e=>e.target.value?eventWLoad(e.target.value):eventWNew());
+eventWEl('eventWShopSelect').addEventListener('change',e=>eventWShopLoad(e.target.value));
+eventWEl('eventWShopType').addEventListener('change',eventWShopRewardOptions);
+eventWEl('eventWSaveQuick').addEventListener('click',eventWSave);
+eventWEl('eventWActivity').addEventListener('change',eventWPickerSummary);
+eventWEl('eventWArtUpload').addEventListener('change',eventWPreviewArt);
+eventWEl('eventWMazePick').addEventListener('click',()=>eventWPickerOpen('maze'));
+eventWEl('eventWEggPick').addEventListener('click',()=>eventWPickerOpen('eggs'));
+eventWEl('eventWShopEggPick').addEventListener('click',()=>eventWPickerOpen('shop'));
+eventWEl('eventWEggSearch').addEventListener('input',eventWPickerRender);
+eventWEl('eventWEggDialogDone').addEventListener('click',()=>eventWPickerClose(true));
+for(const key of ['eventWEggDialogClose','eventWEggDialogCancel'])eventWEl(key).addEventListener('click',()=>eventWPickerClose(false));
+eventWEl('eventWEggDialog').addEventListener('click',e=>{if(e.target===eventWEl('eventWEggDialog'))eventWPickerClose(false);});
+
+
+document.getElementById('applyEventOverride').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox before changing event test settings.');return;}const id=document.getElementById('eventAdminSelect').value,mode=document.getElementById('eventAdminOverride').value;if(!EVENT_DEFS[id])return;state.eventOverrides[id]=mode;const cfg=eventDailyCalendar(EVENT_DEFS[id]),testMax=cfg?cfg.days:62;state.eventTestDays[id]=Math.max(0,Math.min(testMax,Number(document.getElementById('eventAdminTestDay').value||0)));save();document.getElementById('eventAdminMessage').textContent=`${EVENT_DEFS[id].name}: ${mode==='auto'?'automatic dates restored':mode==='active'?'forced active':'forced inactive'}${state.eventTestDays[id]?` • calendar test day ${state.eventTestDays[id]}`:''}.`;renderAll();});
+document.getElementById('eventGrantFangs').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox first.');return;}const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(!def)return;addEventCurrency(def,25);save();document.getElementById('eventAdminMessage').textContent=`Granted 25 ${def.currency.name} for testing.`;renderAll();});
+document.getElementById('eventGrantSteps').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox first.');return;}const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],es=eventStateFor(def);if(def?.activity?.type!=='maze')return;refreshMazeSteps(def);es.steps=Math.min(def.activity.maxSteps,es.steps+5);es.stepUpdatedAt=Date.now();save();document.getElementById('eventAdminMessage').textContent='Granted up to 5 Maze Steps for testing.';renderAll();});
+document.getElementById('eventResetMaze').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox first.');return;}const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='maze')return;const es=eventStateFor(def);es.maze=generateMaze(def.activity.size||7);es.lastMessage='Maze reset from Admin.';save();document.getElementById('eventAdminMessage').textContent='Haunted Maze layout reset.';renderAll();});
+document.getElementById('eventResetMemory').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox first.');return;}const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def?.activity?.type!=='memory')return;resetEventMemory(def,'Memory board reset from Admin.');save();document.getElementById('eventAdminMessage').textContent='Winter Memory board reset.';renderAll();});
+document.getElementById('eventClearMemoryCooldown').addEventListener('click',()=>{if(!eventTestSession){eventWMessage('Start Test Sandbox first.');return;}const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],m=ensureMemoryGame(def);if(def?.activity?.type!=='memory'||!m)return;resetEventMemory(def,'Cooldown cleared from Admin. Fresh board ready.');save();document.getElementById('eventAdminMessage').textContent='Memory cooldown cleared and a fresh board was shuffled.';renderAll();});
+document.getElementById('eventWCalendarDays').addEventListener('input',renderEventWCalendar);
 document.getElementById('eventCalendarRewardType').addEventListener('change',updateEventCalendarRewardFields);
-document.getElementById('eventCalendarDay').addEventListener('change',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value];if(def)loadEventCalendarDayEditor(def,Number(document.getElementById('eventCalendarDay').value||1));});
-document.getElementById('saveEventCalendarDay').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],cfg=eventDailyCalendar(def);if(!def||!cfg)return;const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1))),type=document.getElementById('eventCalendarRewardType').value;let reward;if(type==='money'||type==='eventCurrency')reward={type,amount:Math.max(1,Number(document.getElementById('eventCalendarAmount').value||1))};else if(type==='item')reward={type,id:document.getElementById('eventCalendarItem').value,qty:Math.max(1,Number(document.getElementById('eventCalendarAmount').value||1))};else reward={type,slug:document.getElementById('eventCalendarSpecies').value};cfg.entries[day]=reward;cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();document.getElementById('eventAdminMessage').textContent=`Saved ${def.name} Day ${day}: ${calendarRewardLabel(reward,def)}. This prize will be included in the next Live Content export.`;renderAll();});
-document.getElementById('clearEventCalendarDay').addEventListener('click',()=>{const def=EVENT_DEFS[document.getElementById('eventAdminSelect').value],cfg=eventDailyCalendar(def);if(!def||!cfg)return;const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));delete cfg.entries[day];cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();document.getElementById('eventAdminMessage').textContent=`Cleared ${def.name} Day ${day} prize.`;renderAll();});
+document.getElementById('eventCalendarDay').addEventListener('change',()=>{const def=EVENT_DEFS[eventWActiveId()];if(def){const day=Math.max(1,Math.min(eventDailyCalendar(def)?.days||1,Number(document.getElementById('eventCalendarDay').value||1)));document.getElementById('eventCalendarDay').value=day;loadEventCalendarDayEditor(def,day);renderEventCalendarAdminList(def);}});
+document.getElementById('saveEventCalendarDay').addEventListener('click',()=>{
+  const status=document.getElementById('eventCalendarEditStatus'),def=EVENT_DEFS[eventWActiveId()],cfg=def&&eventDailyCalendar(def);
+  if(!isAdminAccount()||!def||!cfg||eventTestSession){status.textContent='Save your Event first, and exit Sandbox before editing prizes.';return;}
+  const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));
+  const type=document.getElementById('eventCalendarRewardType').value;let reward;
+  const qty=Number(document.getElementById('eventCalendarAmount').value);
+  if(['money','eventCurrency','item'].includes(type)&&(!Number.isSafeInteger(qty)||qty<1||qty>1000000)){status.textContent='Enter a valid amount or quantity (1 to 1,000,000).';return;}
+  if(type==='money'||type==='eventCurrency')reward={type,amount:qty};
+  else if(type==='item')reward={type,id:document.getElementById('eventCalendarItem').value,qty};
+  else reward={type,slug:document.getElementById('eventCalendarSpecies').value};
+  const eligible=(type==='money'||type==='eventCurrency')||(type==='item'&&!!ITEM_SHOP.find(x=>x.id===reward.id))||(['egg','monster'].includes(type)&&!!state.species?.[reward.slug]&&state.species[reward.slug].rarity!=='GOD');
+  if(!eligible){status.textContent='Please choose an existing, eligible prize.';return;}
+  cfg.entries[day]=reward;cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();
+  status.textContent=`✓ ${def.name} • Day ${day}: ${calendarRewardLabel(reward,def)} saved.`;
+  renderEventCalendarAdminList(def);renderEventPage();
+});
+document.getElementById('clearEventCalendarDay').addEventListener('click',()=>{
+  const status=document.getElementById('eventCalendarEditStatus'),def=EVENT_DEFS[eventWActiveId()],cfg=def&&eventDailyCalendar(def);
+  if(!isAdminAccount()||!def||!cfg||eventTestSession){status.textContent='Exit Sandbox before editing prizes.';return;}
+  const day=Math.max(1,Math.min(cfg.days,Number(document.getElementById('eventCalendarDay').value||1)));
+  delete cfg.entries[day];cfg.catchUp=document.getElementById('eventCalendarCatchUp').checked;save();
+  status.textContent=`Day ${day} is now empty.`;renderEventCalendarAdminList(def);renderEventPage();
+});
 document.getElementById('newTrial').addEventListener('click',newTrialForm);
 document.getElementById('trialForm').addEventListener('submit',saveTrialForm);
 document.getElementById('deleteTrial').addEventListener('click',deleteCurrentTrial);
@@ -9700,6 +10246,23 @@ async function admin2RunPreflight(){
  document.querySelector('.admin2-jump-nav').addEventListener('click',e=>{const b=e.target.closest('[data-admin2-jump]');if(b)admin2El(b.dataset.admin2Jump).scrollIntoView({behavior:'smooth',block:'start'});});
 })();
 
+// Keyboard movement for the NORMAL Explore maze. Uses the existing move action,
+// so steps, encounters and discoveries have exactly the same rules as button clicks.
+let exploreKeyboardMoveBusy=false;
+document.addEventListener('keydown',async event=>{
+  const directions={ArrowUp:'N',ArrowLeft:'W',ArrowDown:'S',ArrowRight:'E',w:'N',a:'W',s:'S',d:'E'};
+  const direction=directions[event.key]||directions[event.key.toLowerCase?.()];
+  if(!direction||event.repeat||event.ctrlKey||event.metaKey||event.altKey)return;
+  if(!document.getElementById('explore')?.classList.contains('active')||!exploreExpeditionActive)return;
+  const focused=document.activeElement;
+  if(focused?.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'))return;
+  if(document.querySelector('dialog[open]')||battleSession||exploreEvent||mazeClearTransitionBusy||exploreKeyboardMoveBusy)return;
+  const maze=ensureExploreMaze();
+  if(!activeMonster()||isMonsterFainted(activeMonster())||!mazeCanMove(maze,direction))return;
+  event.preventDefault();
+  exploreKeyboardMoveBusy=true;
+  try{await moveExploreMaze(direction);}finally{exploreKeyboardMoveBusy=false;}
+});
 (async()=>{initZoneBackdrop();await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();completeKeeperTablets();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();showAdminPane('dashboard');if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 <div id="lotteryCoinToast" class="lottery-coin-toast" role="status" aria-live="polite"></div>
