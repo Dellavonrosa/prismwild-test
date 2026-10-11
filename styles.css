@@ -1496,3 +1496,16 @@ dialog{width:min(1040px,calc(100% - 24px));border:1px solid var(--line);border-r
 
 /* v0.15.86c: hint for optional keyboard controls, no change to touch controls */
 .explore-keyboard-tip{display:block;margin:.45rem auto 0;color:var(--muted,#b7c5d7);font-size:.8rem;text-align:center;letter-spacing:.025em}
+
+/* v0.15.86e • Monster Dash seamless scrolling polish */
+.dash-header{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,#252038,#151a29);margin-bottom:16px}
+.dash-header h2{font-size:clamp(1.35rem,2vw,2rem);margin:4px 0 8px;color:#e9faff}.dash-header p{max-width:640px;margin:0;color:#b8c3d8;line-height:1.5}
+.dash-best{display:flex;min-width:115px;flex-direction:column;text-align:center;border:1px solid rgba(135,237,253,.35);background:rgba(5,9,22,.55);border-radius:14px;padding:12px;white-space:nowrap}
+.dash-best small,.dash-best span{color:#9fb6c8;font-size:.73rem}.dash-best strong{font-size:1.85rem;color:#8fe5ff}
+.dash-game-shell{border:1px solid var(--line);border-radius:18px;background:#131829;padding:14px 14px 18px;box-shadow:var(--shadow)}
+.dash-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:2px 4px 10px;color:#bdc9db;font-weight:600;font-size:.87rem}
+#dashRunStatus{color:#86e6f6}#monsterDashCanvas{display:block;box-sizing:border-box;width:100%;max-width:100%;aspect-ratio:8/3;height:auto;image-rendering:pixelated;border:2px solid #3c4e66;border-radius:12px;background:#121a2b;touch-action:manipulation;cursor:pointer}
+.dash-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:16px 0 8px}.dash-actions button{min-width:135px}.dash-jump-btn{background:#283349!important;border-color:#65abbb!important;color:#f0ffff!important;font-weight:800}
+.dash-hint{text-align:center;color:#abbdd0;font-size:.84rem;line-height:1.5;margin:8px 0 12px}.dash-reward{background:rgba(45,70,80,.3);border:1px solid rgba(121,224,239,.24);border-radius:11px;padding:12px;color:#d1ecf3;text-align:center;min-height:22px}
+.dash-rewards-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.dash-rewards-info>div{background:rgba(16,22,33,.9);padding:14px;border:1px solid var(--line);border-radius:12px}.dash-rewards-info strong{display:block;color:#eeeafc;margin-bottom:7px}.dash-rewards-info span{color:#c2c8da;line-height:1.5}.dash-rewards-info>small{grid-column:1/-1;color:#aeb8cd}
+@media(max-width:650px){.dash-header{align-items:stretch;flex-direction:column}.dash-best{align-items:center}.dash-rewards-info{grid-template-columns:1fr}.dash-actions button{flex:1;min-width:105px}#monsterDashCanvas{border-radius:6px}.dash-toolbar{font-size:.73rem}}

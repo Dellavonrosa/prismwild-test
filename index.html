@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.86c</title>
-<link rel="stylesheet" href="styles.css?v=0.15.86c-daily-egg-keyboard">
+<title>Prismwild Prototype v0.15.86e</title>
+<link rel="stylesheet" href="styles.css?v=0.15.86e-dash-smooth-scroll">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -15,7 +15,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86c</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86e</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -272,6 +272,7 @@
         <button id="showAdventureExpeditions" class="subtab" type="button">Expeditions <span class="badge expedition-inline-badge">0</span></button>
         <button id="showAdventureTrials" class="subtab" type="button">Trials</button>
         <button id="showAdventureHunting" class="subtab" type="button">🪤 Hunting Zone <span id="huntingTabReady" class="badge hidden">0</span></button>
+        <button id="showAdventureArcade" class="subtab" type="button">🎮 Arcade</button>
       </div>
       <div id="adventureBattlePane" class="adventure-pane">
       <div class="page-heading">
@@ -336,6 +337,29 @@
         <p id="huntingMessage" class="hunt-message" role="status"></p>
         <div class="hunt-bait-guide"><h3>Bait in your pack</h3><div id="huntingBaitSummary" class="hunt-bait-summary"></div><p>Higher tiers improve both capture success and the chances of attracting rarer species. Configure exclusive monsters in Admin → Monster Studio → Obtain method → Hunting Zone.</p></div>
       </div>
+      <div id="adventureArcadePane" class="adventure-pane hidden">
+        <section class="dash-header">
+          <div><div class="eyebrow">SILVY'S GAME CORNER</div><h2>🏃 Monster Dash</h2>
+          <p>Waiting for your monsters to heal? Run, jump, and grab coins while they rest. No healthy monster, entry fee, or cooldown required!</p></div>
+          <div class="dash-best"><small>PERSONAL BEST</small><strong id="dashBest">0</strong><span>distance</span></div>
+        </section>
+        <div class="dash-game-shell">
+          <div class="dash-toolbar"><span id="dashRunStatus">Ready to run</span><span id="dashLiveScore">Distance: 0 · Coins: 0</span></div>
+          <canvas id="monsterDashCanvas" width="800" height="300" role="img" aria-label="Side-scrolling Monster Dash game. Jump over obstacles and collect coins." tabindex="0"></canvas>
+          <div class="dash-actions">
+            <button id="dashStart" class="primary" type="button">▶ Start Run</button>
+            <button id="dashPause" class="ghost" type="button" disabled>Pause</button>
+            <button id="dashJump" class="ghost dash-jump-btn" type="button">⬆ JUMP</button>
+          </div>
+          <p class="dash-hint">Space, ↑, or W to jump • Tap JUMP or the game screen on mobile • Colliding ends your run. Paused runs can resume.</p>
+          <p id="dashRewardMessage" class="dash-reward" aria-live="polite">Play as often as you like. Prizes are paid when a run ends.</p>
+        </div>
+        <div class="dash-rewards-info">
+          <div><strong>Currency rewards</strong><span>Short: 5–10 • Good: 15–25 • Great: 30–40 • 1,000+: 50–60</span></div>
+          <div><strong>Small XP Crystals</strong><span>2% / 5% / 10% / 15% chance by distance tier • <b id="dashCrystalCount">0 / 3</b> earned today</span></div>
+          <small>Crystals are awarded to Inventory for you to give to a monster later. Runs ending before 80 distance award nothing. This minigame never uses your monsters' health.</small>
+        </div>
+      </div>
       <dialog id="huntingBaitDialog" class="hunt-dialog">
         <div class="hunt-dialog-head"><div><div class="eyebrow">READY THE TRAP</div><h3 id="huntingBaitHeading">Choose Bait</h3></div><button id="huntingCloseBait" class="ghost small" type="button">✕</button></div>
         <p>Each bait starts the same four-hour hunt. Choose carefully: your bait is used immediately.</p>
@@ -393,7 +417,7 @@
       </div>
       <section id="shopDonationsPane" class="hidden donation-pane">
         <div class="donation-heading">
-          <div><div class="eyebrow">COMMUNITY DROP-OFF • DAILY</div><h3>Donation Crates</h3><p>Fill six requests using Field Finds, Expedition Treasures, and Excavation Finds. Each completed crate pays double the donated goods' sell value, plus 5 Account XP. XP Crystals are rare bonus finds, exclusive to Donations.</p></div>
+          <div><div class="eyebrow">COMMUNITY DROP-OFF • DAILY</div><h3>Donation Crates</h3><p>Fill six requests using Field Finds, Expedition Treasures, and Excavation Finds. Each completed crate pays double the donated goods' sell value, plus 5 Account XP. XP Crystals are rare bonus finds here and in Monster Dash.</p></div>
           <div class="donation-date"><small>Today's crates</small><strong id="donationDate"></strong><span id="donationProgress"></span></div>
         </div>
         <div id="donationGrid" class="donation-grid"></div>
@@ -1496,7 +1520,7 @@
     <section id="detailPaneItems" class="monster-profile-pane hidden">
       <div class="monster-item-tools profile-item-tools">
         <div class="move-heading"><h3>Use Item</h3><span id="monsterItemToolStatus" class="move-note"></span></div>
-        <p class="move-note">Attack Scrolls teach moves. Potential Injectors raise Potential. Nature Discs reroll Traits once per day. DNA Splicers permanently add +15 to one stat and may only be used once per monster. Donation-exclusive XP Crystals award 50, 250, or 650 XP to this monster.</p>
+        <p class="move-note">Attack Scrolls teach moves. Potential Injectors raise Potential. Nature Discs reroll Traits once per day. DNA Splicers permanently add +15 to one stat and may only be used once per monster. XP Crystals from Donations or Monster Dash award 50, 250, or 650 XP to this monster.</p>
         <div id="monsterItemTools" class="monster-item-tool-grid"></div>
       </div>
       <div id="teachScrollBox" class="teach-box profile-scroll-box">
@@ -2334,9 +2358,9 @@ const REQUEST_TEMPLATES={
 const DAILY_BOARD_BONUS_XP=50;
 const GAUNTLET_MAX_STAGE=5;
 
-// Rare Donation-exclusive rewards: not included in the Shop's purchasable stock.
+// Rare XP rewards from Donations and Monster Dash; not in Shop stock.
 const DONATION_CRYSTALS={
-  xp_crystal_small:{name:'Small XP Crystal',xp:50,icon:'xp_crystal_small',desc:'A rare gift from Donations. Give one monster +50 XP.'},
+  xp_crystal_small:{name:'Small XP Crystal',xp:50,icon:'xp_crystal_small',desc:'A rare reward from Donations or Monster Dash. Give one monster +50 XP.'},
   xp_crystal_medium:{name:'Medium XP Crystal',xp:250,icon:'xp_crystal_medium',desc:'A rare gift from Donations. Give one monster +250 XP.'},
   xp_crystal_large:{name:'Large XP Crystal',xp:650,icon:'xp_crystal_large',desc:'An exceptionally rare gift from Donations. Give one monster +650 XP.'}
 };
@@ -2873,6 +2897,7 @@ function reconSaveMaterial(e){e.preventDefault();if(!isAdminAccount())return;con
 function reconDeleteRecipe(){if(!isAdminAccount())return;const id=document.getElementById('reconEditId').value,r=state.reconstructionRecipes[id];if(!r||!confirm(`Delete the recipe ${r.title}? Existing eggs will be safe.`))return;delete state.reconstructionRecipes[id];save();renderReconstructionAdmin();reconClearRecipe();renderReconstructionLab();}
 function reconDeleteMaterial(){if(!isAdminAccount())return;const id=document.getElementById('reconMaterialEditId').value,m=state.reconstructionMaterials[id];if(!m)return;const referenced=Object.values(state.reconstructionRecipes).some(r=>r.ingredients.some(p=>p.id===id));if(referenced||Number(state.inventory[id]||0)>0){document.getElementById('reconMaterialAdminMessage').textContent='Cannot delete: a saved recipe or inventory still uses this material.';return;}if(!confirm(`Delete custom material ${m.name}?`))return;delete state.reconstructionMaterials[id];syncReconstructionMaterialRegistry();save();renderReconstructionAdmin();reconClearMaterial();renderSpriteRegistry();}
 
+const DASH_W=800,DASH_H=300,DASH_GROUND=242,DASH_MAX_CRYSTALS=3;
 function defaultState(){
   return {
     species:JSON.parse(JSON.stringify(BUILTIN_SPECIES)),
@@ -2892,6 +2917,7 @@ function defaultState(){
     accountStats:{requestsCompleted:0,highestGauntletStage:0,gauntletRunsCompleted:0},
     dailyRequests:null,
     dailyMysteryEggPurchasedOn:'',
+    monsterDash:{best:0,totalRuns:0,crystalDate:'',crystalsToday:0,lastReward:''},
     blackMarket:null,
     donations:null,donationSettings:defaultDonationSettings(),
     lottery:{nextFreeAt:0,lastResult:''},lotteryEggPool:[],ancientEggPool:[],relicJournal:{unlocked:false},artifactCatalog:defaultArtifactCatalog(),artifactJournal:{pending:[],owned:{},completedSets:0,lastMessage:''},
@@ -3033,6 +3059,7 @@ function normalizeState(){
   state.attacks=state.attacks||{};
   state.inventory=state.inventory||{};
   state.dailyMysteryEggPurchasedOn=typeof state.dailyMysteryEggPurchasedOn==='string'?state.dailyMysteryEggPurchasedOn:'';
+  normalizeMonsterDashState();
   normalizeReconstructionState();
   state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
   state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
@@ -4709,14 +4736,17 @@ function showSilverwindPane(name='desk'){
 }
 let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle',currentSilverwindPane='desk';
 function showAdventurePane(name='battle'){
-  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane',hunting:'adventureHuntingPane'};
-  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials',hunting:'showAdventureHunting'};
-  if(!panes[name])name='battle';currentAdventurePane=name;
+  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane',hunting:'adventureHuntingPane',arcade:'adventureArcadePane'};
+  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials',hunting:'showAdventureHunting',arcade:'showAdventureArcade'};
+  if(!panes[name])name='battle';
+  if(name!=='arcade')monsterDashPause();
+  currentAdventurePane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
   if(name==='expeditions')renderExpeditions();
   if(name==='trials')renderTrials();
   if(name==='hunting')renderHuntingZone();
+  if(name==='arcade')renderMonsterDash();
 }
 function showHideoutPane(name='collection'){
   const panes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
@@ -4737,9 +4767,10 @@ function switchTab(name){
     name='shop';
   }else if(name==='shop')currentShopMode='supplies';
   if(exploreExpeditionActive)endExploreExpedition();
+  if(name!=='arcade'&&name!=='adventure')monsterDashPause();
   // Internal destinations route straight into their hub homes.
   const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
-  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials',hunting:'hunting'};
+  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials',hunting:'hunting',arcade:'arcade'};
   const silverwindRoutes={'silverwind-desk':'desk','silverwind-artifacts':'artifacts','silverwind-reference':'reference','silverwind-archive':'archive','silverwind-attacks':'attacks'};
   const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null,silverwindPane=silverwindRoutes[name]||null;
   const mainName=hideoutPane?'hideout':adventurePane?'adventure':silverwindPane?'silverwind':name;
@@ -9545,6 +9576,7 @@ async function renderAll(){
   if(version!==uiRenderVersion)return;
   renderCollection();
   renderHuntingZone();
+  renderMonsterDashStatus();
   renderBreedSelectors();
   renderBreedJob();
   renderSilverwindDesk();
@@ -9618,7 +9650,7 @@ document.getElementById('expeditionRerollDaily').addEventListener('click',()=>{r
 
 document.getElementById('search').addEventListener('input',renderCollection);document.getElementById('filter').addEventListener('change',renderCollection);
 document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutReconstruction').addEventListener('click',()=>showHideoutPane('reconstruction'));document.getElementById('showHideoutHabitats').addEventListener('click',()=>showHideoutPane('habitats'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));document.getElementById('showHideoutProfile').addEventListener('click',()=>showHideoutPane('profile'));
-document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));document.getElementById('showAdventureHunting').addEventListener('click',()=>showAdventurePane('hunting'));
+document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));document.getElementById('showAdventureHunting').addEventListener('click',()=>showAdventurePane('hunting'));document.getElementById('showAdventureArcade').addEventListener('click',()=>showAdventurePane('arcade'));
 document.getElementById('habitatGrid').addEventListener('change',e=>{if(e.target.matches('[data-habitat-name],[data-habitat-theme],[data-habitat-decor],[data-habitat-monster]'))changeHabitatSetting(e.target);});
 document.getElementById('habitatGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-habitat-pet]');if(btn)petHabitatMonster(btn.dataset.habitatPet,btn);});
 document.getElementById('habitatVisitShop').addEventListener('click',()=>switchTab('shop-supplies'));
@@ -10245,6 +10277,202 @@ async function admin2RunPreflight(){
  admin2El('admin2JumpNav')?.addEventListener('click',()=>{});
  document.querySelector('.admin2-jump-nav').addEventListener('click',e=>{const b=e.target.closest('[data-admin2-jump]');if(b)admin2El(b.dataset.admin2Jump).scrollIntoView({behavior:'smooth',block:'start'});});
 })();
+
+// ---------------- Monster Dash: a free permanent healing-time arcade ----------------
+// No battle state is modified by this game. Rewards are granted once, on collision.
+let monsterDashRun=null,monsterDashFrame=0,monsterDashLastTime=0;
+function normalizeMonsterDashState(){
+  const old=state.monsterDash&&typeof state.monsterDash==='object'&&!Array.isArray(state.monsterDash)?state.monsterDash:{};
+  state.monsterDash={best:Math.max(0,Math.floor(Number(old.best)||0)),totalRuns:Math.max(0,Math.floor(Number(old.totalRuns)||0)),crystalDate:typeof old.crystalDate==='string'?old.crystalDate:'',crystalsToday:Math.max(0,Math.min(DASH_MAX_CRYSTALS,Math.floor(Number(old.crystalsToday)||0))),lastReward:typeof old.lastReward==='string'?old.lastReward.slice(0,300):''};
+  if(state.monsterDash.crystalDate!==localDateKey()){state.monsterDash.crystalDate=localDateKey();state.monsterDash.crystalsToday=0;}
+}
+function monsterDashIsVisible(){return !!document.getElementById('adventureArcadePane')?.offsetParent&&document.getElementById('adventure')?.classList.contains('active');}
+function monsterDashPause(){
+  if(monsterDashRun?.playing){monsterDashRun.playing=false;cancelAnimationFrame(monsterDashFrame);monsterDashFrame=0;monsterDashLastTime=0;renderMonsterDashStatus();}
+}
+function renderMonsterDashStatus(){
+  const dash=state.monsterDash;if(!dash)return;
+  if(dash.crystalDate!==localDateKey()){dash.crystalDate=localDateKey();dash.crystalsToday=0;save();}
+  const best=document.getElementById('dashBest');if(!best)return;
+  best.textContent=money(dash.best);
+  document.getElementById('dashCrystalCount').textContent=`${dash.crystalsToday} / ${DASH_MAX_CRYSTALS}`;
+  const run=monsterDashRun,playing=!!run?.playing,started=!!run;
+  const start=document.getElementById('dashStart'),pause=document.getElementById('dashPause');
+  start.textContent=playing?'↻ Restart Run':started?'▶ Resume / New Run':'▶ Start Run';
+  pause.disabled=!playing;
+  document.getElementById('dashRunStatus').textContent=playing?'RUNNING':started?'PAUSED':'READY';
+  document.getElementById('dashLiveScore').textContent=`Distance: ${Math.floor(run?.distance||0)} · Coins: ${run?.coins||0}`;
+  if(!run?.playing&&dash.lastReward)document.getElementById('dashRewardMessage').textContent=dash.lastReward;
+}
+function renderMonsterDash(){renderMonsterDashStatus();monsterDashDraw();}
+function monsterDashNewRun(){
+  if(!monsterDashIsVisible())return;
+  cancelAnimationFrame(monsterDashFrame);monsterDashFrame=0;
+  monsterDashRun={playing:true,distance:0,coins:0,elapsed:0,playerY:DASH_GROUND-34,velocity:0,obstacles:[],tokens:[],nextObstacle:1.5,nextCoin:1.1,groundOffset:0,speed:225};
+  monsterDashLastTime=0;
+  document.getElementById('dashRewardMessage').textContent='Jump over trouble. Grab the shiny things!';
+  renderMonsterDashStatus();monsterDashFrame=requestAnimationFrame(monsterDashTick);
+}
+function monsterDashJump(){
+  const r=monsterDashRun;if(!r?.playing){if(!r)monsterDashNewRun();return;}
+  if(r.playerY>=DASH_GROUND-34-.5){r.velocity=-530;r.playerY=DASH_GROUND-34-1;}
+}
+function monsterDashStartOrResume(){
+  const r=monsterDashRun;
+  if(!r){monsterDashNewRun();return;}
+  if(r.playing){monsterDashPause();monsterDashNewRun();return;}
+  if(!monsterDashIsVisible())return;
+  r.playing=true;monsterDashLastTime=0;renderMonsterDashStatus();monsterDashFrame=requestAnimationFrame(monsterDashTick);
+}
+function monsterDashCoin(){
+  const r=monsterDashRun;if(!r)return;
+  r.tokens.push({x:DASH_W+20,y:155+Math.round(Math.random()*35),taken:false});
+}
+function monsterDashOver(){
+  const r=monsterDashRun;if(!r||!r.playing)return;
+  r.playing=false;cancelAnimationFrame(monsterDashFrame);monsterDashFrame=0;
+  const dash=state.monsterDash;
+  const distance=Math.floor(r.distance),isRecord=distance>dash.best;
+  dash.best=Math.max(dash.best,distance);dash.totalRuns++;
+  let message='';
+  if(distance<80){message=`Ran ${distance} distance. Too short for a reward. Give it another try!`;}
+  else{
+    const tier=distance>=1000?3:distance>=500?2:distance>=200?1:0;
+    const rewards=[[5,10,0.02],[15,25,0.05],[30,40,0.10],[50,60,0.15]];
+    const [low,high,chance]=rewards[tier];
+    // Coins improve the roll, but can never exceed the tier's stated payout.
+    const payout=Math.min(high,low+Math.floor(Math.random()*Math.max(1,high-low+1))+Math.min(3,Math.floor(r.coins/2)));
+    state.currency=Math.max(0,Number(state.currency)||0)+payout;
+    message=`Distance ${distance} • ${r.coins} coins collected • +${payout} currency`;
+    if(dash.crystalDate!==localDateKey()){dash.crystalDate=localDateKey();dash.crystalsToday=0;}
+    if(dash.crystalsToday<DASH_MAX_CRYSTALS&&Math.random()<chance){
+      state.inventory=state.inventory||{};
+      state.inventory.xp_crystal_small=(Number(state.inventory.xp_crystal_small)||0)+1;
+      dash.crystalsToday++;
+      message+=' • ✨ Small XP Crystal!';
+    }
+  }
+  if(isRecord)message+=' • NEW PERSONAL BEST!';
+  dash.lastReward=message;
+  monsterDashRun=null;monsterDashLastTime=0;
+  save();renderMonsterDashStatus();monsterDashDraw();
+  document.getElementById('dashRunStatus').textContent='GAME OVER';
+  document.getElementById('dashStart').textContent='↻ Run Again';
+  document.getElementById('currency').textContent=money(state.currency);
+  if(distance>=80)renderInventory();
+}
+function monsterDashStep(dt){
+  const r=monsterDashRun;if(!r?.playing)return;
+  dt=Math.min(.04,Math.max(0,Number(dt)||0));
+  r.elapsed+=dt;r.speed=Math.min(430,225+r.elapsed*5.5);
+  r.distance+=dt*r.speed*.21;r.groundOffset+=dt*r.speed;
+  r.velocity+=1320*dt;r.playerY=Math.min(DASH_GROUND-34,r.playerY+r.velocity*dt);
+  if(r.playerY>=DASH_GROUND-34)r.velocity=0;
+  r.nextObstacle-=dt;r.nextCoin-=dt;
+  if(r.nextObstacle<=0){
+    const height=27+Math.floor(Math.random()*17),width=25+Math.floor(Math.random()*20);
+    r.obstacles.push({x:DASH_W+12,w:width,h:height});
+    // Timing leaves enough run-up and airborne recovery for a human jump.
+    r.nextObstacle=1.2+Math.random()*.65+Math.min(.35,180/r.speed);
+  }
+  if(r.nextCoin<=0){monsterDashCoin();r.nextCoin=1.05+Math.random()*1.05;}
+  for(const obs of r.obstacles)obs.x-=r.speed*dt;
+  for(const coin of r.tokens)coin.x-=r.speed*dt;
+  r.obstacles=r.obstacles.filter(o=>o.x>-80);
+  r.tokens=r.tokens.filter(c=>!c.taken&&c.x>-30);
+  const x=104,y=r.playerY;
+  for(const coin of r.tokens){
+    if(Math.abs(coin.x-(x+17))<24&&Math.abs(coin.y-(y+17))<26){coin.taken=true;r.coins++;}
+  }
+  for(const obs of r.obstacles){
+    if(x+28>obs.x+5&&x+6<obs.x+obs.w-5&&y+29>DASH_GROUND-obs.h+4){monsterDashOver();break;}
+  }
+}
+function monsterDashTick(timestamp){
+  if(!monsterDashRun?.playing)return;
+  if(!monsterDashIsVisible()||document.hidden){monsterDashPause();return;}
+  const dt=monsterDashLastTime?(timestamp-monsterDashLastTime)/1000:0;
+  monsterDashLastTime=timestamp;
+  monsterDashStep(dt);
+  monsterDashDraw();
+  if(monsterDashRun?.playing){
+    document.getElementById('dashLiveScore').textContent=`Distance: ${Math.floor(monsterDashRun.distance)} · Coins: ${monsterDashRun.coins}`;
+    monsterDashFrame=requestAnimationFrame(monsterDashTick);
+  }
+}
+// Repeat whole 800px scenery panels. Scrolling past a panel width is visually
+// identical to scroll=0, so there are no teleports or mismatched tile seams.
+function monsterDashDrawTiledLayer(ctx,worldScroll,speed,drawPanel){
+  const tileWidth=DASH_W;
+  const shift=((Math.floor(worldScroll*speed)%tileWidth)+tileWidth)%tileWidth;
+  for(let left=-shift;left<DASH_W;left+=tileWidth)drawPanel(left);
+}
+function monsterDashDraw(){
+  const canvas=document.getElementById('monsterDashCanvas'),ctx=canvas?.getContext?.('2d');if(!ctx)return;
+  const r=monsterDashRun,scroll=r?.groundOffset||0;
+  ctx.imageSmoothingEnabled=false;
+  const sky=ctx.createLinearGradient(0,0,0,DASH_H);sky.addColorStop(0,'#10172c');sky.addColorStop(1,'#354061');ctx.fillStyle=sky;ctx.fillRect(0,0,DASH_W,DASH_H);
+  // Three seamless parallax strips: each strip repeats its *entire* tile.
+  // The old per-object wrap and independently wrapping hill vertices could snap
+  // scenery back into view. Repeating identical panels makes both edges match.
+  monsterDashDrawTiledLayer(ctx,scroll,.13,(left)=>{
+    ctx.fillStyle='#536081';ctx.beginPath();ctx.moveTo(left,196);
+    const ridge=[[42,166],[105,124],[160,174],[218,142],[275,115],[338,165],
+      [390,148],[450,123],[511,175],[570,145],[635,118],[695,168],[758,147],[800,196]];
+    for(const [dx,y] of ridge)ctx.lineTo(left+dx,y);
+    ctx.lineTo(left+DASH_W,245);ctx.lineTo(left,245);ctx.closePath();ctx.fill();
+  });
+  monsterDashDrawTiledLayer(ctx,scroll,.37,(left)=>{
+    ctx.fillStyle='#1a263c';
+    for(let i=0;i<10;i++){
+      const x=left+12+i*80,y=161-(i%3)*5;
+      ctx.fillRect(x,y,14,242-y);
+      ctx.fillRect(x-16,y+16,46,8);
+      ctx.fillRect(x-10,y-6,36,10);
+    }
+  });
+  ctx.fillStyle='#354d54';ctx.fillRect(0,DASH_GROUND,DASH_W,58);
+  ctx.fillStyle='#708477';ctx.fillRect(0,DASH_GROUND,DASH_W,5);
+  monsterDashDrawTiledLayer(ctx,scroll,1,(left)=>{
+    for(let i=0;i<20;i++){
+      const x=left+8+i*40;
+      ctx.fillStyle=i%3?'#435b54':'#63877c';
+      ctx.fillRect(x,267+(i%3)*7,17,4);
+    }
+  });
+  // Coins are magical runes rather than ordinary Shop currency sprites.
+  for(const c of r?.tokens||[]){const x=Math.round(c.x),y=c.y;ctx.fillStyle='#e5a73e';ctx.fillRect(x-8,y-8,16,16);ctx.fillStyle='#ffe8a0';ctx.fillRect(x-4,y-6,8,12);ctx.fillStyle='#f4ca58';ctx.fillRect(x-6,y-3,12,6);ctx.fillStyle='#7c4c22';ctx.fillRect(x-2,y-3,4,6);}
+  for(const o of r?.obstacles||[]){const x=Math.round(o.x),y=DASH_GROUND-o.h;ctx.fillStyle='#111624';ctx.fillRect(x-3,y+3,o.w+6,o.h);ctx.fillStyle='#78657b';ctx.fillRect(x,y,o.w,o.h);ctx.fillStyle='#b298aa';ctx.fillRect(x+4,y+3,o.w-9,7);ctx.fillStyle='#4b3957';ctx.fillRect(x+5,y+14,Math.max(4,o.w-11),Math.max(6,o.h-19));}
+  // Tiny original pixel monster: coral ears and cyan eyes, no sprite dependencies.
+  const px=104,py=Math.round(r?.playerY??DASH_GROUND-34);
+  ctx.fillStyle='rgba(4,8,19,.35)';ctx.fillRect(px+2,DASH_GROUND+3,34,5);
+  const legPhase=r?.playing&&r.playerY>=DASH_GROUND-35?Math.floor(r.elapsed*13)%2:0;
+  ctx.fillStyle='#131727';ctx.fillRect(px+6,py+17,27,14);ctx.fillStyle='#3c3046';ctx.fillRect(px+8,py+19,22,9);
+  ctx.fillStyle='#172133';ctx.fillRect(px+5,py+5,30,19);ctx.fillRect(px+8,py,8,11);ctx.fillRect(px+23,py+1,9,12);
+  ctx.fillStyle='#a35f83';ctx.fillRect(px+10,py+3,4,7);ctx.fillRect(px+26,py+4,4,6);
+  ctx.fillStyle='#99f6fc';ctx.fillRect(px+12,py+12,6,5);ctx.fillRect(px+25,py+12,6,5);
+  ctx.fillStyle='#15131f';ctx.fillRect(px+15,py+12,2,3);ctx.fillRect(px+28,py+12,2,3);
+  ctx.fillStyle='#b6c0d2';ctx.fillRect(px+12,py+22,11,3);
+  ctx.fillStyle='#090e19';ctx.fillRect(px+9,py+29,10,legPhase?5:3);ctx.fillRect(px+24,py+29,11,legPhase?3:5);
+  if(!r?.playing){
+    ctx.fillStyle='rgba(8,13,29,.6)';ctx.fillRect(0,0,DASH_W,DASH_H);
+    ctx.fillStyle='#e7faff';ctx.textAlign='center';ctx.font='bold 28px monospace';ctx.fillText('MONSTER DASH',DASH_W/2,104);
+    ctx.font='17px monospace';ctx.fillStyle='#a8cbd1';ctx.fillText('JUMP • COLLECT • SURVIVE',DASH_W/2,142);
+    ctx.font='15px monospace';ctx.fillText('PRESS START TO RUN',DASH_W/2,177);
+    ctx.textAlign='left';
+  }
+}
+document.getElementById('dashStart').addEventListener('click',monsterDashStartOrResume);
+document.getElementById('dashPause').addEventListener('click',monsterDashPause);
+document.getElementById('dashJump').addEventListener('click',monsterDashJump);
+document.getElementById('monsterDashCanvas').addEventListener('pointerdown',e=>{e.preventDefault();monsterDashJump();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)monsterDashPause();});
+document.addEventListener('keydown',e=>{
+  if(!monsterDashIsVisible()||!['Space','ArrowUp','KeyW'].includes(e.code)||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(document.querySelector('dialog[open]')||document.activeElement?.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'))return;
+  e.preventDefault();monsterDashJump();
+});
+// ---------------- End Monster Dash ----------------
 
 // Keyboard movement for the NORMAL Explore maze. Uses the existing move action,
 // so steps, encounters and discoveries have exactly the same rules as button clicks.
