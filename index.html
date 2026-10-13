@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild Prototype v0.15.86f</title>
-<link rel="stylesheet" href="styles.css?v=0.15.86f-keeper-save-transfer">
+<title>Prismwild v0.16.3 · Monster Clicker</title>
+<link rel="stylesheet" href="styles.css?v=0.16.3-monster-clicker">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -12,10 +12,22 @@
   <div id="zoneBackdropB" class="zone-backdrop-image"></div>
   <div class="zone-backdrop-scrim"></div>
 </div>
+<div id="saveHealthNotice" class="polish-save-notice hidden" role="alert"></div>
+<section id="saveRecoveryPanel" class="polish-recovery hidden" aria-labelledby="saveRecoveryTitle">
+  <div class="eyebrow">KEEPER SAVE RECOVERY</div><h1 id="saveRecoveryTitle">Your save needs attention</h1>
+  <p>Prismwild could not read your saved progress. Play and automatic saving are paused so the original data stays untouched.</p>
+  <p id="saveRecoveryMessage" role="status" aria-live="polite"></p>
+  <div class="polish-ready-actions">
+    <button id="downloadUnreadableSave" class="ghost" type="button">Download original save data</button>
+    <button id="restoreSaveCheckpoint" class="primary" type="button">Restore previous checkpoint</button>
+    <label class="ghost file-label">Import exported Keeper Save<input id="recoverySaveImport" type="file" accept=".json,application/json" aria-label="Import an exported Keeper Save for recovery"></label>
+  </div>
+  <p>The checkpoint contains progress from a previous visit. Keep your regular Keeper Save exports for backups that include locally uploaded artwork.</p>
+</section>
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.15.86f</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.16.3 · MONSTER CLICKER</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -68,6 +80,7 @@
         <button class="nav-link" data-route="shop-donations" type="button">📦 Donations</button>
       </div>
     </div>
+    <button class="tab" data-tab="arcade" type="button">🎮 Arcade</button>
     <button class="tab event-nav-tab" data-tab="event">Event <span id="eventBadge" class="badge">LIVE</span></button>
     <button class="tab" data-tab="requests">Requests <span id="requestBadge" class="badge">0</span></button>
 
@@ -95,6 +108,10 @@
         </div>
         <div class="landing-date" id="landingDate"></div>
       </div>
+      <section class="polish-ready-panel" aria-labelledby="hideoutReadyTitle">
+        <div class="eyebrow">MY HIDEOUT</div><h3 id="hideoutReadyTitle">Ready when you are</h3>
+        <div id="hideoutReadyActions" class="polish-ready-actions"></div>
+      </section>
       <section id="newKeeperChecklist" class="new-keeper-checklist hidden">
         <div class="new-keeper-checklist-head"><div><div class="eyebrow">NEW KEEPER PATH</div><h3>Your First Steps</h3><p>These are suggestions, not locks. Prismwild opens up as soon as you choose your starter.</p></div><button id="dismissNewKeeperChecklist" class="ghost small hidden" type="button">Dismiss Guide</button></div>
         <div id="newKeeperChecklistItems" class="new-keeper-checklist-items"></div>
@@ -284,7 +301,7 @@
         <button id="showAdventureExpeditions" class="subtab" type="button">Expeditions <span class="badge expedition-inline-badge">0</span></button>
         <button id="showAdventureTrials" class="subtab" type="button">Trials</button>
         <button id="showAdventureHunting" class="subtab" type="button">🪤 Hunting Zone <span id="huntingTabReady" class="badge hidden">0</span></button>
-        <button id="showAdventureArcade" class="subtab" type="button">🎮 Arcade</button>
+
       </div>
       <div id="adventureBattlePane" class="adventure-pane">
       <div class="page-heading">
@@ -315,16 +332,18 @@
       </div>
       <div id="adventureExpeditionsPane" class="adventure-pane hidden">
       <div class="page-heading">
-        <div class="eyebrow">KEEPER EXPEDITION BOARD</div>
-        <h2>Daily Expeditions</h2>
-        <p>Send one to five available monsters on timed jobs across Prismwild. Longer expeditions bring home larger hauls, better rare-reward chances, and XP for each participating monster.</p>
+        <div class="eyebrow">SILVERWIND’S FIELDWORK OFFICE</div>
+        <h2>Silverwind’s Expedition Desk</h2>
+        <p>Every team has a story. Choose your crew, find their specialties, and send them into the wilds to bring home supplies, training, and discoveries.</p>
       </div>
       <div class="expedition-rules-card">
         <div><strong>Three contracts each day</strong><span>Short • 1 hour</span><span>Extended • 5 hours</span><span>Long • 12 hours</span></div>
-        <p>Monsters on an active expedition cannot battle, breed, or leave on another expedition. Every team member earns full training XP when you collect the return haul (1h: 50 XP, 5h: 300 XP, 12h: 850 XP). Bigger and stronger teams improve the chance of bonus loot. Started jobs survive the daily refresh.</p>
+        <p>Teams stay reserved until you collect their haul and training (1h: 50 XP, 5h: 300 XP, 12h: 850 XP per monster). A matching role, regional element, and captain each add 5% bonus loot chance. Normal rewards are guaranteed. Started trips survive the daily refresh.</p>
       </div>
       <div id="expeditionGrid" class="expedition-grid"></div>
-      <p id="expeditionMessage" class="expedition-message"></p>
+      <p id="expeditionMessage" class="expedition-message" role="status" aria-live="polite"></p>
+      <section class="desk-journal"><div class="eyebrow">THE PLACES WE’VE BEEN</div><h3>Regional research</h3><p>Complete 1, 3, and 6 trips in a region to uncover field notes. The third and sixth trips each recover an Ancient Page for the Reconstruction Lab.</p><div id="expeditionResearch" class="desk-research-grid"></div></section>
+      <details class="desk-history"><summary>Return report archive</summary><div id="expeditionHistory"></div></details>
       </div>
       <div id="adventureTrialsPane" class="adventure-pane hidden">
         <div class="page-heading trial-heading">
@@ -348,29 +367,6 @@
         <div id="huntingTrapsGrid" class="hunt-traps-grid"></div>
         <p id="huntingMessage" class="hunt-message" role="status"></p>
         <div class="hunt-bait-guide"><h3>Bait in your pack</h3><div id="huntingBaitSummary" class="hunt-bait-summary"></div><p>Higher tiers improve both capture success and the chances of attracting rarer species. Configure exclusive monsters in Admin → Monster Studio → Obtain method → Hunting Zone.</p></div>
-      </div>
-      <div id="adventureArcadePane" class="adventure-pane hidden">
-        <section class="dash-header">
-          <div><div class="eyebrow">SILVY'S GAME CORNER</div><h2>🏃 Monster Dash</h2>
-          <p>Waiting for your monsters to heal? Run, jump, and grab coins while they rest. No healthy monster, entry fee, or cooldown required!</p></div>
-          <div class="dash-best"><small>PERSONAL BEST</small><strong id="dashBest">0</strong><span>distance</span></div>
-        </section>
-        <div class="dash-game-shell">
-          <div class="dash-toolbar"><span id="dashRunStatus">Ready to run</span><span id="dashLiveScore">Distance: 0 · Coins: 0</span></div>
-          <canvas id="monsterDashCanvas" width="800" height="300" role="img" aria-label="Side-scrolling Monster Dash game. Jump over obstacles and collect coins." tabindex="0"></canvas>
-          <div class="dash-actions">
-            <button id="dashStart" class="primary" type="button">▶ Start Run</button>
-            <button id="dashPause" class="ghost" type="button" disabled>Pause</button>
-            <button id="dashJump" class="ghost dash-jump-btn" type="button">⬆ JUMP</button>
-          </div>
-          <p class="dash-hint">Space, ↑, or W to jump • Tap JUMP or the game screen on mobile • Colliding ends your run. Paused runs can resume.</p>
-          <p id="dashRewardMessage" class="dash-reward" aria-live="polite">Play as often as you like. Prizes are paid when a run ends.</p>
-        </div>
-        <div class="dash-rewards-info">
-          <div><strong>Currency rewards</strong><span>Short: 5–10 • Good: 15–25 • Great: 30–40 • 1,000+: 50–60</span></div>
-          <div><strong>Small XP Crystals</strong><span>2% / 5% / 10% / 15% chance by distance tier • <b id="dashCrystalCount">0 / 3</b> earned today</span></div>
-          <small>Crystals are awarded to Inventory for you to give to a monster later. Runs ending before 80 distance award nothing. This minigame never uses your monsters' health.</small>
-        </div>
       </div>
       <dialog id="huntingBaitDialog" class="hunt-dialog">
         <div class="hunt-dialog-head"><div><div class="eyebrow">READY THE TRAP</div><h3 id="huntingBaitHeading">Choose Bait</h3></div><button id="huntingCloseBait" class="ghost small" type="button">✕</button></div>
@@ -598,7 +594,7 @@
   <div class="note-card"><strong>Reconstruction Recipes &amp; Materials</strong><p>Create three-slot recipes that produce an egg. Ancient Pages only reveal recipes marked discoverable. New materials can be used in any recipe and optionally added to excavation rewards. Custom icons are editable in Sprite Workshop.</p></div>
   <div class="recon-admin-columns">
     <form id="reconRecipeForm" class="admin-form">
-      <h3>Recipe Editor</h3><input id="reconEditId" type="hidden">
+      <h3 id="reconRecipeEditorHeading">New Recipe</h3><input id="reconEditId" type="hidden">
       <label>Recipe title<input id="reconRecipeTitle" maxlength="72" required placeholder="Forgotten Leviathan"></label>
       <label>Resulting Monster<select id="reconRecipeSpecies" required></select></label>
       <label>Egg Sprite Code<select id="reconRecipeEggSprite"></select><small>Automatic uses the species' custom egg artwork, if present. Or select an existing Sprite Workshop code.</small></label>
@@ -608,7 +604,7 @@
         <label>Material C<select id="reconItem2" required></select><input type="number" id="reconQty2" min="1" max="9999" step="1" value="1" required></label>
       </div>
       <label class="check-row"><input id="reconPageDiscoverable" type="checkbox" checked><span>Ancient Pages can discover this recipe</span></label>
-      <div class="recon-admin-actions"><button class="primary" type="submit">Save Recipe</button><button id="reconNewRecipe" type="button" class="ghost">New</button><button id="reconGiveTestPage" type="button" class="ghost">Give Test Ancient Page</button><button id="reconDeleteRecipe" type="button" class="danger">Delete</button></div>
+      <div class="recon-admin-actions"><button id="reconSaveRecipeButton" class="primary" type="submit">Save Recipe</button><button id="reconNewRecipe" type="button" class="ghost">New Recipe</button><button id="reconCancelRecipeEdit" type="button" class="ghost hidden">Cancel Edit</button><button id="reconGiveTestPage" type="button" class="ghost">Give Test Ancient Page</button><button id="reconDeleteRecipe" type="button" class="danger" disabled>Remove Recipe</button></div>
       <p id="reconRecipeAdminMessage" class="admin-message" role="status"></p>
       <h3>Saved Recipes</h3><div id="reconAdminRecipeList" class="recon-admin-list"></div>
     </form>
@@ -1251,6 +1247,42 @@
       </div>
     </section>
 
+    <section id="arcade" class="page">
+      <div class="arcade-heading"><div><div class="eyebrow">SILVY’S GAME CORNER</div><h2>Prismwild Arcade</h2><p>A little play. A little progress. Bring your monsters along.</p></div><button id="arcadeBack" class="ghost hidden" type="button">← All games</button></div>
+      <div id="arcade-lobby"><div class="arcade-intro"><span>✦</span><div><h3>Pick your next little adventure</h3><p>Free to play, with rewards for your collection. New games will find a home here.</p></div></div><div class="arcade-games">
+        <article class="arcade-game-card arcade-clicker-card"><div class="arcade-card-art">◈ <span>?</span> ✦</div><div class="eyebrow">SPOT IT · CLICK IT · SPIN</div><h3>Monster Clicker</h3><p>Find the named monster among three faces. Train your Active Monster and a collection friend, then match three reels for a bonus prize.</p><div class="arcade-tags"><span>+1 currency</span><span>XP for two</span><span>Bonus reels</span></div><button class="primary" type="button" data-arcade-game="clicker">Play Monster Clicker →</button></article>
+        <article class="arcade-game-card arcade-dash-card"><div class="arcade-card-art">▂ ▆ <span>🏃</span> ▄ ▂</div><div class="eyebrow">RUN · JUMP · COLLECT</div><h3>Monster Dash</h3><p>Jump over obstacles and gather coins in the wilds. Beat your best distance while your monsters rest.</p><div class="arcade-tags"><span>Currency prizes</span><span>XP Crystals</span><span>Personal best</span></div><button class="primary" type="button" data-arcade-game="dash">Play Monster Dash →</button></article>
+      </div></div>
+      <div id="arcade-dash" class="hidden">        <section class="dash-header">
+          <div><div class="eyebrow">SILVY'S GAME CORNER</div><h2>🏃 Monster Dash</h2>
+          <p>Waiting for your monsters to heal? Run, jump, and grab coins while they rest. No healthy monster, entry fee, or cooldown required!</p></div>
+          <div class="dash-best"><small>PERSONAL BEST</small><strong id="dashBest">0</strong><span>distance</span></div>
+        </section>
+        <div class="dash-game-shell">
+          <div class="dash-toolbar"><span id="dashRunStatus">Ready to run</span><span id="dashLiveScore">Distance: 0 · Coins: 0</span></div>
+          <canvas id="monsterDashCanvas" width="800" height="300" role="img" aria-label="Side-scrolling Monster Dash game. Jump over obstacles and collect coins." tabindex="0"></canvas>
+          <div class="dash-actions">
+            <button id="dashStart" class="primary" type="button">▶ Start Run</button>
+            <button id="dashPause" class="ghost" type="button" disabled>Pause</button>
+            <button id="dashJump" class="ghost dash-jump-btn" type="button">⬆ JUMP</button>
+          </div>
+          <p class="dash-hint">Space, ↑, or W to jump • Tap JUMP or the game screen on mobile • Colliding ends your run. Paused runs can resume.</p>
+          <p id="dashRewardMessage" class="dash-reward" aria-live="polite">Play as often as you like. Prizes are paid when a run ends.</p>
+        </div>
+        <div class="dash-rewards-info">
+          <div><strong>Currency rewards</strong><span>Short: 5–10 • Good: 15–25 • Great: 30–40 • 1,000+: 50–60</span></div>
+          <div><strong>Small XP Crystals</strong><span>2% / 5% / 10% / 15% chance by distance tier • <b id="dashCrystalCount">0 / 3</b> earned today</span></div>
+          <small>Crystals are awarded to Inventory for you to give to a monster later. Runs ending before 80 distance award nothing. This minigame never uses your monsters' health.</small>
+        </div>
+</div>
+      <div id="arcade-clicker" class="hidden">
+        <div class="mc-heading"><div><div class="eyebrow">A FACE-FINDING GAME FOR YOUR COLLECTION</div><h2>Monster Clicker</h2></div><div class="mc-counters"><span><strong id="mcCorrect">0</strong> correct</span><span><strong id="mcWins">0</strong> reel wins</span></div></div>
+        <div id="mcBoard" class="mc-board"></div>
+        <section class="mc-machine" aria-labelledby="mcMachineTitle"><div class="eyebrow">THREE OF A KIND WINS</div><h3 id="mcMachineTitle">The bonus reels</h3><div id="mcReels" class="mc-reels" aria-label="Bonus reels" aria-busy="false"><div class="mc-reel"><strong>?</strong><small>Ready</small></div><div class="mc-reel"><strong>?</strong><small>Ready</small></div><div class="mc-reel"><strong>?</strong><small>Ready</small></div></div><p id="mcMessage" role="status" aria-live="polite"></p><button id="mcRetry" type="button" class="primary hidden">Retry collecting saved spin</button></section>
+        <details class="mc-rules"><summary>How to play & prize odds</summary><p>Click the named monster to earn 1 currency and 1 XP for each displayed companion. Monsters at level 100 stay at the level cap. Wrong guesses have no penalty. Then three independent reels spin; three matching symbols win the pictured prize. Your next question and partner appear automatically.</p><div id="mcPrizeOdds"></div><p>Medium Recovery Gel uses the existing Medium Healing Gel item. Random injectors are equally selected from P2–P12. Prismatic Eggs use the regular expedition egg species pool and go to Egg Storage. No entry cost or daily play limit.</p></details>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -1336,8 +1368,15 @@
     <h2 id="expeditionTeamTitle">Choose 1–5 Monsters</h2>
     <p id="expeditionTeamDescription">Available monsters can be assigned to this expedition.</p>
     <div class="expedition-team-summary"><strong id="expeditionTeamCount">0 / 5 selected</strong><span id="expeditionTeamBonus">Bonus loot chance: 0%</span></div>
+    <div class="desk-team-tools">
+      <details class="desk-presets"><summary>Saved teams &amp; repeat crew</summary><div class="desk-template-row"><label>Saved teams<select id="expeditionSavedTeam"><option value="">Choose a saved team…</option></select></label><button id="expeditionLoadTeam" class="ghost" type="button">Load team</button><button id="expeditionDeleteTeam" class="ghost" type="button">Remove saved team</button><button id="expeditionUseLastTeam" class="ghost" type="button">Use last team</button></div>
+      <div class="desk-template-row"><label>Team name<input id="expeditionTeamName" maxlength="32" placeholder="e.g. Midnight Surveyors"></label><button id="expeditionSaveTeam" class="ghost" type="button">Save this team</button></div></details>
+      <div class="desk-template-row"><label>Team captain<select id="expeditionCaptain"><option value="">Choose a captain…</option></select></label></div>
+      <div class="desk-filter-row"><input id="expeditionTeamSearch" type="search" placeholder="Search name, element, or role…" aria-label="Search expedition monsters"><label><input id="expeditionAvailableOnly" type="checkbox"> Available only</label></div>
+    </div>
+    <p id="expeditionBonusBreakdown" class="desk-preview"></p><p id="expeditionTeamLoot" class="desk-preview"></p>
     <div id="expeditionTeamPicker" class="expedition-team-picker"></div>
-    <p id="expeditionTeamMessage" class="expedition-team-message"></p>
+    <p id="expeditionTeamMessage" class="expedition-team-message" role="status" aria-live="polite"></p>
     <div class="expedition-team-actions"><button id="startSelectedExpedition" class="primary big" type="button" disabled>Begin Expedition</button><button id="cancelExpeditionTeam" class="ghost" type="button">Cancel</button></div>
   </div>
 </dialog>
@@ -1435,6 +1474,17 @@
   </div>
 </dialog>
 
+<dialog id="reconRevealDialog" class="recon-reveal-dialog" aria-labelledby="reconRevealTitle" aria-describedby="reconRevealDescription">
+  <div class="recon-reveal-heading"><span class="eyebrow">RECONSTRUCTION CHAMBER</span><button id="reconSkipReveal" class="ghost small" type="button">Skip Animation</button></div>
+  <div id="reconRevealStage" class="recon-reveal-stage stage-0" aria-hidden="true">
+    <div class="recon-reveal-grid"></div><div class="recon-reveal-ring outer"></div><div class="recon-reveal-ring inner"></div>
+    <div class="recon-reveal-beam"></div><div class="recon-reveal-glow"></div><div class="recon-reveal-platform"></div>
+    <div id="reconRevealMaterials" class="recon-reveal-materials"></div><div id="reconRevealEgg" class="recon-reveal-egg"></div>
+  </div>
+  <div class="recon-reveal-copy" aria-live="polite"><h2 id="reconRevealTitle">Preparing the materials...</h2><p id="reconRevealDescription">An ancient recipe is coming to life.</p></div>
+  <div id="reconRevealActions" class="recon-reveal-actions hidden"><button id="reconRevealStorage" class="primary" type="button">View Egg Storage</button><button id="reconRevealStay" class="ghost" type="button">Stay in Lab</button></div>
+</dialog>
+
 <dialog id="labMonsterPicker" class="lab-picker-dialog">
   <button type="button" id="labCloseMonsterPicker" class="close" aria-label="Close monster picker">×</button>
   <div class="lab-dialog-inner"><div class="eyebrow">BREEDING LAB</div><h2 id="labPickerHeading">Choose a parent</h2><p>Search your Collection and compare eligible monsters. Unavailable monsters explain why.</p>
@@ -1487,7 +1537,7 @@
 
     <div class="monster-profile-identity">
       <div id="detailSpecies" class="eyebrow species-line"></div>
-      <div class="monster-profile-name-row"><h2 id="detailName"></h2><button id="labFavoriteMonster" class="icon-button lab-favorite-toggle" type="button" aria-label="Favorite monster" title="Mark as favorite for breeding">☆</button><button id="renameToggle" class="icon-button" type="button" aria-label="Rename monster" title="Rename">✎</button></div>
+      <div class="monster-profile-name-row"><h2 id="detailName"></h2><button id="labFavoriteMonster" class="icon-button lab-favorite-toggle" type="button" aria-label="Favorite monster" title="Favorite for breeding and protect from release">☆</button><button id="renameToggle" class="icon-button" type="button" aria-label="Rename monster" title="Rename">✎</button></div>
       <div class="monster-profile-level"><strong>Lv.<span id="detailLevel"></span></strong><span id="detailRole"></span></div>
       <div id="renameBox" class="rename-box compact-rename hidden">
         <label for="renameInput">Nickname</label>
@@ -1938,6 +1988,7 @@ const SPRITE_DEFS={
   currency:{name:'Normal Currency',category:'Currency & Loot',kind:'atlas'},
   prismatic_shard:{name:'Prismatic Shard / Revive Gem',category:'Items',kind:'atlas'},
   mystery_capsule:{name:'Mystery Capsule',category:'Items',kind:'atlas'},
+  active_capture_pod:{name:'Active Capture Pod',category:'Items',kind:'atlas',atlasKey:'mystery_capsule'},
   egg_generic:{name:'Generic Egg',category:'Eggs',kind:'atlas'},
   egg_shop:{name:'Shop Egg',category:'Eggs',kind:'atlas'},
   egg_wild:{name:'Wild Egg',category:'Eggs',kind:'atlas'},
@@ -2065,6 +2116,8 @@ function inventoryIconMarkup(info,className='sheet-icon icon-lg'){
 const FAINT_DURATION_MS=3*60*1000;
 const WILD_MONSTER_REWARD_CHANCE=.15;
 const CAPTURE_POD_BONUS=.20;
+const ACTIVE_CAPTURE_POD_BONUS=.15;
+const ACTIVE_CAPTURE_POD_PRICE=500;
 const CAPTURE_POD_DURATION_MS=20*60*1000;
 const MONSTER_WARD_DURATION_MS=5*60*1000;
 const MONSTER_WARD_REDUCTION=.15;
@@ -2103,6 +2156,24 @@ const EXPEDITION_MISSIONS={
   strange_disturbance:{title:'Strange Disturbance',icon:'✦',description:'Something unfamiliar is stirring beyond the usual routes. Investigate the signs and bring back whatever explains them.',rewardHint:'Unpredictable mixed rewards'}
 };
 
+
+// Expedition Desk: data is separate from the existing live content registry.
+const EXPEDITION_REGIONS={
+  flat_lands:{name:'Flat Lands',elements:['Nature','Earth'],material:'field_herbs',color:'#acd890',lore:['Old trail stones carry claw marks instead of directions. Someone expected monsters to read them.','Roots beneath the caravan road have grown around fragments of an ancient Keeper notebook.','The oldest route follows a migrating herd. The road was built around the monsters, not the other way around.'],scene:'followed the overgrown caravan trails'},
+  blaze_lands:{name:'Blaze Lands',elements:['Fire','Earth'],material:'dig_gemstone_amber',color:'#f2aa75',lore:['Cold ash gathers in circles where no fire has burned for years.','An amber fragment holds the imprint of a creature missing from the field guide.','The vents below the old watchtower breathe in a rhythm that resembles a sleeping monster.'],scene:'crossed the cooling ash fields'},
+  permafrost_peaks:{name:'Permafrost Peaks',elements:['Ice','Metal'],material:'dig_bone_rib',color:'#a5dbef',lore:['Something enormous crossed this pass before the snow became permanent.','Inside a clear ice shelf, the team found a rib beside a scrap of Keeper research.','The blue lights beneath the glacier follow the same paths as the oldest expedition maps.'],scene:'traced a sheltered path across the frozen pass'},
+  shadow_plains:{name:'Shadow Plains',elements:['Shadow','Spirit'],material:'dig_gemstone_onyx',color:'#c1a4ee',lore:['The team counted one more shadow than there were monsters. It left at sunrise.','An onyx marker preserves a page-shaped impression beneath its surface.','The missing shadow appears in an old Keeper sketch, waiting beside the same trail marker.'],scene:'followed the lantern markers through the long shadows'},
+  bright_temple:{name:'Bright Temple',elements:['Light','Spirit'],material:'dig_gemstone_sunstone',color:'#eddda4',lore:['Light enters the sealed courtyard even when every doorway is closed.','A sunstone lens revealed writing between the lines of an ancient field note.','The temple windows once projected a map onto the floor. One destination was deliberately covered.'],scene:'searched the quiet courtyards of the temple'},
+  wastelands:{name:'Wastelands',elements:['Earth','Metal'],material:'dig_bone_fang',color:'#d2b69a',lore:['Buried shelters are lined with tooth marks on the inside of their doors.','A fossil fang was wrapped in a page describing how Keepers once rebuilt lost creatures.','Every shelter faces the same distant ridge. The maps call it a refuge, but never say for whom.'],scene:'picked a route between the buried outposts'},
+  chaos_wastes:{name:'Chaos Wastes',elements:['Void','Lightning'],material:'dig_gemstone_moonstone',color:'#d59be2',lore:['The compass pointed back toward camp from both sides of the same hill.','A moonstone fragment held a reflection of a notebook that was not there.','Comparing the impossible routes revealed a pattern: something is trying to guide visitors home.'],scene:'charted the shifting paths beyond the familiar wilds'}
+};
+const EXPEDITION_SPECIALTIES={
+  rebuilding_effort:{role:'Brute',task:'Clear the blocked supply path'},hostile_pack:{role:'Brute',task:'Track down the scattered cache'},
+  lost_temple:{role:'Speed',task:'Survey a hidden side chamber'},supply_run:{role:'Defender',task:'Keep the spare supplies intact'},
+  resource_survey:{role:'Speed',task:'Mark an extra gathering site'},missing_team:{role:'Defender',task:'Recover the missing team’s packs'},
+  monster_migration:{role:'Speed',task:'Find the herd’s abandoned nesting ground'},ancient_cache:{role:'Brute',task:'Uncover a sealed compartment'},
+  recovery_mission:{role:'Defender',task:'Bring the fragile supplies home'},strange_disturbance:{role:'Speed',task:'Follow an unusual field signal'}
+};
 
 // ---------- Reusable Event Framework ----------
 const EVENT_HOUR_MS=60*60*1000;
@@ -2398,6 +2469,7 @@ const ITEM_SHOP = [
   {id:'incu_catalyst',name:'Incubation Catalyst',category:'Consumable',price:300,icon:'incubation_catalyst',desc:'Use once on an incubating egg to reduce its remaining hatch time by 30 minutes.'},
   {id:'hormone_catalyst',name:'Hormone Catalyst',category:'Breeding Consumable',price:750,spriteKey:'hormone_catalyst',iconImage:'assets/icons/basic_sprites/hormone_catalyst.png',desc:'Use once on an active breeding pen to reduce its remaining breeding time by 30 minutes.'},
   {id:'refresh_juice',name:'Refresh Juice',category:'Event Consumable',price:1000,icon:'recovery_gel',desc:'Usable once per hour. Halloween: instantly restores 5 Haunted Maze Steps. Winter: immediately clears a failed-match Memory lockout. It cannot clear the one-hour completion cooldown.'},
+  {id:'active_capture_pod',name:'Active Capture Pod',category:'Battle Consumable',price:500,icon:'mystery_capsule',consumable:true,desc:'Throw at a wild monster during battle for a +15 percentage point capture chance. Stacks with the normal 15% recruit rate and any active Capture Pod field boost.'},
   {id:'capture_pod',name:'Capture Pod',category:'Exploration Consumable',price:2500,icon:'mystery_capsule',desc:'Activates a 20-minute field signal that adds 20 percentage points to the recruit chance of defeated capturable monsters.'},
   {id:'monster_ward',name:'Monster Ward',category:'Exploration Consumable',price:1500,icon:'trait_charm',desc:'Five-minute field buff: lowers ordinary wild encounter chance by 15 percentage points (40% to 25%). Does not affect Alpha hunts, Mythic Temples, or event mazes.'},
   {id:'nature_disc',name:'Nature Disc',category:'Monster Tuning',price:5000,icon:'trait_charm',desc:'Rerolls one monster’s Trait. Each individual monster may use one Nature Disc per local calendar day.'},
@@ -2555,8 +2627,8 @@ function silverwindReferenceTopics(){
 
     {id:'expeditions',category:'Fieldwork',title:'Daily Expeditions',summary:'Send teams away on timed contracts for larger reward bundles.',keywords:'1 hour 5 hour 12 hour team away mission contract rewards',note:`Expeditions are useful when you want monsters doing something productive while you are elsewhere. I support this principle strongly and would like the paperwork to learn it.`,body:()=>referenceList(EXPEDITION_DURATION_ORDER.map(key=>{const d=EXPEDITION_DURATIONS[key];return `<strong>${d.label}</strong>: ${d.hours} hour${d.hours===1?'':'s'}.`;}).concat([
       `Assign <strong>1 to 5</strong> eligible monsters to a contract.`,
-      `Away monsters are locked from actions that would conflict with the Expedition.`,
-      `Unstarted contracts reroll daily. Active timers persist.`,
+      `Teams remain reserved until their returned haul and training XP are collected.`,
+      `Unstarted contracts reroll daily. Active timers and returned hauls persist. Match the mission role, regional element, and captain for up to 15 extra percentage points of bonus loot chance (50% total cap). Normal rewards are guaranteed.`,
       `Longer missions generally offer stronger reward ranks and access to more valuable expedition treasure.`,
       `Every assigned monster earns the full training XP when the Keeper collects the return: <strong>1h: 50 XP</strong>, <strong>5h: 300 XP</strong>, <strong>12h: 850 XP</strong>. XP is never split among team members.`
     ]))+referenceActions([['expeditions','Open Expeditions']])},
@@ -2840,6 +2912,54 @@ function useAncientPages(){
   return true;
 }
 let reconSelectedRecipeId='',reconSelectedPane='chamber';
+let reconRevealEggId=null,reconRevealTimeouts=[];
+function reconClearRevealTimers(){reconRevealTimeouts.forEach(clearTimeout);reconRevealTimeouts=[];}
+function reconFinishEggReveal(){
+  reconClearRevealTimers();
+  const egg=state.eggs.find(e=>e.id===reconRevealEggId);if(!egg)return;
+  document.getElementById('reconRevealStage').className='recon-reveal-stage stage-4';
+  document.getElementById('reconRevealTitle').textContent=`${eggDisplayName(egg)} reconstructed!`;
+  document.getElementById('reconRevealDescription').textContent='Your egg is waiting in Egg Storage, ready for an Incubator.';
+  document.getElementById('reconRevealActions').classList.remove('hidden');
+  document.getElementById('reconSkipReveal').classList.add('hidden');
+  document.getElementById('reconRevealStorage').focus({preventScroll:true});
+}
+function reconCloseEggReveal(goToStorage=false){
+  reconClearRevealTimers();reconRevealEggId=null;
+  const dialog=document.getElementById('reconRevealDialog');if(dialog.open)dialog.close();
+  if(goToStorage)switchTab('eggs');
+}
+function openReconEggReveal(egg,recipe){
+  const dialog=document.getElementById('reconRevealDialog');if(!dialog||typeof dialog.showModal!=='function')return;
+  reconClearRevealTimers();reconRevealEggId=egg.id;
+  const stage=document.getElementById('reconRevealStage'),eggHost=document.getElementById('reconRevealEgg');
+  stage.className='recon-reveal-stage stage-0';
+  document.getElementById('reconRevealTitle').textContent='Preparing the materials...';
+  document.getElementById('reconRevealDescription').textContent=`Following the ${recipe.title} recipe.`;
+  document.getElementById('reconRevealActions').classList.add('hidden');
+  document.getElementById('reconSkipReveal').classList.remove('hidden');
+  document.getElementById('reconRevealMaterials').innerHTML=recipe.ingredients.map((part,i)=>{
+    const info=itemInfoForInventoryId(part.id);
+    return `<div class="recon-reveal-material material-${i}">${inventoryIconMarkup(info,'sheet-icon recon-reveal-material-icon')}<small>×${part.qty}</small></div>`;
+  }).join('');
+  eggHost.innerHTML=iconMarkup('egg_generic','sheet-icon recon-reveal-egg-image egg-sheet-icon');
+  dialog.showModal();hydrateSprites(dialog);
+  eggVisual(egg.slug,'recon-reveal-egg-image','reconstruction',egg).then(markup=>{
+    if(reconRevealEggId===egg.id&&dialog.open){eggHost.innerHTML=markup;hydrateSprites(eggHost);}
+  }).catch(error=>console.warn('Reconstruction reveal is using the fallback egg sprite.',error));
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){reconFinishEggReveal();return;}
+  for(const [ms,phase,title,description] of [
+    [500,1,'The chamber is waking up...','Ancient energy gathers around the recovered materials.'],
+    [1350,2,'Restoring the lost pattern...','The three materials draw together inside the chamber.'],
+    [2550,3,'A new egg takes shape!','The reconstruction chamber brings your recipe to life.']
+  ])reconRevealTimeouts.push(setTimeout(()=>{
+    if(reconRevealEggId!==egg.id||!dialog.open)return;
+    stage.className=`recon-reveal-stage stage-${phase}`;
+    document.getElementById('reconRevealTitle').textContent=title;
+    document.getElementById('reconRevealDescription').textContent=description;
+  },ms));
+  reconRevealTimeouts.push(setTimeout(()=>{if(reconRevealEggId===egg.id&&dialog.open)reconFinishEggReveal();},3550));
+}
 function reconRecipeIngredientsMarkup(recipe){
   return recipe.ingredients.map((part,i)=>{
     const info=itemInfoForInventoryId(part.id),owned=Math.max(0,Number(state.inventory[part.id]||0));
@@ -2869,6 +2989,7 @@ function renderReconstructionLab(){
   detail.innerHTML=`<div class="recon-detail-head"><div><div class="eyebrow">SELECTED FORMULA</div><h3>${labSafe(chosen.title)}</h3><p>Produces a ${labSafe(sp?.name||'Monster')} Egg</p></div><div class="recon-outcome">🥚 <strong>${labSafe(sp?.name||'Monster')} Egg</strong><small>Incubation: ${fmtTime(Number(sp?.hatchSeconds||60)*1000)}</small></div></div><div class="recon-materials">${reconRecipeIngredientsMarkup(chosen)}</div><div class="recon-checkout"><div><strong>${currencyMarkup(price)}</strong><small>${price===RECONSTRUCTION_MYTHIC_COST?'Mythic reconstruction fee':'Standard reconstruction fee'}</small></div><button type="button" class="primary big" id="reconCreateEgg" ${canPay&&hasMaterials?'':'disabled'}>Reconstruct Egg</button></div>${canPay&&hasMaterials?'':`<p class="form-note">${!hasMaterials?'Missing required materials. ':''}${!canPay?'Not enough currency.':''}</p>`}`;
 }
 function reconstructSelectedEgg(){
+  if(reconRevealEggId)return false;
   const recipe=state.reconstructionRecipes[reconSelectedRecipeId];if(!reconRecipeIsValid(recipe)||!state.knownReconstructionRecipes.includes(recipe.id)){document.getElementById('reconMessage').textContent='This recipe is not available.';return false;}
   const fee=reconCost(recipe),sp=state.species[recipe.slug];
   if(state.currency<fee||!reconMaterialsSatisfied(recipe)){document.getElementById('reconMessage').textContent='You need all three materials and the full reconstruction fee.';renderReconstructionLab();return false;}
@@ -2880,7 +3001,7 @@ function reconstructSelectedEgg(){
   for(const part of recipe.ingredients){state.inventory[part.id]-=part.qty;if(state.inventory[part.id]<=0)delete state.inventory[part.id];}
   state.currency-=fee;state.eggs.push(egg);save();
   document.getElementById('reconMessage').textContent=`${sp.name} Egg reconstructed! It is waiting in Egg Storage.`;
-  renderAll();return true;
+  renderAll();openReconEggReveal(egg,recipe);return true;
 }
 function renderReconstructionAdmin(){
   if(!isAdminAccount())return;
@@ -2891,22 +3012,41 @@ function renderReconstructionAdmin(){
   for(let i=0;i<3;i++){const select=document.getElementById(`reconItem${i}`),old=select.value;select.innerHTML='<option value="">Choose an item…</option>'+fullItems.map(([id,info])=>`<option value="${labSafe(id)}">${labSafe(info.name)}</option>`).join('');select.value=old;}
   const spriteSelect=document.getElementById('reconRecipeEggSprite'),oldSprite=spriteSelect.value;
   spriteSelect.innerHTML='<option value="auto">Automatic (species egg artwork)</option>'+Object.entries(SPRITE_DEFS).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([key,def])=>`<option value="${labSafe(key)}">${labSafe(def.name)} [${labSafe(key)}]</option>`).join('');spriteSelect.value=oldSprite||'auto';
-  document.getElementById('reconAdminRecipeList').innerHTML=Object.values(state.reconstructionRecipes).map(r=>`<button type="button" data-recon-admin-edit="${labSafe(r.id)}"><strong>${labSafe(r.title)}</strong><small>${labSafe(state.species[r.slug]?.name||'Missing species')} · ${r.pageDiscoverable?'Page discoverable':'Hidden recipe'}</small></button>`).join('')||'<p>No recipes saved.</p>';
+  document.getElementById('reconAdminRecipeList').innerHTML=Object.values(state.reconstructionRecipes).map(r=>`<div class="recon-admin-recipe-row" data-recon-recipe-id="${labSafe(r.id)}"><div class="recon-admin-recipe-copy"><strong>${labSafe(r.title)}</strong><small>${labSafe(state.species[r.slug]?.name||'Missing species')} · ${r.pageDiscoverable?'Page discoverable':'Hidden recipe'}</small><small>${r.ingredients.map(p=>`${labSafe(itemInfoForInventoryId(p.id)?.name||p.id)} ×${p.qty}`).join(' + ')}</small></div><div class="recon-admin-row-actions"><button type="button" class="ghost" data-recon-admin-edit="${labSafe(r.id)}" aria-label="Edit recipe: ${labSafe(r.title)}">Edit Recipe</button><button type="button" class="danger" data-recon-admin-remove="${labSafe(r.id)}" aria-label="Remove recipe: ${labSafe(r.title)}">Remove Recipe</button></div></div>`).join('')||'<p>No recipes saved.</p>';
+  reconUpdateRecipeEditor();
   document.getElementById('reconAdminMaterialList').innerHTML=Object.entries(state.reconstructionMaterials).map(([id,m])=>`<button type="button" data-recon-material-edit="${labSafe(id)}"><strong>${labSafe(m.name)}</strong><small>${labSafe(id)} · ${m.sellValue} currency · dig weight ${m.digWeight}</small></button>`).join('')||'<p>No custom materials saved.</p>';
 }
-function reconClearRecipe(){for(const id of ['reconEditId','reconRecipeTitle'])document.getElementById(id).value='';document.getElementById('reconRecipeSpecies').value='';document.getElementById('reconRecipeEggSprite').value='auto';document.getElementById('reconPageDiscoverable').checked=true;for(let i=0;i<3;i++){document.getElementById(`reconItem${i}`).value='';document.getElementById(`reconQty${i}`).value=i===0?'2':'1';}}
-function reconEditRecipe(id){const r=state.reconstructionRecipes[id];if(!r)return;document.getElementById('reconEditId').value=id;document.getElementById('reconRecipeTitle').value=r.title;document.getElementById('reconRecipeSpecies').value=r.slug;document.getElementById('reconRecipeEggSprite').value=r.eggSpriteKey||'auto';document.getElementById('reconPageDiscoverable').checked=r.pageDiscoverable!==false;r.ingredients.forEach((p,i)=>{document.getElementById(`reconItem${i}`).value=p.id;document.getElementById(`reconQty${i}`).value=p.qty;});}
+function reconUpdateRecipeEditor(){
+  const id=document.getElementById('reconEditId').value,recipe=state.reconstructionRecipes[id];
+  document.getElementById('reconRecipeEditorHeading').textContent=recipe?`Editing: ${recipe.title}`:'New Recipe';
+  document.getElementById('reconSaveRecipeButton').textContent=recipe?'Save Changes':'Save Recipe';
+  document.getElementById('reconCancelRecipeEdit').classList.toggle('hidden',!recipe);
+  document.getElementById('reconDeleteRecipe').disabled=!recipe;
+  document.querySelectorAll('#reconAdminRecipeList [data-recon-recipe-id]').forEach(row=>row.classList.toggle('editing',row.dataset.reconRecipeId===id));
+}
+function reconClearRecipe(){for(const id of ['reconEditId','reconRecipeTitle'])document.getElementById(id).value='';document.getElementById('reconRecipeSpecies').value='';document.getElementById('reconRecipeEggSprite').value='auto';document.getElementById('reconPageDiscoverable').checked=true;for(let i=0;i<3;i++){document.getElementById(`reconItem${i}`).value='';document.getElementById(`reconQty${i}`).value=i===0?'2':'1';}document.getElementById('reconRecipeAdminMessage').textContent='';reconUpdateRecipeEditor();}
+function reconEditRecipe(id,focusEditor=true){if(!isAdminAccount())return;const r=state.reconstructionRecipes[id];if(!r)return;document.getElementById('reconEditId').value=id;document.getElementById('reconRecipeTitle').value=r.title;document.getElementById('reconRecipeSpecies').value=r.slug;document.getElementById('reconRecipeEggSprite').value=r.eggSpriteKey||'auto';document.getElementById('reconPageDiscoverable').checked=r.pageDiscoverable!==false;r.ingredients.forEach((p,i)=>{document.getElementById(`reconItem${i}`).value=p.id;document.getElementById(`reconQty${i}`).value=p.qty;});reconUpdateRecipeEditor();if(focusEditor){document.getElementById('reconRecipeAdminMessage').textContent=`Editing ${r.title}. Save Changes updates this recipe.`;document.getElementById('reconRecipeEditorHeading').scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('reconRecipeTitle').focus({preventScroll:true});}}
 function reconSaveRecipe(e){e.preventDefault();if(!isAdminAccount())return;const title=document.getElementById('reconRecipeTitle').value.trim(),slug=document.getElementById('reconRecipeSpecies').value,eggSpriteKey=document.getElementById('reconRecipeEggSprite').value||'auto',ingredients=[0,1,2].map(i=>({id:document.getElementById(`reconItem${i}`).value,qty:Number(document.getElementById(`reconQty${i}`).value)})),out=document.getElementById('reconRecipeAdminMessage');
   if(isGodSpecies(state.species[slug])){out.textContent='GOD species are exclusive to Mythic × Mythic breeding, not Reconstruction.';return;}
   if(!title||!state.species[slug]||ingredients.some(p=>!p.id||!Number.isInteger(p.qty)||p.qty<1||p.qty>9999||!itemInfoForInventoryId(p.id))){out.textContent='Choose a species, a title, and three valid materials with quantities 1–9999.';return;}
   const id=document.getElementById('reconEditId').value||`recon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,6)}`;
   state.reconstructionRecipes[id]={id,title:title.slice(0,72),slug,eggSpriteKey,pageDiscoverable:document.getElementById('reconPageDiscoverable').checked,ingredients};
-  save();renderReconstructionAdmin();reconEditRecipe(id);renderReconstructionLab();out.textContent=`Saved ${title}. Include it in your next Live Content export.`;
+  save();renderReconstructionAdmin();reconEditRecipe(id,false);renderReconstructionLab();out.textContent=`Saved ${title}. Include it in your next Live Content export.`;
 }
 function reconClearMaterial(){for(const id of ['reconMaterialEditId','reconMaterialName','reconMaterialDesc'])document.getElementById(id).value='';document.getElementById('reconMaterialCategory').value='Excavation Find';document.getElementById('reconMaterialValue').value=15;document.getElementById('reconMaterialWeight').value=1;}
 function reconEditMaterial(id){const m=state.reconstructionMaterials[id];if(!m)return;document.getElementById('reconMaterialEditId').value=id;document.getElementById('reconMaterialName').value=m.name;document.getElementById('reconMaterialDesc').value=m.desc;document.getElementById('reconMaterialCategory').value=m.category;document.getElementById('reconMaterialValue').value=m.sellValue;document.getElementById('reconMaterialWeight').value=m.digWeight;}
 function reconSaveMaterial(e){e.preventDefault();if(!isAdminAccount())return;const name=document.getElementById('reconMaterialName').value.trim(),out=document.getElementById('reconMaterialAdminMessage');if(!name){out.textContent='Enter a material name.';return;}const id=document.getElementById('reconMaterialEditId').value||`lab_mat_${slugify(name)}_${Math.random().toString(36).slice(2,6)}`,m=reconSanitizeMaterial(id,{name,category:document.getElementById('reconMaterialCategory').value,desc:document.getElementById('reconMaterialDesc').value,sellValue:document.getElementById('reconMaterialValue').value,digWeight:document.getElementById('reconMaterialWeight').value});if(!m){out.textContent='Invalid material name.';return;}state.reconstructionMaterials[id]=m;syncReconstructionMaterialRegistry();save();renderReconstructionAdmin();reconEditMaterial(id);renderInventory();renderSpriteRegistry();out.textContent=`Saved ${name}. Sprite Workshop code: ${id}.`;}
-function reconDeleteRecipe(){if(!isAdminAccount())return;const id=document.getElementById('reconEditId').value,r=state.reconstructionRecipes[id];if(!r||!confirm(`Delete the recipe ${r.title}? Existing eggs will be safe.`))return;delete state.reconstructionRecipes[id];save();renderReconstructionAdmin();reconClearRecipe();renderReconstructionLab();}
+function reconDeleteRecipe(id=document.getElementById('reconEditId').value){
+  if(!isAdminAccount())return false;
+  const recipe=state.reconstructionRecipes[id];if(!recipe||!confirm(`Remove the recipe ${recipe.title}? Eggs already reconstructed will be kept.`))return false;
+  delete state.reconstructionRecipes[id];
+  state.knownReconstructionRecipes=state.knownReconstructionRecipes.filter(known=>known!==id);
+  if(reconSelectedRecipeId===id)reconSelectedRecipeId='';
+  if(document.getElementById('reconEditId').value===id)reconClearRecipe();
+  save();renderReconstructionAdmin();renderReconstructionLab();
+  document.getElementById('reconRecipeAdminMessage').textContent=`Removed ${recipe.title}. Include this change in your next Live Content export.`;
+  return true;
+}
 function reconDeleteMaterial(){if(!isAdminAccount())return;const id=document.getElementById('reconMaterialEditId').value,m=state.reconstructionMaterials[id];if(!m)return;const referenced=Object.values(state.reconstructionRecipes).some(r=>r.ingredients.some(p=>p.id===id));if(referenced||Number(state.inventory[id]||0)>0){document.getElementById('reconMaterialAdminMessage').textContent='Cannot delete: a saved recipe or inventory still uses this material.';return;}if(!confirm(`Delete custom material ${m.name}?`))return;delete state.reconstructionMaterials[id];syncReconstructionMaterialRegistry();save();renderReconstructionAdmin();reconClearMaterial();renderSpriteRegistry();}
 
 const DASH_W=800,DASH_H=300,DASH_GROUND=242,DASH_MAX_CRYSTALS=3;
@@ -2944,11 +3084,19 @@ function defaultState(){
     nextMonsterNum:1,nextEggNum:1
   };
 }
+let saveLoadFailure=null,saveOriginalRaw=null,saveOriginalKey='monsterGame_v06',saveCheckpointTaken=false;
+function validateStoredProgress(value){
+  if(!value||typeof value!=='object'||Array.isArray(value)||!Array.isArray(value.monsters)||!Array.isArray(value.eggs))throw new Error('Keeper progress is missing or damaged.');
+  if(value.monsters.some(mon=>!mon||typeof mon.id!=='string'||typeof mon.slug!=='string'))throw new Error('A monster record is damaged.');
+  for(const key of ['incubators','collectionPens','breedingPens'])if(value[key]!==undefined&&!Array.isArray(value[key]))throw new Error('Keeper storage is damaged.');
+  for(const key of ['species','attacks','inventory','account'])if(value[key]!==undefined&&(!value[key]||typeof value[key]!=='object'||Array.isArray(value[key])))throw new Error('Keeper records are damaged.');
+  return value;
+}
 function load(){
   try{
-    const raw=localStorage.getItem('monsterGame_v06');
+    const raw=localStorage.getItem('monsterGame_v06');saveOriginalRaw=raw;
     if(raw){
-      const parsed=JSON.parse(raw),fresh=defaultState(),legacyAccount=!parsed.account,legacyOnboarding=!parsed.onboarding;
+      const parsed=validateStoredProgress(JSON.parse(raw)),fresh=defaultState(),legacyAccount=!parsed.account,legacyOnboarding=!parsed.onboarding;
       if(legacyAccount)fresh.account={keeperName:'Keeper',accountId:makeLocalAccountId(),role:'player'};
       if(legacyOnboarding)fresh.onboarding=completedLegacyOnboardingState();
       return {...fresh,...parsed,account:{...fresh.account,...(parsed.account||{})},onboarding:{...fresh.onboarding,...(parsed.onboarding||{}),checklist:{...fresh.onboarding.checklist,...(parsed.onboarding?.checklist||{})},rewarded:{...fresh.onboarding.rewarded,...(parsed.onboarding?.rewarded||{})}}};
@@ -2957,7 +3105,8 @@ function load(){
     // Migrate the v0.5 save so collection, eggs, inventory, custom species and attacks carry forward.
     const old=localStorage.getItem('monsterGame_v05');
     if(old){
-      const p=JSON.parse(old), fresh=defaultState();
+      saveOriginalRaw=old;saveOriginalKey='monsterGame_v05';
+      const p=validateStoredProgress(JSON.parse(old)), fresh=defaultState();
       if(p.species)fresh.species={...fresh.species,...p.species};
       if(p.attacks)fresh.attacks={...fresh.attacks,...p.attacks};
       if(p.monsters)fresh.monsters=p.monsters;
@@ -2970,7 +3119,7 @@ function load(){
       return fresh;
     }
     return defaultState();
-  }catch(e){return defaultState();}
+  }catch(e){saveLoadFailure=e;return defaultState();}
 }
 function rollTrait(){
   const entries=Object.entries(TRAITS);
@@ -3072,6 +3221,7 @@ function normalizeState(){
   state.inventory=state.inventory||{};
   state.dailyMysteryEggPurchasedOn=typeof state.dailyMysteryEggPurchasedOn==='string'?state.dailyMysteryEggPurchasedOn:'';
   normalizeMonsterDashState();
+  normalizeMonsterClicker();
   normalizeReconstructionState();
   state.lottery={nextFreeAt:0,lastResult:'',...(state.lottery||{})};
   state.lottery.nextFreeAt=Math.max(0,Number(state.lottery.nextFreeAt)||0);
@@ -3321,7 +3471,55 @@ function renderEventTestStatus(){
 }
 
 normalizeState();
-function save(){if(eventTestSession)return;localStorage.setItem('monsterGame_v06',JSON.stringify(state));}
+function showSaveHealth(message){
+  const notice=document.getElementById('saveHealthNotice');if(!notice)return;
+  notice.textContent=message;notice.classList.toggle('hidden',!message);
+}
+function save(){
+  if(eventTestSession||saveLoadFailure)return false;
+  try{
+    let checkpointFailed=false;
+    if(!saveCheckpointTaken){
+      const previous=localStorage.getItem('monsterGame_v06');
+      if(previous){
+        validateStoredProgress(JSON.parse(previous));
+        try{localStorage.setItem('prismwild_previous_checkpoint',previous);}catch(error){checkpointFailed=true;}
+      }
+      if(!checkpointFailed)saveCheckpointTaken=true;
+    }
+    localStorage.setItem('monsterGame_v06',JSON.stringify(state));
+    showSaveHealth(checkpointFailed?'Progress saved, but a recovery checkpoint could not be created. Export a Keeper Save from Profile.':'');
+    return true;
+  }catch(error){
+    showSaveHealth('Your latest changes could not be saved in this browser. Keep this page open and export a Keeper Save from Profile before leaving.');
+    return false;
+  }
+}
+function showSaveRecovery(){
+  document.querySelector('.shell').hidden=true;
+  const panel=document.getElementById('saveRecoveryPanel');panel.classList.remove('hidden');
+  const message=document.getElementById('saveRecoveryMessage');message.textContent='Choose a recovery option below. Restoring or importing will replace the unreadable save.';
+  const download=document.getElementById('downloadUnreadableSave');download.disabled=saveOriginalRaw===null;
+  download.onclick=()=>{const url=URL.createObjectURL(new Blob([saveOriginalRaw],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='Prismwild-original-save-data.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  const restore=document.getElementById('restoreSaveCheckpoint');let checkpoint=null;
+  try{checkpoint=localStorage.getItem('prismwild_previous_checkpoint');if(checkpoint)validateStoredProgress(JSON.parse(checkpoint));}catch(error){checkpoint=null;}
+  restore.disabled=!checkpoint;
+  restore.onclick=()=>{
+    if(!checkpoint||!confirm('Restore progress from your previous visit? Download the original save data first if you want to keep a copy.'))return;
+    try{if(saveOriginalRaw!==null)localStorage.setItem('prismwild_unreadable_save',saveOriginalRaw);localStorage.setItem('monsterGame_v06',checkpoint);window.location.reload();}
+    catch(error){message.textContent='Recovery could not be saved. Download the original data and free browser storage before trying again.';}
+  };
+  document.getElementById('recoverySaveImport').onchange=async e=>{const file=e.target.files?.[0];if(file)await importKeeperSave(file);e.target.value='';};
+}
+function renderHideoutReady(){
+  const host=document.getElementById('hideoutReadyActions');if(!host)return;
+  const now=Date.now();
+  const eggs=(state.incubators||[]).slice(0,state.unlockedIncubators).filter(slot=>slot?.eggId&&state.eggs.some(egg=>egg.id===slot.eggId)&&Number(slot.finishAt)>0&&Number(slot.finishAt)<=now).length;
+  const pairs=(state.breedingPens||[]).slice(0,state.unlockedBreedingPens).filter(pen=>pen?.motherId&&pen?.fatherId&&Number(pen.finishAt)>0&&Number(pen.finishAt)<=now).length;
+  const teams=Object.values(state.expeditions?.slots||{}).filter(team=>team&&(team.status==='ready'||(team.status==='active'&&Number(team.finishAt)>0&&Number(team.finishAt)<=now))).length;
+  const signature=[eggs,pairs,teams].join(':');if(host.dataset.readyCounts===signature)return;host.dataset.readyCounts=signature;
+  host.innerHTML=[['eggs',eggs,'egg ready to hatch','eggs ready to hatch'],['breed',pairs,'breeding egg ready','breeding eggs ready'],['expeditions',teams,'expedition returned','expeditions returned']].map(([route,count,singular,plural])=>`<button type="button" class="ghost" data-home-go="${route}"><strong>${count}</strong> ${count===1?singular:plural}</button>`).join('')+(!eggs&&!pairs&&!teams?'<p>Nothing is ready to collect yet. Visit your pens, incubators, or expeditions to plan your next discovery.</p>':'');
+}
 function isAdminAccount(){return state.account?.role==='admin';}
 function starterSafeTrait(){const pool=Object.entries(TRAITS).filter(([name])=>!['Pristine','Legendary','Awful'].includes(name));const total=pool.reduce((sum,[,t])=>sum+t.weight,0);let roll=Math.random()*total;for(const [name,t] of pool){roll-=t.weight;if(roll<=0)return name;}return 'Boring';}
 function starterSpeciesPool(){return Object.entries(state.species).filter(([slug,sp])=>!STARTER_SLUGS.includes(slug)&&!sp.isCrossbreed&&!sp.seasonalEventFamily&&sp.obtain==='Random Battle Reward'&&!/event|halloween|haunted/i.test(String(sp.obtain||'')));}
@@ -3367,7 +3565,8 @@ function applyAccountAccessUI(){
 function renderNewKeeperChecklist(){
   const box=document.getElementById('newKeeperChecklist'),items=document.getElementById('newKeeperChecklistItems'),msg=document.getElementById('newKeeperChecklistMessage'),dismiss=document.getElementById('dismissNewKeeperChecklist');if(!box||!items)return;
   const visible=!!state.onboarding.completed&&!state.onboarding.checklistDismissed;box.classList.toggle('hidden',!visible);if(!visible)return;
-  items.innerHTML=Object.entries(NEW_KEEPER_TASKS).map(([key,task])=>{const done=newcomerTaskDone(key),value=key==='explore'?Math.min(5,Number(state.onboarding.checklist.explore||0)):null;return `<div class="new-keeper-task ${done?'done':''}"><span class="new-keeper-task-check">${done?'✓':'○'}</span><div><strong>${task.label}${key==='explore'?` • ${value}/5`:''}</strong><small>${task.detail}</small>${key!=='starter'?`<em>${done?'Reward claimed':`Reward: ${task.rewardCurrency} currency • ${task.rewardXp} XP`}</em>`:''}</div></div>`;}).join('');
+  const taskRoutes={explore:'battle',battle:'battle',incubate:'eggs',requests:'requests',expedition:'expeditions'};
+  items.innerHTML=Object.entries(NEW_KEEPER_TASKS).map(([key,task])=>{const done=newcomerTaskDone(key),value=key==='explore'?Math.min(5,Number(state.onboarding.checklist.explore||0)):null;return `<div class="new-keeper-task ${done?'done':''}"><span class="new-keeper-task-check">${done?'✓':'○'}</span><div><strong>${task.label}${key==='explore'?` • ${value}/5`:''}</strong><small>${task.detail}</small>${key!=='starter'?`<em>${done?'Reward claimed':`Reward: ${task.rewardCurrency} currency • ${task.rewardXp} XP`}</em>`:''}${!done&&taskRoutes[key]?`<button class="ghost small polish-task-go" type="button" data-home-go="${taskRoutes[key]}" aria-label="${task.label}">Go to activity →</button>`:''}</div></div>`;}).join('');
   if(msg)msg.textContent=state.onboarding.lastMessage||(newcomerAllTasksDone()?'Your New Keeper Path is complete. The rest of Prismwild is yours to explore.':'Complete the path at your own pace. None of these steps block the rest of the game.');
   const all=newcomerAllTasksDone();if(dismiss)dismiss.classList.toggle('hidden',!all);
 }
@@ -4273,45 +4472,134 @@ function sellBlackMarketMonster(requestId,monsterId){
   if(selectedMonsterId===mon.id)selectedMonsterId=null;save();renderAll();
 }
 
+function deskState(){
+  const ex=state.expeditions;
+  ex.savedTeams=Array.isArray(ex.savedTeams)?ex.savedTeams.slice(0,6):[];
+  ex.research=ex.research&&typeof ex.research==='object'&&!Array.isArray(ex.research)?ex.research:{};
+  ex.history=Array.isArray(ex.history)?ex.history.slice(0,20):[];
+  return ex;
+}
+function deskRegion(contract){
+  if(!EXPEDITION_REGIONS[contract.regionId]){
+    const keys=Object.keys(EXPEDITION_REGIONS),seed=Array.from(String(contract.id||contract.missionId||'')).reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+    contract.regionId=keys[seed%keys.length];
+  }
+  return EXPEDITION_REGIONS[contract.regionId];
+}
+function deskElements(mon){const sp=speciesOf(mon)||{};return [sp.element,sp.secondaryElement].flatMap(x=>String(x||'').split(/[\/,]/)).map(x=>x.trim());}
+function deskFit(mon,contract){const region=deskRegion(contract),specialty=EXPEDITION_SPECIALTIES[contract.missionId];return {role:speciesOf(mon)?.battleType===specialty?.role,element:deskElements(mon).some(e=>region.elements.includes(e))};}
+function deskBonus(team,contract,captainId){
+  const base=expeditionTeamBonus(team),fits=team.map(mon=>deskFit(mon,contract)),captain=team.find(mon=>mon.id===captainId),captainFit=captain?deskFit(captain,contract):{};
+  const role=fits.some(f=>f.role)?.05:0,element=fits.some(f=>f.element)?.05:0;
+  // The captain contributes five percentage points if either specialty matches.
+  const captainBonus=(captainFit.role||captainFit.element)?.05:0;
+  return {base,role,element,captain:captainBonus,total:Math.min(.5,base+role+element+captainBonus)};
+}
+function deskTime(value){return new Date(value).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'});}
+function deskMessage(text){document.getElementById('expeditionTeamMessage').textContent=text;}
+function deskLootPreview(contract){
+  const tier=expeditionTierValues(contract.durationKey),region=deskRegion(contract),id=contract.missionId;
+  let lo=tier.currency[0],hi=tier.currency[1];
+  if(id==='hostile_pack'){lo+=50;hi+=120;}
+  if(id==='lost_temple'){lo=Math.floor(lo*.25);hi=Math.floor(hi*.45);}
+  if(id==='resource_survey'){lo=Math.floor(lo*.35);hi=Math.floor(hi*.55);}
+  if(id==='ancient_cache')lo=Math.floor(lo*.5);
+  if(id==='recovery_mission'){lo=Math.floor(lo*.4);hi=Math.floor(hi*.7);}
+  const qty={short:1,extended:2,long:3}[contract.durationKey]||1;
+  return `${lo}–${hi} currency · ${EXPEDITION_XP_REWARDS[contract.durationKey]} XP per monster · ${qty} ${itemInfoForInventoryId(region.material)?.name||'regional finds'}${id==='lost_temple'?` · ${(tier.prismaticChance*100).toFixed(2)}% Prismatic Egg chance`:''}`;
+}
+function deskTeamSnapshot(team,captainId){return team.map(mon=>({id:mon.id,name:displayName(mon),slug:mon.slug,kind:monsterArtKind(mon),captain:mon.id===captainId}));}
+function deskBuildOutcome(contract){
+  const reward=rollExpeditionReward(contract),region=deskRegion(contract),qty={short:1,extended:2,long:3}[contract.durationKey]||1;
+  addExpeditionInventory(reward,region.material,qty);
+  const team=contract.teamSnapshot||[],captain=team.find(mon=>mon.captain)||team[0],companion=team.find(mon=>mon.id!==captain?.id)||captain;
+  const specialty=EXPEDITION_SPECIALTIES[contract.missionId];
+  return {reward,report:[`${captain?.name||'The captain'} led the team into ${region.name} and ${region.scene}.`,`${companion?.name||'The team'} helped complete ${EXPEDITION_MISSIONS[contract.missionId]?.title||'the assignment'}. Every team member made it home safely.`,reward.bonus?`Bonus objective complete: ${specialty?.task||'Recover extra supplies'}. The team brought back an extra find.`:'The team completed the main assignment. The optional cache remained out of reach this time.'],preparedAt:Date.now()};
+}
+function deskResearchGain(contract){
+  const ex=deskState(),region=deskRegion(contract),old=ex.research[contract.regionId]||{},before=Math.max(0,Math.floor(Number(old.completed)||0)),count=before+1;
+  const unlocked=[1,3,6].filter(n=>before<n&&count>=n);
+  ex.research[contract.regionId]={completed:count};
+  const pages=unlocked.filter(n=>n>=3).length;if(pages)state.inventory.ancient_pages=(state.inventory.ancient_pages||0)+pages;
+  return {region:region.name,count,pages,lore:unlocked.map(n=>region.lore[[1,3,6].indexOf(n)])};
+}
+function renderDeskJournal(){
+  const ex=deskState(),host=document.getElementById('expeditionResearch');if(!host)return;
+  host.innerHTML=Object.entries(EXPEDITION_REGIONS).map(([id,region])=>{const count=Math.max(0,Number(ex.research[id]?.completed)||0),next=[1,3,6].find(n=>count<n),unlocked=[1,3,6].filter(n=>count>=n).length;return `<details class="desk-research-region"><summary><span>${labSafe(region.name)}</span><strong>${unlocked}/3 notes</strong></summary><p>${count} completed trip${count===1?'':'s'} · ${next?`Next note: ${next} trips${next>=3?' + Ancient Page':''}`:'Research complete'}</p><progress max="6" value="${Math.min(6,count)}" aria-label="${labSafe(region.name)} research"></progress>${region.lore.map((line,i)=>`<p class="${count>=[1,3,6][i]?'':'desk-muted'}">${count>=[1,3,6][i]?labSafe(line):`Undiscovered field note · ${[1,3,6][i]} trips`}</p>`).join('')}</details>`;}).join('');
+  const history=document.getElementById('expeditionHistory');history.innerHTML=ex.history.length?ex.history.map((entry,i)=>`<button type="button" class="ghost desk-history-button" data-desk-report="${i}"><span>${labSafe(entry.title)} · ${labSafe(entry.region)}</span><small>${labSafe(deskTime(entry.claimedAt))} · Read report →</small></button>`).join(''):'<p class="desk-muted">Your last 20 return reports will be kept here.</p>';
+}
+function deskShowReport(entry){
+  document.getElementById('expeditionRewardTitle').textContent=entry.title;
+  const host=document.getElementById('expeditionRewardContents');
+  host.innerHTML=`<div class="desk-report-region">${labSafe(entry.region||'Field report')}</div><div class="desk-report-portraits">${(entry.team||[]).map(mon=>`<div><img data-desk-report-slug="${labSafe(mon.slug)}" data-desk-report-kind="${labSafe(mon.kind||'base')}" alt="${labSafe(mon.name)}"><small>${mon.captain?'★ ':''}${labSafe(mon.name)}</small></div>`).join('')}</div><h3>Field report</h3>${(entry.report||[]).map(line=>`<p>${labSafe(line)}</p>`).join('')}<h3>Returned haul</h3><p>${labSafe(entry.rewardSummary||'')}</p><h3>Monster training</h3>${(entry.xpResults||[]).map(row=>`<p>${labSafe(expeditionTrainingLine(row))}</p>`).join('')||'<p>No surviving training records.</p>'}${entry.research?`<h3>Research discovery</h3><p>${labSafe(entry.research.region)} · ${entry.research.count} completed trip${entry.research.count===1?'': 's'}${entry.research.pages?` · Ancient Pages ×${entry.research.pages}`:''}</p>${entry.research.lore.map(line=>`<p>${labSafe(line)}</p>`).join('')}`:''}`;
+  host.querySelectorAll('[data-desk-report-slug]').forEach(img=>setMonsterImage(img,img.dataset.deskReportSlug,img.dataset.deskReportKind));
+  const modal=document.getElementById('expeditionRewardModal');if(!modal.open)modal.showModal();
+}
+function deskTemplateOptions(){
+  const select=document.getElementById('expeditionSavedTeam'),old=select.value;
+  select.innerHTML='<option value="">Choose a saved team…</option>'+deskState().savedTeams.map(team=>`<option value="${labSafe(team.id)}">${labSafe(team.name)}</option>`).join('');select.value=old;
+}
+function deskSaveTeam(){
+  const ex=deskState(),name=document.getElementById('expeditionTeamName').value.trim().slice(0,32),ids=[...new Set(expeditionTeamDraft)];
+  if(!name||!ids.length||ids.length>5){deskMessage('Enter a team name and select one to five monsters.');return;}
+  const existing=ex.savedTeams.find(team=>team.name.toLowerCase()===name.toLowerCase());
+  if(existing&&!confirm(`Replace the saved team “${existing.name}”?`))return;
+  if(!existing&&ex.savedTeams.length>=6){deskMessage('You have six saved teams. Remove one or reuse a team name.');return;}
+  const before=JSON.parse(JSON.stringify(state));const team={id:existing?.id||`team_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,name,monsterIds:ids,captainId:deskCaptainId};
+  if(existing)ex.savedTeams[ex.savedTeams.indexOf(existing)]=team;else ex.savedTeams.push(team);
+  if(!save()&&!eventTestSession){state=before;deskMessage('The team could not be saved. Your previous teams were kept.');return;}
+  deskTemplateOptions();document.getElementById('expeditionSavedTeam').value=team.id;deskMessage(`Saved ${name}.`);
+}
+function deskLoadTeam(team){
+  if(!team){deskMessage('Choose a saved team first.');return;}
+  expeditionTeamDraft=[...new Set(team.monsterIds||[])].slice(0,5);deskCaptainId=team.captainId||expeditionTeamDraft[0]||'';
+  document.getElementById('expeditionTeamName').value=team.name||'';renderExpeditionTeamPicker();
+  const unavailable=expeditionTeamDraft.filter(id=>{const mon=state.monsters.find(m=>m.id===id);return !mon||expeditionUnavailableReason(mon);});
+  deskMessage(unavailable.length?`${unavailable.length} saved team member(s) are unavailable. Remove or replace them before departing.`:'Team loaded. Review your captain and supplies before departing.');
+}
+function deskDeleteTeam(){
+  const ex=deskState(),id=document.getElementById('expeditionSavedTeam').value,team=ex.savedTeams.find(t=>t.id===id);if(!team)return;
+  if(!confirm(`Remove the saved team “${team.name}”? Your monsters will stay in your collection.`))return;
+  const before=JSON.parse(JSON.stringify(state));ex.savedTeams=ex.savedTeams.filter(t=>t.id!==id);if(!save()&&!eventTestSession){state=before;deskMessage('Could not save the change.');return;}deskTemplateOptions();deskMessage('Saved team removed.');
+}
+
+
+function deskBoardSignature(){return EXPEDITION_DURATION_ORDER.map(key=>{const c=state.expeditions?.slots?.[key];return `${c?.id}:${c?.status}:${c?.finishAt}`;}).join('|');}
+
 function normalizeExpeditionState(){
-  state.expeditions=state.expeditions&&typeof state.expeditions==='object'?state.expeditions:{slots:{},lastMessage:''};
+  state.expeditions=state.expeditions&&typeof state.expeditions==='object'&&!Array.isArray(state.expeditions)?state.expeditions:{slots:{},lastMessage:''};
   state.expeditions.slots=state.expeditions.slots&&typeof state.expeditions.slots==='object'?state.expeditions.slots:{};
-  state.expeditions.lastMessage=String(state.expeditions.lastMessage||'');
-  const monsterIds=new Set((state.monsters||[]).map(m=>m.id));
+  state.expeditions.lastMessage=String(state.expeditions.lastMessage||'');deskState();
+  const monsterIds=new Set(state.monsters.map(m=>m.id)),reserved=new Set();
   for(const key of EXPEDITION_DURATION_ORDER){
     const c=state.expeditions.slots[key];if(!c)continue;
-    c.durationKey=key;
-    c.status=['available','active','ready','claimed'].includes(c.status)?c.status:'available';
-    c.monsterIds=Array.isArray(c.monsterIds)?c.monsterIds.filter(id=>monsterIds.has(id)).slice(0,5):[];
-    c.startedAt=Number(c.startedAt||0);c.finishAt=Number(c.finishAt||0);c.bonusChance=clamp(Number(c.bonusChance||0),0,.35);
-    c.xpResults=Array.isArray(c.xpResults)?c.xpResults:[];
-    if(c.status==='active'&&c.finishAt&&Date.now()>=c.finishAt)c.status='ready';
-    if((c.status==='active'||c.status==='ready')&&!c.monsterIds.length)c.status='available';
+    if(!EXPEDITION_MISSIONS[c.missionId]){delete state.expeditions.slots[key];continue;}
+    c.durationKey=key;c.status=['available','active','ready','claimed'].includes(c.status)?c.status:'available';
+    c.monsterIds=[...new Set(Array.isArray(c.monsterIds)?c.monsterIds:[])].filter(id=>monsterIds.has(id)).slice(0,5);
+    c.startedAt=Number(c.startedAt)||0;c.finishAt=Number(c.finishAt)||0;c.bonusChance=clamp(Number(c.bonusChance)||0,0,c.deskVersion? .5:.35);
+    c.xpResults=Array.isArray(c.xpResults)?c.xpResults:[];deskRegion(c);
+    if(c.status==='active'&&(!c.finishAt||Date.now()>=c.finishAt))c.status='ready';
+    if(c.status==='active'||c.status==='ready'){
+      c.monsterIds=c.monsterIds.filter(id=>!reserved.has(id));c.monsterIds.forEach(id=>reserved.add(id));
+      // A legacy returned team may have been released before this update. Keep its haul claimable.
+      if(!c.monsterIds.length)c.status='ready';
+    }
   }
 }
 function generateExpeditionContract(durationKey,dateKey=localDateKey(),excludedMissionIds=[]){
-  const pool=Object.keys(EXPEDITION_MISSIONS).filter(id=>!excludedMissionIds.includes(id));
-  const missionId=randomChoice(pool.length?pool:Object.keys(EXPEDITION_MISSIONS));
-  return {id:`${dateKey}:${durationKey}:${missionId}`,dateKey,durationKey,missionId,status:'available',monsterIds:[],startedAt:0,finishAt:0,bonusChance:0,rewardSummary:'',xpResults:[]};
+  const pool=Object.keys(EXPEDITION_MISSIONS).filter(id=>!excludedMissionIds.includes(id)),missionId=randomChoice(pool.length?pool:Object.keys(EXPEDITION_MISSIONS));
+  const occupied=new Set(Object.values(state.expeditions?.slots||{}).map(c=>c?.regionId)),regions=Object.keys(EXPEDITION_REGIONS).filter(id=>!occupied.has(id));
+  return {id:`${dateKey}:${durationKey}:${missionId}`,dateKey,durationKey,missionId,regionId:randomChoice(regions.length?regions:Object.keys(EXPEDITION_REGIONS)),status:'available',monsterIds:[],startedAt:0,finishAt:0,bonusChance:0,rewardSummary:'',xpResults:[]};
 }
 function ensureDailyExpeditions(){
-  if(!state.expeditions||!state.expeditions.slots)normalizeExpeditionState();
-  const today=localDateKey(),used=[];
-  for(const key of EXPEDITION_DURATION_ORDER){
-    const c=state.expeditions.slots[key];
-    if(c?.status==='active'&&c.finishAt&&Date.now()>=c.finishAt)c.status='ready';
-    if(c?.dateKey===today&&c.missionId)used.push(c.missionId);
-  }
-  for(const key of EXPEDITION_DURATION_ORDER){
-    const c=state.expeditions.slots[key];
-    if(c&&(c.status==='active'||c.status==='ready'))continue;
-    if(c&&c.dateKey===today&&(c.status==='available'||c.status==='claimed'))continue;
-    const fresh=generateExpeditionContract(key,today,used);state.expeditions.slots[key]=fresh;used.push(fresh.missionId);
-  }
+  if(!state.expeditions?.slots)normalizeExpeditionState();
+  const today=localDateKey(),used=[];let changed=false;
+  for(const key of EXPEDITION_DURATION_ORDER){const c=state.expeditions.slots[key];if(c?.status==='active'&&Date.now()>=Number(c.finishAt||0)){c.status='ready';changed=true;}if(c?.missionId&&(c.dateKey===today||c.status==='active'||c.status==='ready'))used.push(c.missionId);}
+  for(const key of EXPEDITION_DURATION_ORDER){const c=state.expeditions.slots[key];if(c&&(c.status==='active'||c.status==='ready'||(c.dateKey===today&&(c.status==='available'||c.status==='claimed')))){deskRegion(c);continue;}const fresh=generateExpeditionContract(key,today,used);state.expeditions.slots[key]=fresh;used.push(fresh.missionId);changed=true;}
+  return changed;
 }
 function expeditionForMonster(monId){
-  ensureDailyExpeditions();
-  return EXPEDITION_DURATION_ORDER.map(k=>state.expeditions.slots[k]).find(c=>c?.status==='active'&&c.monsterIds?.includes(monId))||null;
+  ensureDailyExpeditions();return EXPEDITION_DURATION_ORDER.map(key=>state.expeditions.slots[key]).find(c=>(c?.status==='active'||c?.status==='ready')&&c.monsterIds?.includes(monId))||null;
 }
 function isMonsterOnExpedition(monId){return !!expeditionForMonster(monId);}
 function expeditionRemaining(contract){return Math.max(0,Number(contract?.finishAt||0)-Date.now());}
@@ -4320,13 +4608,10 @@ function fmtExpeditionTime(ms){
   return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 function expeditionUnavailableReason(mon){
-  if(!mon)return 'Unavailable';
-  if(state.activeMonsterId===mon.id)return 'Active Monster';
-  if(isMonsterFainted(mon))return 'Fainted';
-  if(isMonsterBreeding(mon.id))return 'Breeding';
-  if(isMonsterOnExpedition(mon.id))return 'On Expedition';
-  if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)return 'In Battle';
-  return '';
+  if(!mon)return 'No longer in your collection';
+  const contract=expeditionForMonster(mon.id);if(contract)return contract.status==='ready'?'Returned — collect rewards first':'On expedition';
+  if(state.activeMonsterId===mon.id)return 'Active Monster';if(isMonsterFainted(mon))return 'Fainted';if(isMonsterBreeding(mon.id))return 'Breeding';
+  if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id)return 'In battle';return '';
 }
 function expeditionTeamBonus(monsters){
   if(!monsters.length)return 0;
@@ -4413,64 +4698,70 @@ function expeditionTrainingLine(entry){
   return `${entry.name} • +${entry.xp} XP${entry.levels?` • Lv.${entry.levelBefore} → ${entry.levelAfter}!`:''}`;
 }
 function showExpeditionRewardModal(contract){
-  const modal=document.getElementById('expeditionRewardModal'),container=document.getElementById('expeditionRewardContents');
-  if(!modal||!container)return;
-  document.getElementById('expeditionRewardTitle').textContent=`${EXPEDITION_MISSIONS[contract.missionId]?.title||'Expedition'} Complete!`;
-  container.replaceChildren();
-  const loot=document.createElement('p');loot.textContent=contract.rewardSummary||'Your team returned.';container.appendChild(loot);
-  if(contract.xpResults?.length){
-    const heading=document.createElement('h3');heading.textContent='Monster Training';container.appendChild(heading);
-    const list=document.createElement('ul');
-    for(const entry of contract.xpResults){const li=document.createElement('li');li.textContent=expeditionTrainingLine(entry);list.appendChild(li);}
-    container.appendChild(list);
-  }
-  if(!modal.open)modal.showModal();
+  deskShowReport(contract.reportEntry||{title:EXPEDITION_MISSIONS[contract.missionId]?.title||'Expedition',region:deskRegion(contract).name,report:[],rewardSummary:contract.rewardSummary,xpResults:contract.xpResults});
 }
-let selectedExpeditionSlot=null,expeditionTeamDraft=[];
+let selectedExpeditionSlot=null,expeditionTeamDraft=[],deskSelectedContractId='',deskCaptainId='',deskRenderedSignature='';
 function openExpeditionTeam(slotKey){
-  ensureDailyExpeditions();const contract=state.expeditions.slots[slotKey],duration=EXPEDITION_DURATIONS[slotKey],mission=EXPEDITION_MISSIONS[contract?.missionId];
-  if(!contract||contract.status!=='available'||!duration||!mission)return;
-  selectedExpeditionSlot=slotKey;expeditionTeamDraft=[];
-  document.getElementById('expeditionTeamTitle').textContent=`${mission.title} • ${duration.label}`;
-  document.getElementById('expeditionTeamDescription').textContent=`Choose 1–5 available monsters. Estimated time: ${duration.hours} hour${duration.hours===1?'':'s'}.`;
-  document.getElementById('expeditionTeamMessage').textContent='';renderExpeditionTeamPicker();document.getElementById('expeditionTeamModal').showModal();
+  ensureDailyExpeditions();const c=state.expeditions.slots[slotKey];if(!c||c.status!=='available')return;
+  selectedExpeditionSlot=slotKey;deskSelectedContractId=c.id;expeditionTeamDraft=[];deskCaptainId='';
+  document.getElementById('expeditionTeamSearch').value='';document.getElementById('expeditionAvailableOnly').checked=false;document.getElementById('expeditionTeamName').value='';
+  document.getElementById('expeditionTeamTitle').textContent=`${EXPEDITION_MISSIONS[c.missionId].title} · ${deskRegion(c).name}`;
+  document.getElementById('expeditionTeamDescription').textContent=`Choose 1–5 monsters and a captain. ${EXPEDITION_DURATIONS[slotKey].hours} hour${EXPEDITION_DURATIONS[slotKey].hours===1?'':'s'} · every member earns ${EXPEDITION_XP_REWARDS[slotKey]} XP. Favored: ${EXPEDITION_SPECIALTIES[c.missionId].role} and ${deskRegion(c).elements.join(' / ')}.`;
+  document.getElementById('expeditionTeamLoot').textContent=deskLootPreview(c);deskMessage('');deskTemplateOptions();renderExpeditionTeamPicker();
+  const modal=document.getElementById('expeditionTeamModal');if(!modal.open)modal.showModal();
 }
 async function renderExpeditionTeamPicker(){
-  const box=document.getElementById('expeditionTeamPicker');if(!box)return;box.innerHTML='';
-  for(const mon of state.monsters){
-    const sp=speciesOf(mon);if(!sp)continue;const reason=expeditionUnavailableReason(mon),selected=expeditionTeamDraft.includes(mon.id),btn=document.createElement('button');btn.type='button';btn.className='expedition-monster-pick'+(selected?' selected':'')+(reason?' unavailable':'');btn.dataset.expeditionMonsterId=mon.id;btn.disabled=!!reason;
-    btn.innerHTML=`<div class="expedition-pick-art"><img alt="${sp.name}">${mon.isPrismatic?'<span>✦</span>':''}</div><div><strong>${displayName(mon)}</strong><small>${sp.name} • Lv.${mon.level} • P${mon.potential}</small>${reason?`<em>${reason}</em>`:'<em>Available</em>'}</div>`;box.appendChild(btn);setMonsterImage(btn.querySelector('img'),mon.slug,monsterArtKind(mon));
+  const box=document.getElementById('expeditionTeamPicker'),c=state.expeditions.slots[selectedExpeditionSlot];if(!box||!c)return;
+  const scroll=box.scrollTop,query=document.getElementById('expeditionTeamSearch').value.trim().toLowerCase(),only=document.getElementById('expeditionAvailableOnly').checked;
+  const chosen=expeditionTeamDraft.map(id=>state.monsters.find(mon=>mon.id===id)).filter(Boolean);
+  if(!expeditionTeamDraft.includes(deskCaptainId))deskCaptainId=expeditionTeamDraft[0]||'';
+  const captainSelect=document.getElementById('expeditionCaptain');captainSelect.innerHTML='<option value="">Choose a captain…</option>'+chosen.map(mon=>`<option value="${labSafe(mon.id)}">${labSafe(displayName(mon))}</option>`).join('');captainSelect.value=deskCaptainId;
+  const ordered=[...state.monsters].sort((a,b)=>Number(expeditionTeamDraft.includes(b.id))-Number(expeditionTeamDraft.includes(a.id))||Number(!!expeditionUnavailableReason(a))-Number(!!expeditionUnavailableReason(b))||Number(deskFit(b,c).role)+Number(deskFit(b,c).element)-Number(deskFit(a,c).role)-Number(deskFit(a,c).element));
+  box.replaceChildren();let visible=0;
+  for(const mon of ordered){
+    const sp=speciesOf(mon);if(!sp)continue;const selected=expeditionTeamDraft.includes(mon.id),reason=expeditionUnavailableReason(mon),fit=deskFit(mon,c);
+    if(!selected&&((only&&reason)||(query&&![displayName(mon),sp.name,sp.battleType,...deskElements(mon)].join(' ').toLowerCase().includes(query))))continue;
+    const btn=document.createElement('button');btn.type='button';btn.className='expedition-monster-pick'+(selected?' selected':'')+(reason?' unavailable':'');btn.dataset.expeditionMonsterId=mon.id;btn.disabled=!!reason&&!selected;btn.setAttribute('aria-pressed',String(selected));
+    btn.innerHTML=`<div class="expedition-pick-art"><img loading="lazy" alt="${labSafe(sp.name)}"></div><div><strong>${selected?'✓ ':''}${labSafe(displayName(mon))}</strong><small>${labSafe(sp.name)} · Lv.${mon.level} · P${mon.potential}</small><em>${labSafe(reason||[fit.role?'Mission specialist':'',fit.element?'Regional match':''].filter(Boolean).join(' · ')||'Available')}</em></div>`;box.appendChild(btn);setMonsterImage(btn.querySelector('img'),mon.slug,monsterArtKind(mon));visible++;
   }
-  const chosen=expeditionTeamDraft.map(id=>state.monsters.find(m=>m.id===id)).filter(Boolean),bonus=expeditionTeamBonus(chosen);
-  document.getElementById('expeditionTeamCount').textContent=`${chosen.length} / 5 selected`;
-  document.getElementById('expeditionTeamBonus').textContent=`Bonus loot chance: ${Math.round(bonus*100)}%`;
-  document.getElementById('startSelectedExpedition').disabled=chosen.length<1;
+  for(const id of expeditionTeamDraft.filter(id=>!state.monsters.some(mon=>mon.id===id))){const btn=document.createElement('button');btn.type='button';btn.className='ghost';btn.dataset.expeditionMonsterId=id;btn.textContent='Missing team member — click to remove';box.appendChild(btn);}
+  if(!visible&&!expeditionTeamDraft.length)box.innerHTML='<p class="desk-muted">No monsters match these filters. Try a different search or show unavailable monsters.</p>';
+  box.scrollTop=scroll;
+  const bonus=deskBonus(chosen,c,deskCaptainId),invalid=expeditionTeamDraft.length!==chosen.length||chosen.some(mon=>expeditionUnavailableReason(mon));
+  document.getElementById('expeditionTeamCount').textContent=`${expeditionTeamDraft.length} / 5 selected`;
+  document.getElementById('expeditionTeamBonus').textContent=`${Math.round(bonus.total*100)}% bonus loot chance`;
+  document.getElementById('expeditionBonusBreakdown').textContent=`Team strength ${Math.round(bonus.base*100)}% + mission ${bonus.role?5:0}% + region ${bonus.element?5:0}% + captain ${bonus.captain?5:0}%. Normal haul is guaranteed. Optional objective: ${EXPEDITION_SPECIALTIES[c.missionId].task}.`;
+  document.getElementById('startSelectedExpedition').disabled=!chosen.length||invalid||!chosen.some(mon=>mon.id===deskCaptainId)||deskSelectedContractId!==c.id||c.status!=='available';
+  document.getElementById('expeditionUseLastTeam').disabled=!deskState().lastTeam?.monsterIds?.length;
 }
 function toggleExpeditionMonster(monId){
-  const mon=state.monsters.find(m=>m.id===monId);if(!mon||expeditionUnavailableReason(mon))return;
-  const i=expeditionTeamDraft.indexOf(monId);if(i>=0)expeditionTeamDraft.splice(i,1);else if(expeditionTeamDraft.length<5)expeditionTeamDraft.push(monId);else{document.getElementById('expeditionTeamMessage').textContent='You can send up to five monsters on one expedition.';return;}
-  document.getElementById('expeditionTeamMessage').textContent='';renderExpeditionTeamPicker();
+  const index=expeditionTeamDraft.indexOf(monId);if(index>=0)expeditionTeamDraft.splice(index,1);
+  else{const mon=state.monsters.find(m=>m.id===monId);if(!mon||expeditionUnavailableReason(mon))return;if(expeditionTeamDraft.length>=5){deskMessage('Your team can have up to five monsters.');return;}expeditionTeamDraft.push(monId);}
+  deskMessage('');renderExpeditionTeamPicker();
 }
 function startSelectedExpedition(){
-  ensureDailyExpeditions();const slotKey=selectedExpeditionSlot,contract=state.expeditions.slots[slotKey],duration=EXPEDITION_DURATIONS[slotKey];
-  const team=expeditionTeamDraft.map(id=>state.monsters.find(m=>m.id===id)).filter(m=>m&&!expeditionUnavailableReason(m));
-  if(!contract||contract.status!=='available'||!duration||team.length<1||team.length>5){document.getElementById('expeditionTeamMessage').textContent='That team is no longer available. Please choose again.';renderExpeditionTeamPicker();return;}
-  const now=Date.now();contract.status='active';contract.monsterIds=team.map(m=>m.id);contract.startedAt=now;contract.finishAt=now+duration.ms;contract.bonusChance=expeditionTeamBonus(team);contract.rewardSummary='';contract.xpResults=[];state.expeditions.lastMessage=`${EXPEDITION_MISSIONS[contract.missionId].title} departed with ${team.length} monster${team.length===1?'':'s'}.`;
-  save();document.getElementById('expeditionTeamModal').close();selectedExpeditionSlot=null;expeditionTeamDraft=[];renderAll();
+  ensureDailyExpeditions();const slot=selectedExpeditionSlot,c=state.expeditions.slots[slot],duration=EXPEDITION_DURATIONS[slot];
+  if(!c||c.id!==deskSelectedContractId||c.status!=='available'){deskMessage('The daily board changed. Close this window and review the new contract before departing.');document.getElementById('startSelectedExpedition').disabled=true;return;}
+  const ids=[...new Set(expeditionTeamDraft)],team=ids.map(id=>state.monsters.find(m=>m.id===id));
+  if(!duration||!team.length||team.length>5||ids.length!==expeditionTeamDraft.length||team.some(mon=>!mon||expeditionUnavailableReason(mon))||!ids.includes(deskCaptainId)){deskMessage('Your team has changed or a member is unavailable. Review every selected member and your captain.');renderExpeditionTeamPicker();return;}
+  const before=JSON.parse(JSON.stringify(state)),now=Date.now();
+  c.status='active';c.monsterIds=ids;c.captainId=deskCaptainId;c.startedAt=now;c.finishAt=now+duration.ms;c.deskVersion=1;c.teamSnapshot=deskTeamSnapshot(team,deskCaptainId);c.bonusChance=deskBonus(team,c,deskCaptainId).total;c.rewardSummary='';c.xpResults=[];
+  c.outcome=deskBuildOutcome(c);deskState().lastTeam={name:'Last expedition team',monsterIds:ids,captainId:deskCaptainId};state.expeditions.lastMessage=`${EXPEDITION_MISSIONS[c.missionId].title} departed for ${deskRegion(c).name}. Returns ${deskTime(c.finishAt)}.`;
+  if(!save()&&!eventTestSession){state=before;deskMessage('Departure could not be saved. Your team has not left. Export your Keeper Save from Profile and resolve the storage warning.');return;}
+  document.getElementById('expeditionTeamModal').close();selectedExpeditionSlot=null;expeditionTeamDraft=[];renderAll();
 }
 function collectExpedition(slotKey){
-  ensureDailyExpeditions();const contract=state.expeditions.slots[slotKey];if(!contract)return;
-  if(contract.status==='active'&&Date.now()>=Number(contract.finishAt||0))contract.status='ready';
-  if(contract.status!=='ready')return;
-  const mission=EXPEDITION_MISSIONS[contract.missionId],reward=rollExpeditionReward(contract);
-  applyExpeditionReward(reward);
-  contract.xpResults=grantExpeditionTeamXP(contract); // Only called on the first successful claim.
-  contract.status='claimed';
-  const xp=EXPEDITION_XP_REWARDS[contract.durationKey]||0;
-  const training=contract.xpResults.length?` • Training: ${xp} XP per monster (${contract.xpResults.length} trained)`:'';
-  contract.rewardSummary=expeditionRewardSummary(reward)+training;
-  contract.claimedAt=Date.now();state.expeditions.lastMessage=`${mission?.title||'Expedition'} returned: ${contract.rewardSummary}`;
-  updateNewKeeperTask('expedition');save();ensureDailyExpeditions();save();renderAll();showExpeditionRewardModal(contract);
+  ensureDailyExpeditions();const c=state.expeditions.slots[slotKey];if(!c||c.status!=='ready')return;
+  const before=JSON.parse(JSON.stringify(state));
+  const outcome=c.outcome||{reward:rollExpeditionReward(c),report:['This team departed before the Expedition Desk update. Their original contract rewards and training have been preserved.']};
+  applyExpeditionReward(outcome.reward);c.xpResults=grantExpeditionTeamXP(c);c.status='claimed';c.claimedAt=Date.now();
+  const research=c.deskVersion?deskResearchGain(c):null;
+  c.rewardSummary=expeditionRewardSummary(outcome.reward);
+  const entry={title:EXPEDITION_MISSIONS[c.missionId]?.title||'Expedition',region:deskRegion(c).name,team:c.teamSnapshot||deskTeamSnapshot(c.monsterIds.map(id=>state.monsters.find(m=>m.id===id)).filter(Boolean),c.captainId),report:outcome.report,rewardSummary:c.rewardSummary,xpResults:c.xpResults,research,claimedAt:c.claimedAt};
+  deskState().history.unshift(entry);state.expeditions.history=state.expeditions.history.slice(0,20);c.reportEntry=entry;delete c.outcome;
+  state.expeditions.lastMessage=`${entry.title} returned. ${entry.rewardSummary}`;updateNewKeeperTask('expedition');
+  if(!save()&&!eventTestSession){state=before;document.getElementById('expeditionMessage').textContent='Rewards could not be saved. The haul is still waiting; no rewards or XP were collected.';return;}
+  ensureDailyExpeditions();renderAll();deskShowReport(entry);
 }
 function rerollUnstartedExpeditions(){
   normalizeExpeditionState();const today=localDateKey(),used=[];
@@ -4482,33 +4773,22 @@ function finishActiveExpeditionsForTest(){
   save();document.getElementById('expeditionAdminMessage').textContent=count?`Finished ${count} active expedition${count===1?'':'s'} for testing.`:'No active expeditions to finish.';renderAll();
 }
 async function renderExpeditions(){
-  ensureDailyExpeditions();const grid=document.getElementById('expeditionGrid');if(!grid)return;grid.innerHTML='';
-  let readyCount=0;
+  ensureDailyExpeditions();const grid=document.getElementById('expeditionGrid');if(!grid)return;
+  // Build every card synchronously; image requests never append stale cards after a newer render.
+  grid.replaceChildren();let ready=0;
   for(const key of EXPEDITION_DURATION_ORDER){
-    const c=state.expeditions.slots[key],duration=EXPEDITION_DURATIONS[key],mission=EXPEDITION_MISSIONS[c.missionId];if(!c||!mission)continue;
-    if(c.status==='active'&&Date.now()>=Number(c.finishAt||0)){c.status='ready';save();}
-    if(c.status==='ready')readyCount++;
-    const card=document.createElement('article');card.className=`expedition-card ${c.status}`;card.dataset.expeditionSlot=key;
-    const team=(c.monsterIds||[]).map(id=>state.monsters.find(m=>m.id===id)).filter(Boolean);
-    let action='';
-    if(c.status==='available')action=`<button class="primary expedition-prepare" type="button" data-expedition-prepare="${key}">Choose Team</button>`;
-    else if(c.status==='active')action=`<div class="expedition-timer" data-expedition-timer="${key}">${fmtExpeditionTime(expeditionRemaining(c))}</div><small>Returns when the timer reaches zero.</small>`;
-    else if(c.status==='ready')action=`<div class="expedition-ready">TEAM RETURNED</div><button class="primary expedition-collect" type="button" data-expedition-collect="${key}">Collect Rewards</button>`;
-    else action=`<div class="expedition-claimed">COMPLETED TODAY</div>${c.rewardSummary?`<p class="expedition-previous-reward">${c.rewardSummary}</p>`:''}`;
-    card.innerHTML=`<div class="expedition-card-top"><span class="expedition-mission-icon">${mission.icon}</span><div><div class="eyebrow">${duration.label.toUpperCase()} • ${duration.hours}H</div><h3>${mission.title}</h3></div></div><p class="expedition-description">${mission.description}</p><div class="expedition-reward-hint"><strong>Expected haul</strong><span>${mission.rewardHint} • ${EXPEDITION_XP_REWARDS[key]} XP / monster</span></div>${team.length?`<div class="expedition-team-strip"><div class="expedition-team-strip-label"><strong>Assigned Team</strong><span>${team.length}/5 • ${Math.round(Number(c.bonusChance||0)*100)}% bonus loot chance</span></div><div class="expedition-team-faces">${team.map(m=>`<div class="expedition-team-face" title="${displayName(m)}"><img data-expedition-face="${m.id}" alt="${displayName(m)}"><span>Lv.${m.level}</span></div>`).join('')}</div></div>`:''}<div class="expedition-card-action">${action}</div>`;
-    grid.appendChild(card);
-    if(c.status==='claimed'&&c.xpResults?.length){
-      const details=document.createElement('details'),heading=document.createElement('summary'),items=document.createElement('ul');
-      details.className='expedition-training-result';heading.textContent='Monster XP & level-ups';details.appendChild(heading);
-      for(const entry of c.xpResults){const li=document.createElement('li');li.textContent=expeditionTrainingLine(entry);items.appendChild(li);}
-      details.appendChild(items);card.appendChild(details);
-    }
-    for(const m of team){const img=card.querySelector(`[data-expedition-face="${m.id}"]`);if(img)await setMonsterImage(img,m.slug,monsterArtKind(m));}
+    const c=state.expeditions.slots[key],mission=EXPEDITION_MISSIONS[c?.missionId];if(!c||!mission)continue;
+    const region=deskRegion(c),specialty=EXPEDITION_SPECIALTIES[c.missionId],duration=EXPEDITION_DURATIONS[key],card=document.createElement('article');card.className=`expedition-card desk-card ${c.status}`;card.dataset.expeditionSlot=key;card.style.setProperty('--desk-accent',region.color);
+    if(c.status==='ready')ready++;
+    const team=c.teamSnapshot||deskTeamSnapshot((c.monsterIds||[]).map(id=>state.monsters.find(m=>m.id===id)).filter(Boolean),c.captainId);
+    const stateLabel={available:'Available',active:'Travelling',ready:'Returned',claimed:'Completed today'}[c.status];
+    let action=c.status==='available'?`<button class="primary" data-expedition-prepare="${key}" type="button">Prepare team →</button>`:c.status==='active'?`<div class="expedition-timer" data-expedition-timer="${key}">${fmtExpeditionTime(expeditionRemaining(c))}</div><small>Returns ${labSafe(deskTime(c.finishAt))}</small>`:c.status==='ready'?`<div class="expedition-ready">Team home · haul ready</div><button class="primary" data-expedition-collect="${key}" type="button">Collect haul & training</button>`:`<p class="desk-muted">A new contract arrives tomorrow.</p><button class="ghost" data-desk-current-report="${key}" type="button">Read return report</button>`;
+    card.innerHTML=`<div class="desk-destination" style="background-image:linear-gradient(0deg,#111721,transparent),url('assets/backgrounds/${c.regionId}.png')"><span class="desk-status">${stateLabel}</span><strong>${labSafe(region.name)}</strong><small>${duration.hours} hour${duration.hours===1?'':'s'} · ${labSafe(region.elements.join(' / '))}</small></div><div class="expedition-card-top"><span class="expedition-mission-icon">${mission.icon}</span><h3>${labSafe(mission.title)}</h3></div><p class="expedition-description">${labSafe(mission.description)}</p><div class="desk-specialty">Favored role: <strong>${specialty.role}</strong><br>Optional objective: ${labSafe(specialty.task)}</div><div class="desk-haul"><strong>Expected haul</strong><p>${labSafe(mission.rewardHint)}</p><small>${labSafe(c.status==='available'||c.deskVersion?deskLootPreview(c):`Original contract rewards · ${EXPEDITION_XP_REWARDS[key]} XP per monster`)}</small></div>${team.length?`<div class="expedition-team-strip"><div class="expedition-team-strip-label"><strong>Assigned team</strong><span>${Math.round(c.bonusChance*100)}% bonus loot</span></div><div class="expedition-team-faces">${team.map(mon=>`<div class="expedition-team-face" title="${labSafe(mon.name)}"><img data-desk-slug="${labSafe(mon.slug)}" data-desk-kind="${labSafe(mon.kind||'base')}" alt="${labSafe(mon.name)}"><span>${mon.captain?'★ Captain':labSafe(mon.name)}</span></div>`).join('')}</div></div>`:''}<div class="expedition-card-action">${action}</div>`;
+    grid.appendChild(card);card.querySelectorAll('[data-desk-slug]').forEach(img=>setMonsterImage(img,img.dataset.deskSlug,img.dataset.deskKind));
   }
-  const badge=document.getElementById('expeditionBadge');if(badge)badge.textContent=String(readyCount);document.querySelectorAll('.expedition-inline-badge').forEach(el=>el.textContent=String(readyCount));
-  const msg=document.getElementById('expeditionMessage');if(msg)msg.textContent=state.expeditions.lastMessage||'Three contracts are generated each day. Pick a team whenever you are ready.';
+  document.getElementById('expeditionBadge').textContent=String(ready);document.querySelectorAll('.expedition-inline-badge').forEach(el=>el.textContent=String(ready));document.getElementById('expeditionMessage').textContent=state.expeditions.lastMessage||'Three daily contracts. No failed trips, just more to discover with the right team.';
+  renderDeskJournal();deskRenderedSignature=deskBoardSignature();
 }
-
 function dailyBoardComplete(){
   ensureDailyRequests();
   return state.dailyRequests.requests.every(r=>r.claimed)&&!!state.dailyRequests.silverwind?.claimed;
@@ -4748,17 +5028,18 @@ function showSilverwindPane(name='desk'){
 }
 let currentHideoutPane='collection',currentCollectionPen=0,currentAdventurePane='battle',currentSilverwindPane='desk';
 function showAdventurePane(name='battle'){
-  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane',hunting:'adventureHuntingPane',arcade:'adventureArcadePane'};
-  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials',hunting:'showAdventureHunting',arcade:'showAdventureArcade'};
+  const panes={battle:'adventureBattlePane',expeditions:'adventureExpeditionsPane',trials:'adventureTrialsPane',hunting:'adventureHuntingPane'};
+  const buttons={battle:'showAdventureBattle',expeditions:'showAdventureExpeditions',trials:'showAdventureTrials',hunting:'showAdventureHunting'};
   if(!panes[name])name='battle';
-  if(name!=='arcade')monsterDashPause();
+  if(name==='arcade'){switchTab('arcade');return;}
+  monsterDashPause();
   currentAdventurePane=name;
   Object.entries(panes).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('hidden',key!==name));
   Object.entries(buttons).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('active',key===name));
   if(name==='expeditions')renderExpeditions();
   if(name==='trials')renderTrials();
   if(name==='hunting')renderHuntingZone();
-  if(name==='arcade')renderMonsterDash();
+
 }
 function showHideoutPane(name='collection'){
   const panes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
@@ -4779,10 +5060,10 @@ function switchTab(name){
     name='shop';
   }else if(name==='shop')currentShopMode='supplies';
   if(exploreExpeditionActive)endExploreExpedition();
-  if(name!=='arcade'&&name!=='adventure')monsterDashPause();
+  if(name!=='arcade'){monsterDashPause();mcStopAnimation();if(currentArcadeGame==='clicker'){mcResetVisit();currentArcadeGame='lobby';}}
   // Internal destinations route straight into their hub homes.
   const hideoutRoutes={collection:'collection',eggs:'eggs',breed:'breed',reconstruction:'reconstruction',habitats:'habitats',inventory:'inventory',profile:'profile'};
-  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials',hunting:'hunting',arcade:'arcade'};
+  const adventureRoutes={battle:'battle',expeditions:'expeditions',trials:'trials',hunting:'hunting'};
   const silverwindRoutes={'silverwind-desk':'desk','silverwind-artifacts':'artifacts','silverwind-reference':'reference','silverwind-archive':'archive','silverwind-attacks':'attacks'};
   const hideoutPane=hideoutRoutes[name]||null,adventurePane=adventureRoutes[name]||null,silverwindPane=silverwindRoutes[name]||null;
   const mainName=hideoutPane?'hideout':adventurePane?'adventure':silverwindPane?'silverwind':name;
@@ -4796,6 +5077,7 @@ function switchTab(name){
     currentSilverwindPane=silverwindPane||currentSilverwindPane||'desk';
     showSilverwindPane(currentSilverwindPane);
   }
+  if(mainName==='arcade')showArcade('lobby');
   if(mainName==='requests'&&state.onboarding?.completed){updateNewKeeperTask('requests');save();}
   renderAll();
 }
@@ -4808,7 +5090,7 @@ function monsterCard(mon){
   const sp=speciesOf(mon);if(!sp)return document.createElement('div');
   const active=state.activeMonsterId===mon.id,fainted=isMonsterFainted(mon),breedPen=breedingPenForMonster(mon.id),breedRemaining=breedPen?Number(breedPen.finishAt||0)-Date.now():0,expedition=expeditionForMonster(mon.id),expeditionLeft=expeditionRemaining(expedition);
   const el=document.createElement('button');el.type='button';el.dataset.monsterId=mon.id;el.className='monster-card'+(active?' active-monster':'')+(fainted?' fainted-monster':'')+(breedPen?' breeding-monster':'')+(expedition?' expedition-monster':'')+(mon.isPrismatic?' prismatic-monster':'');
-  el.innerHTML=`<div class="sprite-well">${active?'<div class="active-badge">ACTIVE</div>':''}${mon.isPrismatic?'<div class="prismatic-badge">✦ PRISMATIC</div>':''}${fainted?`<div class="faint-badge" data-faint-countdown="${mon.id}">FAINTED • ${fmtTime(faintRemaining(mon))}</div>`:''}${breedPen?`<div class="breeding-badge" data-breed-countdown="${mon.id}">BREEDING • ${breedRemaining<=0?'READY':fmtTime(breedRemaining)}</div>`:''}${expedition?`<div class="expedition-badge" data-expedition-countdown="${mon.id}">EXPEDITION • ${fmtExpeditionTime(expeditionLeft)}</div>`:''}<img alt="${sp.name}"></div><div class="card-copy">
+  el.innerHTML=`<div class="sprite-well">${active?'<div class="active-badge">ACTIVE</div>':''}${mon.isPrismatic?'<div class="prismatic-badge">✦ PRISMATIC</div>':''}${fainted?`<div class="faint-badge" data-faint-countdown="${mon.id}">FAINTED • ${fmtTime(faintRemaining(mon))}</div>`:''}${breedPen?`<div class="breeding-badge" data-breed-countdown="${mon.id}">BREEDING • ${breedRemaining<=0?'READY':fmtTime(breedRemaining)}</div>`:''}${expedition?`<div class="expedition-badge" data-expedition-countdown="${mon.id}">${expedition.status==='ready'?'RETURNED • COLLECT':'EXPEDITION • '+fmtExpeditionTime(expeditionLeft)}</div>`:''}<img alt="${sp.name}"></div><div class="card-copy">
     <div class="card-title"><h3 class="${isGodSpecies(sp)?'god-rgb-name':''}">${displayName(mon)}</h3><span>Lv.${mon.level}</span></div>
     ${mon.nickname?`<p class="species-mini">${sp.name}</p>`:''}<p>${sp.role||sp.battleType}</p>
     <div class="chips"><span>${mon.gender}</span><span>P${mon.potential}</span><span>${speciesElementLabel(sp)}</span><span>${mon.trait}</span>${mon.isAlpha?'<span class="alpha-chip">⚑ ALPHA</span>':''}${isGodSpecies(sp)?'<span class="god-grade-tag">✦ GOD ✦</span>':sp.rarity==='Mythic'?'<span class="mythic-chip">MYTHIC</span>':''}</div></div>`;
@@ -5000,7 +5282,7 @@ async function openDetail(id){
   document.getElementById('detailName').textContent=displayName(mon);document.getElementById('detailName').classList.toggle('god-rgb-name',isGodSpecies(sp));document.getElementById('detailSpecies').classList.toggle('god-rgb-name',isGodSpecies(sp));document.getElementById('detailSpecies').textContent=`${sp.name}${mon.isPrismatic?' • ✦ PRISMATIC':''}${mon.isAlpha?' • ⚑ ALPHA':''}${isGodSpecies(sp)?' • ✦ GOD ✦':sp.rarity==='Mythic'?' • MYTHIC':''}`;
   document.getElementById('detailRole').textContent=`${sp.role||sp.battleType} • ${sp.battleType}`;document.getElementById('detailLevel').textContent=mon.level;
   document.getElementById('detailGender').textContent=mon.gender;document.getElementById('detailPotential').textContent=`P${mon.potential}`;
-  const favoriteBtn=document.getElementById('labFavoriteMonster');favoriteBtn.textContent=mon.favorite?'★':'☆';favoriteBtn.setAttribute('aria-pressed',mon.favorite?'true':'false');favoriteBtn.title=mon.favorite?'Remove from breeding favorites':'Add to breeding favorites';
+  const favoriteBtn=document.getElementById('labFavoriteMonster');favoriteBtn.textContent=mon.favorite?'★':'☆';favoriteBtn.setAttribute('aria-pressed',mon.favorite?'true':'false');favoriteBtn.title=mon.favorite?'Remove from favorites to allow release':'Favorite for breeding and protect from release';
   document.getElementById('detailTrait').textContent=`${mon.trait} • ${traitSummary(mon.trait)}`;
   const st=battleStatsFor(mon);document.getElementById('statHP').textContent=st.hp;document.getElementById('statAttack').textContent=st.attack;document.getElementById('statArmor').textContent=st.armor;document.getElementById('statSpeed').textContent=st.speed;document.getElementById('statElement').textContent=speciesElementLabel(sp);
   const activeBtn=document.getElementById('setActiveMonster'),fainted=isMonsterFainted(mon),awayExpedition=expeditionForMonster(mon.id);
@@ -5031,10 +5313,11 @@ function setSelectedActive(){
 function releaseSelectedMonster(){
   const mon=state.monsters.find(m=>m.id===selectedMonsterId);if(!mon)return;
   const sp=speciesOf(mon);if(!sp)return;
+  if(mon.favorite){alert('This monster is a favorite. Remove its favorite star before releasing it.');return;}
   if(state.monsters.length<=1){alert('You must keep at least one monster.');return;}
   if(state.activeMonsterId===mon.id){alert('Switch to a different Active Monster before releasing this one.');return;}
   if(isMonsterBreeding(mon.id)){alert('This monster is currently locked into a breeding pen.');return;}
-  if(isMonsterOnExpedition(mon.id)){alert('This monster is currently away on an expedition.');return;}
+  if(isMonsterOnExpedition(mon.id)){alert('This monster is reserved for an expedition. Collect its returned haul and training before releasing it.');return;}
   if(battleSession&&!battleSession.result&&battleSession.playerId===mon.id){alert('This monster is currently in battle.');return;}
   const label=`${displayName(mon)} (${sp.name} • ${mon.id})`;
   if(!confirm(`Release ${label}?\n\nThis permanently removes this individual monster from your Collection and cannot be undone. Archive discovery will remain unlocked.`))return;
@@ -6964,7 +7247,7 @@ const KEEPER_SAVE_MAX_FILE_BYTES=240*1024*1024;
 const KEEPER_SAVE_MAX_ASSET_BYTES=18*1024*1024;
 let keeperSaveTransferBusy=false;
 function keeperSaveStatus(message,failed=false){
-  const el=document.getElementById('keeperSaveMessage');
+  const el=document.getElementById(saveLoadFailure?'saveRecoveryMessage':'keeperSaveMessage');
   if(el){el.textContent=message;el.classList.toggle('error',failed);}
 }
 function keeperSaveControlsBusy(busy){
@@ -7022,7 +7305,7 @@ async function exportKeeperSave(){
     const progress=JSON.parse(JSON.stringify(state));
     const withArt=!!document.getElementById('keeperSaveIncludeArt')?.checked;
     const assets=withArt?await keeperSaveGatherAssets():{};
-    const payload={format:KEEPER_SAVE_FORMAT,version:KEEPER_SAVE_VERSION,exportedAt:new Date().toISOString(),sourceBuild:'v0.15.86f',keeperName:String(progress.account?.keeperName||'Keeper'),includesLocalArtwork:withArt,state:progress,assets};
+    const payload={format:KEEPER_SAVE_FORMAT,version:KEEPER_SAVE_VERSION,exportedAt:new Date().toISOString(),sourceBuild:'v0.15.86i',keeperName:String(progress.account?.keeperName||'Keeper'),includesLocalArtwork:withArt,state:progress,assets};
     const safeName=String(progress.account?.keeperName||'Keeper').replace(/[^a-z0-9_-]+/gi,'_').slice(0,32)||'Keeper';
     keeperSaveDownload(payload,`Prismwild_Keeper_${safeName}_${new Date().toISOString().slice(0,10)}.json`);
     keeperSaveStatus(`Export ready for ${payload.keeperName}: ${progress.monsters?.length||0} monsters, ${progress.eggs?.length||0} eggs${withArt?`, ${Object.keys(assets).length} local art files`:''}. Send this JSON file to the other device.`);
@@ -9142,7 +9425,7 @@ function enemyMoveId(){
 }
 
 function setBattleControlsLocked(locked){
-  ['battleAttack','battleItem','battleFlee'].forEach(id=>{
+  ['battleAttack','battleItem','battleFlee','battleTypeChart'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.disabled=!!locked;
   });
@@ -9176,6 +9459,249 @@ async function showBattleFeedback(feedback){
   box.classList.remove('show');
   await battle2Wait(180);
   box.classList.add('hidden');
+}
+
+// v0.16.0: Capture 2.0 lands on the enemy's existing ground oval.
+function ensureBattleCaptureOverlay(){
+  const stage=document.getElementById('battle2Stage');
+  if(!stage)return null;
+  let overlay=stage.querySelector('.battle-capture-overlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.className='battle-capture-overlay hidden';
+    overlay.setAttribute('aria-hidden','true');
+    overlay.innerHTML='<div class="battle-capture-shadow"></div><div class="battle-capture-impact"></div><div class="battle-capture-outcome"></div><div class="battle-capture-pod"></div>';
+    stage.appendChild(overlay);
+  }
+  return overlay;
+}
+function clearBattleCaptureOverlay(preserveCapturedEnemy=false){
+  const overlay=document.querySelector('#battle2Stage .battle-capture-overlay');
+  const enemyArt=document.getElementById('battleEnemyArtWrap');
+  if(enemyArt){
+    enemyArt.classList.remove('capture-targeting','capture-fading','capture-releasing');
+    if(!preserveCapturedEnemy)enemyArt.classList.remove('capture-hidden');
+    for(const key of ['--cap-origin-x','--cap-origin-y','--cap-absorb-duration','--cap-outcome-duration'])enemyArt.style.removeProperty(key);
+  }
+  if(overlay){
+    overlay.className='battle-capture-overlay hidden';
+    const pod=overlay.querySelector('.battle-capture-pod');
+    if(pod){pod.className='battle-capture-pod';pod.removeAttribute('style');pod.replaceChildren();}
+  }
+}
+function battleCaptureDuration(ms){
+  // Keep animations and JS timers on the same Normal / Fast / Minimal clock.
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  return Math.max(35,Math.round(battle2Ms(ms)*(reduced?.22:1)));
+}
+const battleCaptureArtBoundsCache=new Map();
+function battleCaptureArtworkBounds(img,wrap){
+  const rect=(img?.getBoundingClientRect().width?img:wrap)?.getBoundingClientRect();
+  if(!rect||!img?.complete||!img.naturalWidth||!img.naturalHeight)return rect;
+  // object-fit:contain leaves space inside the <img> box; uploaded art can also
+  // have transparent margins. Aim at the visible sprite, including its facing.
+  const src=img.currentSrc||img.src;
+  let art=battleCaptureArtBoundsCache.get(src);
+  if(!art){
+    art={left:0,top:0,width:1,height:1};
+    try{
+      const canvas=document.createElement('canvas'),scale=Math.min(1,192/Math.max(img.naturalWidth,img.naturalHeight));
+      canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+      canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      let left=canvas.width,top=canvas.height,right=-1,bottom=-1;
+      for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>16){
+        left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);
+      }
+      if(right>=left&&bottom>=top)art={left:left/canvas.width,top:top/canvas.height,width:(right-left+1)/canvas.width,height:(bottom-top+1)/canvas.height};
+    }catch(_e){} // Cross-origin or undecodable art still uses its fitted image box.
+    if(battleCaptureArtBoundsCache.size>=32)battleCaptureArtBoundsCache.delete(battleCaptureArtBoundsCache.keys().next().value);
+    battleCaptureArtBoundsCache.set(src,art);
+  }
+  const scale=Math.min(rect.width/img.naturalWidth,rect.height/img.naturalHeight);
+  const width=img.naturalWidth*scale,height=img.naturalHeight*scale;
+  const left=img.style.transform==='scaleX(-1)'?1-art.left-art.width:art.left;
+  return {left:rect.left+(rect.width-width)/2+left*width,top:rect.top+(rect.height-height)/2+art.top*height,width:art.width*width,height:art.height*height};
+}
+function battleCaptureCoordinates(stage){
+  if(!stage)return null;
+  const playerArt=document.getElementById('battlePlayerArt');
+  const enemyArt=document.getElementById('battleEnemyArt');
+  const playerWrap=document.getElementById('battlePlayerArtWrap');
+  const enemyWrap=document.getElementById('battleEnemyArtWrap');
+  const bounds=stage.getBoundingClientRect();
+  if(!bounds.width||!bounds.height)return null;
+  const src=battleCaptureArtworkBounds(playerArt,playerWrap);
+  const dst=battleCaptureArtworkBounds(enemyArt,enemyWrap);
+  if(!src||!dst)return null;
+  // CSS offsets are relative to the inside of the stage border, not its outer
+  // viewport rectangle. Convert once so parent scaling doesn't move the pod.
+  const scaleX=bounds.width/(stage.offsetWidth||bounds.width),scaleY=bounds.height/(stage.offsetHeight||bounds.height);
+  const originX=bounds.left+(stage.clientLeft||0)*scaleX,originY=bounds.top+(stage.clientTop||0)*scaleY;
+  const width=stage.clientWidth||bounds.width/scaleX,height=stage.clientHeight||bounds.height/scaleY;
+  const clampX=x=>Math.min(width-28,Math.max(28,x));
+  const clampY=y=>Math.min(height-28,Math.max(28,y));
+  const start={x:clampX((src.left-originX+src.width*.64)/scaleX),y:clampY((src.top-originY+src.height*.56)/scaleY)};
+  const hit={x:clampX((dst.left-originX+dst.width*.50)/scaleX),y:clampY((dst.top-originY+dst.height*.48)/scaleY)};
+  const groundRect=(enemyWrap||enemyArt).getBoundingClientRect();
+  const groundStyle=enemyWrap?getComputedStyle(enemyWrap,'::before'):null;
+  const groundInset=(parseFloat(groundStyle?.bottom)||1)+(parseFloat(groundStyle?.height)||34)/2;
+  const groundY=(groundRect.bottom-originY)/scaleY-groundInset;
+  // The pod shadow's center is 20px below the pod center. Match it to the
+  // monster's existing ground oval rather than any percentage of stage height.
+  const floor={x:clampX(hit.x-Math.min(35,width*.05)),y:clampY(groundY-20)};
+  const midX=start.x+(hit.x-start.x)*.52;
+  const midY=start.y+(hit.y-start.y)*.52-Math.min(85,height*.18);
+  const origin={x:hit.x-(groundRect.left-originX)/scaleX,y:hit.y-(groundRect.top-originY)/scaleY};
+  return {start,hit,floor,mid:{x:midX,y:clampY(midY)},origin};
+}
+async function animateBattleCaptureShake(pod){
+  if(!pod)return;
+  const ms=battleCaptureDuration(610);
+  pod.style.setProperty('--cap-shake-duration',ms+'ms');
+  pod.classList.remove('shake');void pod.offsetWidth;pod.classList.add('shake');
+  await wait(ms);
+  pod.classList.remove('shake');
+}
+async function playBattleCaptureSequence(success,shakes){
+  const overlay=ensureBattleCaptureOverlay();
+  const enemyArt=document.getElementById('battleEnemyArtWrap');
+  if(!overlay){await battle2Wait(250);return;}
+  const pod=overlay.querySelector('.battle-capture-pod');
+  if(enemyArt){
+    enemyArt.classList.remove('capture-fading','capture-hidden','capture-releasing');
+    enemyArt.classList.add('capture-targeting');
+  }
+  const coords=battleCaptureCoordinates(document.getElementById('battle2Stage'));
+  if(!coords||!pod){clearBattleCaptureOverlay();await battle2Wait(250);return;}
+  const {start,hit,mid,floor,origin}=coords;
+  const throwMs=battleCaptureDuration(820),absorbMs=battleCaptureDuration(430);
+  const dropMs=battleCaptureDuration(720),outcomeMs=battleCaptureDuration(550);
+  // CSS keyframes and JS use one position source; responsive dimensions are in pixels.
+  for(const [key,value] of Object.entries({
+    '--cap-start-x':start.x+'px','--cap-start-y':start.y+'px',
+    '--cap-hit-x':hit.x+'px','--cap-hit-y':hit.y+'px',
+    '--cap-mid-x':mid.x+'px','--cap-mid-y':mid.y+'px',
+    '--cap-floor-x':floor.x+'px','--cap-floor-y':floor.y+'px',
+    '--cap-throw-duration':throwMs+'ms','--cap-absorb-duration':absorbMs+'ms',
+    '--cap-drop-duration':dropMs+'ms','--cap-outcome-duration':outcomeMs+'ms'
+  }))overlay.style.setProperty(key,value);
+  if(enemyArt){
+    enemyArt.style.setProperty('--cap-origin-x',origin.x+'px');
+    enemyArt.style.setProperty('--cap-origin-y',origin.y+'px');
+    enemyArt.style.setProperty('--cap-absorb-duration',absorbMs+'ms');
+    enemyArt.style.setProperty('--cap-outcome-duration',outcomeMs+'ms');
+  }
+  overlay.className='battle-capture-overlay';
+  pod.className='battle-capture-pod';
+  pod.innerHTML=iconMarkup('active_capture_pod','sheet-icon battle-capture-pod-icon');
+  try{await hydrateSprites(pod);}catch(_e){} // Preserve the atlas fallback if local sprite storage is unavailable.
+  let completed=false;
+  try{
+    // Throw lands on the live monster artwork, regardless of stage size or its card labels.
+    pod.classList.add('thrown');
+    await wait(throwMs);
+    pod.style.left=hit.x+'px';pod.style.top=hit.y+'px';
+    pod.classList.remove('thrown');
+    overlay.classList.add('capture-impact');
+    if(enemyArt)enemyArt.classList.add('capture-fading');
+    await wait(absorbMs);
+    if(enemyArt)enemyArt.classList.add('capture-hidden');
+    overlay.classList.remove('capture-impact');
+    pod.classList.add('falling');
+    await wait(dropMs);
+    pod.style.left=floor.x+'px';pod.style.top=floor.y+'px';
+    pod.classList.remove('falling');pod.classList.add('settled');
+    overlay.classList.add('capture-on-ground');
+    await wait(battleCaptureDuration(190));
+    for(let i=0;i<Math.max(1,Number(shakes||1));i++){
+      await animateBattleCaptureShake(pod);
+      await wait(battleCaptureDuration(255));
+    }
+    if(success){
+      overlay.classList.add('capture-succeeded');pod.classList.add('sealed');
+      await wait(outcomeMs);
+    }else{
+      overlay.classList.add('capture-failed');pod.classList.add('burst');
+      if(enemyArt){
+        enemyArt.classList.remove('capture-hidden','capture-fading');
+        enemyArt.classList.add('capture-releasing');
+      }
+      await wait(outcomeMs);
+      enemyArt?.classList.remove('capture-releasing');
+    }
+    completed=true;
+  }finally{
+    // The captured enemy remains invisible until the result page, then resets for the next fight.
+    clearBattleCaptureOverlay(completed&&success);
+  }
+}
+function awardCapturedBattleMonster(enemy){
+  const enemySp=speciesOf(enemy);
+  if(!enemySp||!collectionHasOpenSlot())return null;
+  const id=uid('M',state.nextMonsterNum++);
+  const joined={id,slug:enemy.slug,level:enemy.level,xp:0,gender:enemy.gender,potential:enemy.potential,trait:enemy.trait,nickname:'',attacks:[...(enemy.attacks||[])].slice(0,2),isPrismatic:!!enemy.isPrismatic,isAlpha:!!enemy.isAlpha,faintedUntil:0,parents:null};
+  state.monsters.push(joined);placeMonsterInCollection(id);
+  return {id,name:enemySp.name,level:enemy.level,isPrismatic:!!enemy.isPrismatic,isAlpha:!!enemy.isAlpha};
+}
+async function attemptBattleCapture(){
+  if(!battleCaptureEligible()||!battleSession||battleSession.result||battleSession.locked)return;
+  if(!(Number(state.inventory.active_capture_pod||0)>0))return;
+  if(!collectionHasOpenSlot()){
+    alert('Your Collection Pens are full, so there is nowhere for a captured monster to go.');
+    return;
+  }
+  battleSession.locked=true;
+  setBattleControlsLocked(true);
+  document.getElementById('battleSubmenu').classList.add('hidden');
+  state.inventory.active_capture_pod--;
+  if(state.inventory.active_capture_pod<=0)delete state.inventory.active_capture_pod;
+  const enemy=sessionMon('enemy'),enemySp=speciesOf(enemy),captureChance=battleActiveCaptureChance();
+  const success=Math.random()<captureChance;
+  const shakes=success?3:randomChoice([1,2]);
+  battleSession.log.push(`You hurled an Active Capture Pod at ${enemySp?.name||'the wild monster'}!`);
+  save();
+  await refreshBattleUI();
+  await playBattleCaptureSequence(success,shakes);
+  if(success){
+    const monsterReward=awardCapturedBattleMonster(enemy);
+    if(monsterReward){
+      battleSession.log.push(`${enemy.isPrismatic?'Prismatic ':''}${enemySp.name} was captured!`);
+      updateRequestProgress('wild_win',1);
+      updateNewKeeperTask('battle');
+      save();
+      battleSession.result={type:'capture',title:'Captured!',text:`You caught ${enemy.isPrismatic?'a Prismatic ':''}${battleSession.mode==='alpha-hunt'?'Alpha ':''}${enemySp.name} Lv.${enemy.level}.`,monsterReward};
+      await refreshBattleUI();
+      await showBattleFeedback({kind:'status',main:'CAPTURED!',sub:enemySp.name});
+    }else{
+      clearBattleCaptureOverlay(); // Rare multi-tab pen change: the enemy escaped, so restore its artwork.
+      battleSession.log.push(`Your Collection Pens are full, so ${enemySp.name} slipped away.`);
+      await refreshBattleUI();
+      await showBattleFeedback({kind:'miss',main:'NO ROOM',sub:'Collection Pens are full'});
+      if(!checkBattleEnd()){
+        await wait(220);
+        const foeMove=enemyMoveId(); await resolveAnimatedMove('enemy',foeMove,'player');
+        if(!checkBattleEnd()&&hasGodTrait(sessionMon('enemy'),'Light Speed'))await resolveAnimatedMove('enemy',foeMove,'player');
+      }
+      if(!checkBattleEnd())await resolveStatusTicks();
+      battleSession.locked=false; setBattleControlsLocked(false); await refreshBattleUI();
+    }
+    return;
+  }
+  battleSession.log.push(`${enemySp.name} broke free!`);
+  await refreshBattleUI();
+  await showBattleFeedback({kind:'miss',main:'BROKE FREE!',sub:`${Math.round(captureChance*100)}% chance failed`});
+  if(!checkBattleEnd()){
+    await wait(220);
+    const foeMove=enemyMoveId(); await resolveAnimatedMove('enemy',foeMove,'player');
+    if(!checkBattleEnd()&&hasGodTrait(sessionMon('enemy'),'Light Speed'))await resolveAnimatedMove('enemy',foeMove,'player');
+  }
+  if(!checkBattleEnd())await resolveStatusTicks();
+  battleSession.locked=false;
+  setBattleControlsLocked(false);
+  await refreshBattleUI();
 }
 
 async function resolveAnimatedMove(attackerSide,moveId,defenderSide){
@@ -9303,16 +9829,30 @@ const BATTLE_HEAL_ITEMS=[
   {id:'medium_heal_gel',percent:.50,label:'Medium Healing Gel'},
   {id:'life_crystal',full:true,label:'Life Crystal'}
 ];
+function battleCaptureEligible(){
+  if(!battleSession||battleSession.result||battleSession.locked)return false;
+  return ['wild','alpha-hunt','mythic-temple'].includes(String(battleSession.mode||''));
+}
+function battleActiveCaptureChance(){
+  return clamp(currentCaptureChance()+ACTIVE_CAPTURE_POD_BONUS,0,1);
+}
 function openItemMenu(){
   if(!battleSession||battleSession.result||battleSession.locked)return;
   const mon=sessionMon('player'),max=battleStatsFor(mon).hp,full=battleSession.playerHp>=max,box=document.getElementById('battleSubmenu');
-  box.innerHTML=BATTLE_HEAL_ITEMS.map(def=>{
+  let html=BATTLE_HEAL_ITEMS.map(def=>{
     const qty=Number(state.inventory[def.id]||0),disabled=qty<=0||full;
     const effect=def.full?'Fully restore Vitality.':`Restore ${Math.round(def.percent*100)}% of maximum Vitality.`;
     return `<button class="move-action" data-heal-item="${def.id}" type="button" ${disabled?'disabled':''}><strong>${def.label} ×${qty}</strong><span>${full?'Vitality is already full.':effect}</span></button>`;
   }).join('');
+  if(battleCaptureEligible()){
+    const qty=Number(state.inventory.active_capture_pod||0),chance=Math.round(battleActiveCaptureChance()*100),fullPens=!collectionHasOpenSlot();
+    const disabled=qty<=0||fullPens;
+    html += `<button class="move-action capture-move-action" data-active-capture-pod="1" type="button" ${disabled?'disabled':''}><strong>Active Capture Pod ×${qty}</strong><span>${fullPens?'Your Collection Pens are full.':`Attempt a capture now • ${chance}% total catch chance`}</span></button>`;
+  }
+  box.innerHTML=html;
   box.classList.remove('hidden');
   box.querySelectorAll('[data-heal-item]').forEach(btn=>{if(!btn.disabled)btn.onclick=()=>useBattleHealingItem(btn.dataset.healItem);});
+  box.querySelectorAll('[data-active-capture-pod]').forEach(btn=>{if(!btn.disabled)btn.onclick=()=>attemptBattleCapture();});
 }
 
 async function useBattleHealingItem(itemId){
@@ -9511,6 +10051,9 @@ async function refreshBattleUI(){
     }else if(r.type==='event-victory'){
       result.innerHTML=`<div class="eyebrow">EVENT VICTORY</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line"><strong>+${r.xp} Monster XP</strong><strong class="event-battle-currency">${eventCurrencySpriteMarkup(EVENT_DEFS[battleSession?.eventId]||EVENT_DEFS.spooky_halloween_2026,'event-currency-inline')} +${r.fangs} ${EVENT_DEFS[battleSession?.eventId]?.currency?.name||'Fangs'}</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.monsterReward?`<strong class="monster-reward">NEW EVENT MONSTER • ${r.monsterReward.isAlpha?'⚑ ALPHA ':''}${r.monsterReward.isPrismatic?'✦ PRISMATIC ':''}${r.monsterReward.name} Lv.${r.monsterReward.level}</strong>`:''}</div><button id="leaveBattle" class="primary" type="button">Back to Haunted Maze</button>`;
       document.getElementById('leaveBattle').onclick=()=>{battleSession=null;switchTab('event');};
+    }else if(r.type==='capture'){
+      result.innerHTML=`<div class="eyebrow">CAPTURE SUCCESS</div><h3>${r.title}</h3><p>${r.text}</p><div class="reward-line">${r.monsterReward?`<strong class="monster-reward">NEW MONSTER • ${r.monsterReward.isAlpha?'⚑ ALPHA ':''}${r.monsterReward.isPrismatic?'✦ PRISMATIC ':''}${r.monsterReward.name} Lv.${r.monsterReward.level}</strong>`:''}<strong>Battle capture used one Active Capture Pod.</strong></div><button id="leaveBattle" class="primary" type="button">Back to Explore</button>`;
+      document.getElementById('leaveBattle').onclick=async()=>{battleSession=null;exploreEvent=null;showBattleSubpage('explore');if(mazeFullyRevealed(exploreMaze)&&mazeObjectivesCleared(exploreMaze))await completeExploreMaze();await renderExplorePage();await renderAll();restoreExploreScroll();};
     }else{
       const backToEvent=isEvent,isExploreDefeat=!isEvent&&r.type==='defeat';
       result.innerHTML=`<div class="eyebrow">${r.type.toUpperCase()}</div><h3>${r.title}</h3><p>${r.text}</p>${r.type==='victory'?`<div class="reward-line"><strong>+${r.xp} XP</strong><strong>+${currencyMarkup(r.currency,'currency-inline reward-currency')}</strong>${r.levels?`<strong>LEVEL UP ×${r.levels}</strong>`:''}${r.monsterReward?`<strong class="monster-reward">NEW MONSTER • ${r.monsterReward.isAlpha?'⚑ ALPHA ':''}${r.monsterReward.isPrismatic?'✦ PRISMATIC ':''}${r.monsterReward.name} Lv.${r.monsterReward.level}</strong>`:''}</div>`:''}<button id="leaveBattle" class="primary" type="button">${backToEvent?'Back to Haunted Maze':isExploreDefeat?'Expedition Ended • Battle Menu':'Back to Explore'}</button>`;
@@ -9529,6 +10072,7 @@ function applyBattleFacing(img,slug,side){
   img.style.transform=native===desired?'scaleX(1)':'scaleX(-1)';
 }
 async function renderWildBattle(){
+  clearBattleCaptureOverlay();
   if(!battleSession)return;
   const player=sessionMon('player'),enemy=sessionMon('enemy');
   const playerImg=document.getElementById('battlePlayerArt'),enemyImg=document.getElementById('battleEnemyArt');
@@ -9736,6 +10280,7 @@ async function renderAll(){
   renderAccountProgress();
   applyAccountAccessUI();
   renderNewKeeperChecklist();
+  renderHideoutReady();
   renderRequestBoard();
   await renderLanding();
   if(version!==uiRenderVersion)return;
@@ -9744,6 +10289,7 @@ async function renderAll(){
   renderCollection();
   renderHuntingZone();
   renderMonsterDashStatus();
+  if(mcVisible())renderMonsterClicker();
   renderBreedSelectors();
   renderBreedJob();
   renderSilverwindDesk();
@@ -9797,14 +10343,29 @@ document.getElementById('reconRecipeDetail').addEventListener('click',e=>{if(e.t
 document.getElementById('reconRecipeForm').addEventListener('submit',reconSaveRecipe);
 document.getElementById('reconMaterialForm').addEventListener('submit',reconSaveMaterial);
 document.getElementById('reconNewRecipe').addEventListener('click',reconClearRecipe);
+document.getElementById('reconCancelRecipeEdit').addEventListener('click',reconClearRecipe);
 document.getElementById('reconGiveTestPage').addEventListener('click',()=>{if(!isAdminAccount())return;state.inventory.ancient_pages=(state.inventory.ancient_pages||0)+1;save();renderInventory();renderReconstructionLab();document.getElementById('reconRecipeAdminMessage').textContent='Granted one Ancient Page for local testing.';});
-document.getElementById('reconDeleteRecipe').addEventListener('click',reconDeleteRecipe);
+document.getElementById('reconDeleteRecipe').addEventListener('click',()=>reconDeleteRecipe());
 document.getElementById('reconNewMaterial').addEventListener('click',reconClearMaterial);
 document.getElementById('reconDeleteMaterial').addEventListener('click',reconDeleteMaterial);
-document.getElementById('reconAdminRecipeList').addEventListener('click',e=>{const b=e.target.closest('[data-recon-admin-edit]');if(b)reconEditRecipe(b.dataset.reconAdminEdit);});
+document.getElementById('reconAdminRecipeList').addEventListener('click',e=>{const remove=e.target.closest('[data-recon-admin-remove]');if(remove){reconDeleteRecipe(remove.dataset.reconAdminRemove);return;}const edit=e.target.closest('[data-recon-admin-edit]');if(edit)reconEditRecipe(edit.dataset.reconAdminEdit);});
 document.getElementById('reconAdminMaterialList').addEventListener('click',e=>{const b=e.target.closest('[data-recon-material-edit]');if(b)reconEditMaterial(b.dataset.reconMaterialEdit);});
+document.getElementById('reconSkipReveal').addEventListener('click',reconFinishEggReveal);
+document.getElementById('reconRevealStay').addEventListener('click',()=>reconCloseEggReveal());
+document.getElementById('reconRevealStorage').addEventListener('click',()=>reconCloseEggReveal(true));
+document.getElementById('reconRevealDialog').addEventListener('cancel',e=>{e.preventDefault();if(document.getElementById('reconRevealActions').classList.contains('hidden'))reconFinishEggReveal();else reconCloseEggReveal();});
+document.getElementById('reconRevealDialog').addEventListener('close',()=>{if(!document.getElementById('reconRevealDialog').open){reconClearRevealTimers();reconRevealEggId=null;}});
 document.getElementById('expeditionGrid').addEventListener('click',e=>{const prep=e.target.closest('[data-expedition-prepare]'),collect=e.target.closest('[data-expedition-collect]');if(prep)openExpeditionTeam(prep.dataset.expeditionPrepare);else if(collect)collectExpedition(collect.dataset.expeditionCollect);});
-document.getElementById('expeditionTeamPicker').addEventListener('click',e=>{const btn=e.target.closest('[data-expedition-monster-id]');if(btn)toggleExpeditionMonster(btn.dataset.expeditionMonsterId);});
+document.getElementById('expeditionGrid').addEventListener('click',e=>{const button=e.target.closest('[data-desk-current-report]');if(button){const contract=state.expeditions.slots[button.dataset.deskCurrentReport];if(contract)showExpeditionRewardModal(contract);}});
+document.getElementById('expeditionHistory').addEventListener('click',e=>{const button=e.target.closest('[data-desk-report]');if(button){const entry=deskState().history[Number(button.dataset.deskReport)];if(entry)deskShowReport(entry);}});
+document.getElementById('expeditionTeamSearch').addEventListener('input',renderExpeditionTeamPicker);
+document.getElementById('expeditionAvailableOnly').addEventListener('change',renderExpeditionTeamPicker);
+document.getElementById('expeditionCaptain').addEventListener('change',e=>{deskCaptainId=e.target.value;renderExpeditionTeamPicker();});
+document.getElementById('expeditionSaveTeam').addEventListener('click',deskSaveTeam);
+document.getElementById('expeditionLoadTeam').addEventListener('click',()=>deskLoadTeam(deskState().savedTeams.find(team=>team.id===document.getElementById('expeditionSavedTeam').value)));
+document.getElementById('expeditionUseLastTeam').addEventListener('click',()=>deskLoadTeam(deskState().lastTeam));
+document.getElementById('expeditionDeleteTeam').addEventListener('click',deskDeleteTeam);
+document.getElementById('expeditionTeamPicker').addEventListener('click' ,e=>{const btn=e.target.closest('[data-expedition-monster-id]');if(btn)toggleExpeditionMonster(btn.dataset.expeditionMonsterId);});
 document.getElementById('startSelectedExpedition').addEventListener('click',startSelectedExpedition);
 document.getElementById('closeExpeditionTeam').addEventListener('click',()=>document.getElementById('expeditionTeamModal').close());
 document.getElementById('cancelExpeditionTeam').addEventListener('click',()=>document.getElementById('expeditionTeamModal').close());
@@ -9817,7 +10378,7 @@ document.getElementById('expeditionRerollDaily').addEventListener('click',()=>{r
 
 document.getElementById('search').addEventListener('input',renderCollection);document.getElementById('filter').addEventListener('change',renderCollection);
 document.getElementById('showHideoutCollection').addEventListener('click',()=>showHideoutPane('collection'));document.getElementById('showHideoutIncubators').addEventListener('click',()=>showHideoutPane('eggs'));document.getElementById('showHideoutBreed').addEventListener('click',()=>showHideoutPane('breed'));document.getElementById('showHideoutReconstruction').addEventListener('click',()=>showHideoutPane('reconstruction'));document.getElementById('showHideoutHabitats').addEventListener('click',()=>showHideoutPane('habitats'));document.getElementById('showHideoutInventory').addEventListener('click',()=>showHideoutPane('inventory'));document.getElementById('showHideoutProfile').addEventListener('click',()=>showHideoutPane('profile'));
-document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));document.getElementById('showAdventureHunting').addEventListener('click',()=>showAdventurePane('hunting'));document.getElementById('showAdventureArcade').addEventListener('click',()=>showAdventurePane('arcade'));
+document.getElementById('showAdventureBattle').addEventListener('click',()=>showAdventurePane('battle'));document.getElementById('showAdventureExpeditions').addEventListener('click',()=>showAdventurePane('expeditions'));document.getElementById('showAdventureTrials').addEventListener('click',()=>showAdventurePane('trials'));document.getElementById('showAdventureHunting').addEventListener('click',()=>showAdventurePane('hunting'));
 document.getElementById('habitatGrid').addEventListener('change',e=>{if(e.target.matches('[data-habitat-name],[data-habitat-theme],[data-habitat-decor],[data-habitat-monster]'))changeHabitatSetting(e.target);});
 document.getElementById('habitatGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-habitat-pet]');if(btn)petHabitatMonster(btn.dataset.habitatPet,btn);});
 document.getElementById('habitatVisitShop').addEventListener('click',()=>switchTab('shop-supplies'));
@@ -10171,6 +10732,8 @@ document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
 document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.52 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
 function tickLiveTimers(){
+  if(saveLoadFailure)return;
+  renderHideoutReady();
   // Lottery status updates without rebuilding wheel or interrupting its spin animation.
   if(currentShopMode==='donations'&&state.donations?.dateKey!==localDateKey()){ensureDailyDonations();save();renderDonations();}
   if(currentShopMode==='lottery'&&!lotterySpinning){const el=document.getElementById('lotteryFreeStatus');if(el){const free=lotteryFreeReady();el.textContent=free?'Free spin ready!':`Next free spin in ${formatShortCooldown(state.lottery.nextFreeAt-Date.now())}`;const spin=document.getElementById('lotterySpin');spin.disabled=!free&&!(state.inventory.lottery_coin>0);spin.textContent=free?'Spin Free':(state.inventory.lottery_coin>0?'Spend 1 Lottery Coin':'Free Spin Recharging');}}
@@ -10197,16 +10760,14 @@ function tickLiveTimers(){
   }
   if(breedingNeedsRender){save();renderBreedingPens();renderBreedSelectors();}
 
-  let expeditionNeedsRender=false;
   ensureDailyExpeditions();
-  for(const key of EXPEDITION_DURATION_ORDER){
-    const c=state.expeditions.slots[key];if(!c||c.status!=='active')continue;
-    const remaining=expeditionRemaining(c),timer=document.querySelector(`[data-expedition-timer="${key}"]`);
-    if(remaining<=0){c.status='ready';expeditionNeedsRender=true;}
-    else if(timer)timer.textContent=fmtExpeditionTime(remaining);
+  const expeditionSignature=deskBoardSignature();
+  if(expeditionSignature!==deskRenderedSignature){
+    deskRenderedSignature=expeditionSignature;save();renderExpeditions();renderCollection();renderHideoutReady();renderBreedSelectors();
   }
-  document.querySelectorAll('[data-expedition-countdown]').forEach(el=>{const c=expeditionForMonster(el.dataset.expeditionCountdown);if(c)el.textContent=`EXPEDITION • ${fmtExpeditionTime(expeditionRemaining(c))}`;});
-  if(expeditionNeedsRender){save();renderAll();return;}
+  for(const key of EXPEDITION_DURATION_ORDER){const c=state.expeditions.slots[key],timer=document.querySelector(`[data-expedition-timer="${key}"]`);if(c?.status==='active'&&timer)timer.textContent=fmtExpeditionTime(expeditionRemaining(c));}
+  document.querySelectorAll('[data-expedition-countdown]').forEach(el=>{const c=expeditionForMonster(el.dataset.expeditionCountdown);if(c)el.textContent=c.status==='ready'?'RETURNED • COLLECT':`EXPEDITION • ${fmtExpeditionTime(expeditionRemaining(c))}`;});
+
 
   let recovered=false;
   for(const mon of state.monsters){
@@ -10279,7 +10840,7 @@ function tickLiveTimers(){
   if(cooldownExpired){if(refreshJuiceExpired)renderAll();else{renderExploreSupplies();if(document.getElementById('inventoryDetailModal')?.open&&inventorySelection)openInventoryDetail(inventorySelection.id);}}
 }
 // UI and offline affection time are independent of terrarium animation.
-setInterval(()=>{const now=Date.now();if(settleHabitatAffection(now))save();refreshAffectionDisplays(now);},30000);
+setInterval(()=>{if(saveLoadFailure)return;const now=Date.now();if(settleHabitatAffection(now))save();refreshAffectionDisplays(now);},30000);
 setInterval(tickLiveTimers,500);
 
 document.getElementById('battle2Speed').addEventListener('change',e=>battle2ChangeSpeed(e.target.value));
@@ -10442,8 +11003,142 @@ async function admin2RunPreflight(){
  admin2El('admin2ExportBackup').addEventListener('click',()=>admin2El('exportData').click());
  admin2El('admin2ImportBackup').addEventListener('change',e=>{const file=e.target.files?.[0];if(file)importAdminFile(file);});
  admin2El('admin2JumpNav')?.addEventListener('click',()=>{});
- document.querySelector('.admin2-jump-nav').addEventListener('click',e=>{const b=e.target.closest('[data-admin2-jump]');if(b)admin2El(b.dataset.admin2Jump).scrollIntoView({behavior:'smooth',block:'start'});});
+ // Studio tabs bind below; original form controls are retained.
 })();
+
+// Monster Clicker: round and pending payout are saved separately to survive reloads.
+const MC_SYMBOLS=[
+  {id:'currency',icon:'◈',name:'100–500 currency',weight:30},
+  {id:'gel',icon:'✚',name:'Medium Recovery Gel',weight:25},
+  {id:'catalyst',icon:'⚗',name:'Hormone Catalyst',weight:20},
+  {id:'injector',icon:'⬆',name:'Random Potential Injector',weight:14},
+  {id:'coin',icon:'✦',name:'Lottery Coin',weight:10},
+  {id:'prismatic',icon:'🥚',name:'Prismatic Egg',weight:1}
+];
+let currentArcadeGame='lobby',mcTimer=0,mcBusy=false,mcViewKey='',mcRenderToken=0,mcImagesReady=false;
+function normalizeMonsterClicker(){
+  const old=state.monsterClicker&&typeof state.monsterClicker==='object'?state.monsterClicker:{};
+  state.monsterClicker={round:old.round||null,pending:old.pending||null,correct:Math.max(0,Math.floor(Number(old.correct)||0)),wins:Math.max(0,Math.floor(Number(old.wins)||0)),lastResult:String(old.lastResult||''),lastReels:Array.isArray(old.lastReels)?old.lastReels:[]};
+}
+function mcResetVisit(){const d=mcData();d.correct=0;d.wins=0;if(d.pending)d.pending.countWin=false;mcViewKey='';save();}
+function mcData(){if(!state.monsterClicker)normalizeMonsterClicker();return state.monsterClicker;}
+function showArcade(game='lobby'){
+  if(!['lobby','dash','clicker'].includes(game))game='lobby';
+  if(currentArcadeGame==='clicker'&&game!=='clicker')mcResetVisit();
+  if(game==='clicker'&&currentArcadeGame!=='clicker')mcResetVisit();
+  monsterDashPause();clearTimeout(mcTimer);mcTimer=0;currentArcadeGame=game;
+  document.getElementById('arcade').classList.toggle('arcade-playing',game!=='lobby');
+  for(const id of ['lobby','dash','clicker'])document.getElementById('arcade-'+id).classList.toggle('hidden',game!==id);
+  document.getElementById('arcadeBack').classList.toggle('hidden',game==='lobby');
+  if(game==='dash')renderMonsterDash();if(game==='clicker')renderMonsterClicker();
+}
+function mcVisible(){return currentArcadeGame==='clicker'&&document.getElementById('arcade').classList.contains('active');}
+function mcStopAnimation(){clearTimeout(mcTimer);mcTimer=0;}
+function mcPool(){return Object.entries(state.species).filter(([,sp])=>sp.builtin||sp.published).map(([slug])=>slug);}
+function mcMakeRound(previous=null){
+  const active=activeMonster(),pool=mcPool();if(!active||!speciesOf(active)||pool.length<3)return null;
+  let partners=state.monsters.filter(mon=>mon.id!==active.id&&speciesOf(mon));if(!partners.length)return null;
+  if(partners.length>1)partners=partners.filter(mon=>mon.id!==previous?.partnerId);
+  const unused=pool.filter(slug=>!previous?.choices?.includes(slug)),choices=shuffleCopy(unused.length>=3?unused:pool).slice(0,3);
+  return {id:`mc_${Date.now()}_${Math.random().toString(36).slice(2,9)}`,activeId:active.id,partnerId:randomChoice(partners).id,choices,target:randomChoice(choices)};
+}
+function mcRoundValid(round){return round&&round.activeId===state.activeMonsterId&&round.activeId!==round.partnerId&&[round.activeId,round.partnerId].every(id=>state.monsters.some(mon=>mon.id===id&&speciesOf(mon)))&&round.choices?.length===3&&new Set(round.choices).size===3&&round.choices.includes(round.target)&&round.choices.every(slug=>state.species[slug]);}
+function mcMessage(message){document.getElementById('mcMessage').textContent=message;}
+function mcRollReels(){return Array.from({length:3},()=>weightedChoice(MC_SYMBOLS.map(symbol=>({value:symbol.id,weight:symbol.weight}))));}
+function mcPrize(reels){
+  if(reels.length!==3||!reels.every(symbol=>symbol===reels[0]))return null;
+  switch(reels[0]){
+    case 'currency':return {kind:'currency',amount:randomInt(100,500)};
+    case 'gel':return {kind:'item',id:'medium_heal_gel',name:'Medium Recovery Gel',qty:1};
+    case 'catalyst':return {kind:'item',id:'hormone_catalyst',name:'Hormone Catalyst',qty:1};
+    case 'coin':return {kind:'item',id:'lottery_coin',name:'Lottery Coin',qty:1};
+    case 'injector':{const item=randomChoice(ITEM_SHOP.filter(item=>/^injector_p\d+$/.test(item.id)));return item?{kind:'item',id:item.id,name:item.name,qty:1}:null;}
+    case 'prismatic':{const reward={eggs:[]};randomNormalExpeditionEgg(reward,{prismatic:true});return reward.eggs[0]?{kind:'egg',egg:reward.eggs[0]}:null;}
+    default:return null;
+  }
+}
+function mcPrizeLabel(prize){return !prize?'No three-of-a-kind this time.':prize.kind==='currency'?`${prize.amount} bonus currency!`:prize.kind==='egg'?'Prismatic Egg! Find it in Egg Storage.':`${prize.name} ×1! Added to Inventory.`;}
+function mcDrawReels(reels,spinning=false){
+  const host=document.getElementById('mcReels');host.classList.toggle('spinning',spinning);host.setAttribute('aria-busy',String(spinning));
+  host.querySelectorAll('.mc-reel').forEach((el,i)=>{const symbol=MC_SYMBOLS.find(s=>s.id===reels[i]);el.dataset.symbol=symbol?.id||'';el.querySelector('strong').textContent=symbol?.icon||'?';el.querySelector('small').textContent=symbol?.name||'Ready';});
+}
+function mcAnimate(){
+  mcStopAnimation();const pending=mcData().pending;if(!pending||!mcVisible())return;
+  const remaining=pending.finishAt-Date.now();
+  if(remaining<=0){mcSettle(pending.id);return;}
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  mcDrawReels(reduced?[]:MC_SYMBOLS.slice(0,3).map((_,i)=>MC_SYMBOLS[(Math.floor(Date.now()/120)+i*2)%MC_SYMBOLS.length].id),!reduced);
+  mcTimer=setTimeout(mcAnimate,reduced?remaining:Math.min(120,remaining));
+}
+function mcAnswer(roundId,slug){
+  const data=mcData(),round=data.round;
+  if(mcBusy||data.pending||!mcVisible()||!mcImagesReady||!round||round.id!==roundId)return;
+  if(!mcRoundValid(round)){mcViewKey='';renderMonsterClicker();mcMessage('Your team changed. Here is a fresh question.');return;}
+  if(!round.choices.includes(slug))return;
+  if(slug!==round.target){mcMessage('Not that one—have another look. There is no penalty.');return;}
+  mcBusy=true;const before=JSON.parse(JSON.stringify(state));
+  try{
+    const active=state.monsters.find(mon=>mon.id===round.activeId),partner=state.monsters.find(mon=>mon.id===round.partnerId);
+    const training=[active,partner].map(mon=>{const atMax=mon.level>=100,levels=grantXP(mon,1);return {name:displayName(mon),xp:atMax?0:1,levels,level:mon.level};});
+    state.currency+=1;data.correct++;
+    const reels=mcRollReels(),prize=mcPrize(reels),now=Date.now();
+    data.pending={id:round.id,reels,prize,training,finishAt:now+(window.matchMedia('(prefers-reduced-motion: reduce)').matches?500:1800)};
+    if(!save()&&!eventTestSession){state=before;mcMessage('Could not save this answer. No currency or XP was added. Resolve the save warning and try again.');return;}
+    document.getElementById('currency').textContent=money(state.currency);mcViewKey='';renderMonsterClicker();
+  }finally{mcBusy=false;}
+}
+function mcSettle(pendingId){
+  mcStopAnimation();const data=mcData(),pending=data.pending;if(mcBusy||!pending||pending.id!==pendingId)return;
+  if(Date.now()<pending.finishAt){mcAnimate();return;}
+  mcBusy=true;const before=JSON.parse(JSON.stringify(state));
+  try{
+    const prize=pending.prize;
+    if(prize?.kind==='currency')state.currency+=prize.amount;
+    else if(prize?.kind==='item')state.inventory[prize.id]=(state.inventory[prize.id]||0)+prize.qty;
+    else if(prize?.kind==='egg')state.eggs.push(prize.egg);
+    if(prize&&pending.countWin!==false)data.wins++;
+    data.lastReels=pending.reels;
+    const training=pending.training.map(mon=>`${mon.name}: ${mon.xp?'+1 XP':'MAX level'}${mon.levels?` (Lv.${mon.level}!)`:''}`).join(' · ');
+    data.lastResult=`+1 currency · ${training}. ${mcPrizeLabel(prize)}`;
+    data.pending=null;data.round=mcMakeRound(data.round);
+    if(!save()&&!eventTestSession){state=before;mcDrawReels(pending.reels);mcMessage('Your spin is saved, but its prize could not be collected. Resolve the save warning, then retry.');document.getElementById('mcRetry').classList.remove('hidden');return;}
+    mcViewKey='';renderMonsterClicker();renderAll();
+  }finally{mcBusy=false;}
+}
+function mcParticipant(mon,label){return `<article class="mc-participant"><div class="eyebrow">${label}</div><div class="mc-portrait"><img data-mc-owned="${labSafe(mon.id)}" alt="${labSafe(displayName(mon))}"></div><h3>${labSafe(displayName(mon))}</h3><p>${labSafe(speciesOf(mon)?.name||'')} · Lv.${mon.level}</p><span>${mon.level>=100?'MAX level':'+1 XP per correct answer'}</span></article>`;}
+function renderMonsterClicker(){
+  if(!mcVisible())return;const data=mcData();
+  if(!data.pending&&!mcRoundValid(data.round)){
+    const previous=data.round,round=mcMakeRound(previous);
+    if(round){data.round=round;if(!save()&&!eventTestSession){data.round=previous;mcMessage('Could not save a new round. Resolve the save warning, then reopen Monster Clicker.');return;}}
+    else data.round=null;
+  }
+  document.getElementById('mcCorrect').textContent=String(data.correct);document.getElementById('mcWins').textContent=String(data.wins);
+  const round=data.round,host=document.getElementById('mcBoard');
+  if(!round){host.innerHTML='<div class="mc-empty"><h3>Bring a friend to the arcade</h3><p>Choose an Active Monster and own at least two monsters to play. Each round trains two different members of your collection.</p><button type="button" class="primary" data-mc-collection>Open Collection</button></div>';mcViewKey='';mcMessage('Your game will be ready when your team is.');mcDrawReels(data.lastReels);return;}
+  const active=state.monsters.find(mon=>mon.id===round.activeId),partner=state.monsters.find(mon=>mon.id===round.partnerId);
+  // During a saved spin the original participants may have been reassigned or removed; the payout remains valid.
+  const key=`${round.id}:${data.pending?.id||''}:${data.correct}:${data.wins}`;
+  if(key!==mcViewKey){
+    mcViewKey=key;const token=++mcRenderToken;mcImagesReady=false;
+    host.innerHTML=`${active?mcParticipant(active,'YOUR ACTIVE MONSTER'):'<div></div>'}<div class="mc-question"><div class="eyebrow">FIND & CLICK</div><h3>Find <span>${labSafe(state.species[round.target]?.name||'the monster')}</span></h3><div class="mc-choices">${round.choices.map((slug,i)=>`<button class="mc-choice" type="button" data-mc-slug="${labSafe(slug)}" data-mc-round="${labSafe(round.id)}" aria-label="${labSafe(state.species[slug]?.name||'Monster')}" disabled><img alt="${labSafe(state.species[slug]?.name||'Monster')}" data-mc-choice-image="${labSafe(slug)}"><span>${i+1}</span></button>`).join('')}</div><p>One correct answer. Two monsters grow.</p></div>${partner?mcParticipant(partner,'YOUR ARCADE PARTNER'):'<div></div>'}`;
+    const images=Array.from(host.querySelectorAll('img')).map(img=>{const mon=state.monsters.find(mon=>mon.id===img.dataset.mcOwned),slug=mon?.slug||img.dataset.mcChoiceImage;return setMonsterImage(img,slug,mon?monsterArtKind(mon):'base').then(()=>{if(!img.getAttribute('src')||!img.naturalWidth){const fallback=document.createElement('span');fallback.className='mc-image-fallback';fallback.textContent=img.alt;img.replaceWith(fallback);}});});
+    Promise.allSettled(images).then(()=>{if(token!==mcRenderToken)return;mcImagesReady=true;host.querySelectorAll('.mc-choice').forEach(button=>button.disabled=!!mcData().pending);});
+  }
+  document.getElementById('mcRetry').classList.add('hidden');
+  if(data.pending){mcMessage('Correct! +1 currency and training saved. Spinning for a bonus…');mcAnimate();}
+  else{mcDrawReels(data.lastReels);mcMessage(data.lastResult||'Pick the monster named above. Correct answers earn currency and train both monsters.');}
+}
+
+document.getElementById('arcade').addEventListener('click',event=>{
+  const game=event.target.closest('[data-arcade-game]');if(game){showArcade(game.dataset.arcadeGame);return;}
+  const choice=event.target.closest('[data-mc-slug]');if(choice){mcAnswer(choice.dataset.mcRound,choice.dataset.mcSlug);return;}
+  if(event.target.closest('[data-mc-collection]'))switchTab('collection');
+});
+document.getElementById('arcadeBack').addEventListener('click',()=>showArcade('lobby'));
+document.getElementById('mcRetry').addEventListener('click',()=>{const pending=mcData().pending;if(pending)mcSettle(pending.id);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)mcStopAnimation();else if(mcVisible())renderMonsterClicker();});
+document.getElementById('mcPrizeOdds').innerHTML=MC_SYMBOLS.map(symbol=>`<div class="mc-odds-row"><span>${symbol.icon} ${symbol.name}</span><strong>${((symbol.weight/100)**3*100).toFixed(symbol.id==='prismatic'?4:3)}% per spin${symbol.id==='prismatic'?' · 1 in 1,000,000':''}</strong></div>`).join('');
 
 // ---------------- Monster Dash: a free permanent healing-time arcade ----------------
 // No battle state is modified by this game. Rewards are granted once, on collision.
@@ -10453,7 +11148,7 @@ function normalizeMonsterDashState(){
   state.monsterDash={best:Math.max(0,Math.floor(Number(old.best)||0)),totalRuns:Math.max(0,Math.floor(Number(old.totalRuns)||0)),crystalDate:typeof old.crystalDate==='string'?old.crystalDate:'',crystalsToday:Math.max(0,Math.min(DASH_MAX_CRYSTALS,Math.floor(Number(old.crystalsToday)||0))),lastReward:typeof old.lastReward==='string'?old.lastReward.slice(0,300):''};
   if(state.monsterDash.crystalDate!==localDateKey()){state.monsterDash.crystalDate=localDateKey();state.monsterDash.crystalsToday=0;}
 }
-function monsterDashIsVisible(){return !!document.getElementById('adventureArcadePane')?.offsetParent&&document.getElementById('adventure')?.classList.contains('active');}
+function monsterDashIsVisible(){return !!document.getElementById('arcade-dash')?.offsetParent&&document.getElementById('arcade')?.classList.contains('active');}
 function monsterDashPause(){
   if(monsterDashRun?.playing){monsterDashRun.playing=false;cancelAnimationFrame(monsterDashFrame);monsterDashFrame=0;monsterDashLastTime=0;renderMonsterDashStatus();}
 }
@@ -10658,7 +11353,46 @@ document.addEventListener('keydown',async event=>{
   exploreKeyboardMoveBusy=true;
   try{await moveExploreMaze(direction);}finally{exploreKeyboardMoveBusy=false;}
 });
-(async()=>{initZoneBackdrop();await openAssetDB();try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();completeKeeperTablets();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();showAdminPane('dashboard');if(!state.onboarding.completed)await openNewcomerExperience();})();
+// Presentation only: move the original controls, retaining their IDs and handlers.
+function installContentStudio(){
+ const el=id=>document.getElementById(id);
+ const wrapDetails=(node,title)=>{const d=document.createElement('details');d.className='studio-details';const summary=document.createElement('summary');summary.textContent=title;node.before(d);d.append(summary,node);return d;};
+ const species=el('speciesAdminPane'),attack=el('attackAdminPane');
+ for(const [pane,title,subtitle] of [[species,'Monster Studio','Shape your next discovery.'],[attack,'Attack Studio','Give every move a distinct identity.']]){
+  pane.classList.add('content-studio');const header=document.createElement('header');header.className='studio-heading';header.innerHTML='<div><span class="eyebrow">PRISMWILDS / CONTENT STUDIO</span><h2></h2><p></p></div><span class="studio-local">LOCAL WORKSPACE</span>';header.querySelector('h2').textContent=title;header.querySelector('p').textContent=subtitle;pane.prepend(header);
+ }
+ const toolbar=species.querySelector('.admin-toolbar');const publishing=document.createElement('div');publishing.className='studio-publishing';toolbar.after(publishing);
+ for(const node of [...toolbar.children])if(!['newSpecies','admin2DuplicateMonster'].includes(node.id))publishing.append(node);
+ publishing.append(species.querySelector('.note-card'));wrapDetails(publishing,'Publishing & backups');
+ wrapDetails(species.querySelector('.monster-census'),'Roster census');
+ wrapDetails(species.querySelector('.registry-filters'),'Filter & sort library');
+ species.querySelector('.registry-panel h3').textContent='Monster library';attack.querySelector('.registry-panel h3').textContent='Attack library';
+ el('adminSearch').placeholder='Find a monster…';el('attackAdminSearch').placeholder='Find an attack…';
+ el('adminSearch').setAttribute('aria-label','Search monster library');el('attackAdminSearch').setAttribute('aria-label','Search attack library');
+ const preview=document.createElement('aside');preview.className='studio-preview';preview.innerHTML='<span class="eyebrow">MONSTER PREVIEW</span><p class="studio-preview-note">Your current design, at a glance.</p>';
+ preview.append(el('admin2MonsterSnapshot'));species.querySelector('.admin-layout').append(preview);
+ function tabs(form,nav,panels,labels){
+  nav.className='studio-tabs';nav.setAttribute('role','tablist');nav.setAttribute('aria-label','Editor sections');nav.replaceChildren();
+  function select(index,focus=false){panels.forEach((panel,i)=>{panel.hidden=i!==index;panel.classList.add('studio-panel');panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',form.id+'Tab'+i);});[...nav.children].forEach((b,i)=>{b.setAttribute('aria-selected',String(i===index));b.tabIndex=i===index?0:-1;});if(focus)nav.children[index].focus();}
+  panels.forEach((panel,i)=>{const b=document.createElement('button');b.type='button';b.id=form.id+'Tab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls',panel.id);b.textContent=labels[i];b.onclick=()=>select(i);b.onkeydown=e=>{let n;if(e.key==='ArrowRight')n=(i+1)%panels.length;if(e.key==='ArrowLeft')n=(i+panels.length-1)%panels.length;if(e.key==='Home')n=0;if(e.key==='End')n=panels.length-1;if(n!==undefined){e.preventDefault();select(n,true);}};nav.append(b);});
+  form.addEventListener('invalid',e=>{const i=panels.findIndex(p=>p.contains(e.target));if(i>=0)select(i);},true);select(0);
+ }
+ tabs(el('speciesForm'),species.querySelector('.admin2-jump-nav'),['admin2Identity','admin2Combat','admin2Breeding'].map(el),['Identity & art','Battle profile','Availability & breeding']);
+ const form=el('attackForm'),old=form.querySelector('.form-section'),nav=document.createElement('div');old.before(nav);
+ const groups=[['attackIdentity','Identity','Name, element and battle presentation.',['attackName','attackElement','attackStyle','attackFxStyle','attackDescription']],['attackEffects','Power & effects','Tune damage, accuracy and special effects.',['attackPower','attackAccuracy','attackCritChance','attackStatus','attackStatusChance','attackStatusDuration','attackLifeSteal','attackEvadeNext']],['attackPublishing','Availability','Choose how players obtain this move.',['scrollEnabled','scrollPrice','publishAttack']]];
+ const panels=groups.map(([id,title,description,ids])=>{const p=document.createElement('section');p.id=id;p.className='form-section';p.innerHTML='<div class="section-title"><div><h3></h3><p></p></div></div><div class="form-grid two"></div>';p.querySelector('h3').textContent=title;p.querySelector('p').textContent=description;for(const field of ids)p.lastElementChild.append(el(field).closest('label'));old.before(p);return p;});
+ panels[0].append(old.querySelector('.form-note'));old.remove();tabs(form,nav,panels,['Identity','Power & effects','Availability']);
+ const attackHeader=document.createElement('div');attackHeader.className='studio-attack-title';attackHeader.innerHTML='<span class="eyebrow">MOVE DESIGN</span><h3 id="studioAttackTitle">New Attack</h3>';form.prepend(attackHeader);attackHeader.append(el('admin2AttackDirty'));
+ const refreshAttack=()=>{el('studioAttackTitle').textContent=el('attackName').value||'New Attack';};new MutationObserver(refreshAttack).observe(el('attackLivePreview'),{childList:true});
+ // Highlight selection without changing registry rendering or record loading.
+ for(const [list,field] of [[el('registryList'),'speciesName'],[el('attackRegistryList'),'attackName']]){
+  const mark=()=>{for(const b of list.children){const selected=b.querySelector('strong')?.textContent===el(field).value;b.classList.toggle('studio-selected',selected);b.setAttribute('aria-pressed',String(selected));}if(!list.children.length){const p=document.createElement('p');p.className='studio-empty';p.textContent='No matches. Try another search.';list.append(p);}};
+  new MutationObserver(()=>{if(!list.querySelector('.studio-empty'))mark();}).observe(list,{childList:true});list.addEventListener('click',()=>setTimeout(mark));
+ }
+}
+installContentStudio();
+
+(async()=>{initZoneBackdrop();await openAssetDB();if(saveLoadFailure){showSaveRecovery();return;}try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();completeKeeperTablets();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();showAdminPane('dashboard');if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
 <div id="lotteryCoinToast" class="lottery-coin-toast" role="status" aria-live="polite"></div>
 </body>
