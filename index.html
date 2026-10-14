@@ -571,7 +571,7 @@
       </div>
       <div class="admin2-nav" aria-label="Admin workshop navigation">
         <div class="admin2-nav-group"><span>Workspace</span><button id="showDashboardAdmin" class="subtab active" type="button">Overview</button><button id="showPublishingAdmin" class="subtab" type="button">Publishing &amp; Backups</button></div>
-        <div class="admin2-nav-group"><span>Create</span><button id="showSpeciesAdmin" class="subtab" type="button">Monster Studio</button><button id="showAttackAdmin" class="subtab" type="button">Attack Editor</button><button id="showSpriteAdmin" class="subtab" type="button">Sprite Workshop</button></div>
+        <div class="admin2-nav-group"><span>Create</span><button id="showBatchAdmin" class="subtab" type="button">Batch Workshop</button><button id="showSpeciesAdmin" class="subtab" type="button">Monster Studio</button><button id="showAttackAdmin" class="subtab" type="button">Attack Editor</button><button id="showSpriteAdmin" class="subtab" type="button">Sprite Workshop</button></div>
         <div class="admin2-nav-group"><span>World &amp; Rewards</span><button id="showTrialAdmin" class="subtab" type="button">Trials</button><button id="showLotteryAdmin" class="subtab" type="button">Lottery Eggs</button><button id="showAncientEggAdmin" class="subtab" type="button">Ancient Eggs</button><button id="showArtifactAdmin" class="subtab" type="button">Artifacts</button><button id="showDonationAdmin" class="subtab" type="button">Donations</button><button id="showReconstructionAdmin" class="subtab" type="button">Reconstruction Lab</button></div>
         <div class="admin2-nav-group"><span>Events &amp; Content</span><button id="showDialogueAdmin" class="subtab" type="button">Silvy Dialogue</button><button id="showLandingAdmin" class="subtab" type="button">Landing Page</button><button id="showEventAdmin" class="subtab" type="button">Event Tester</button><button id="showExpeditionAdmin" class="subtab" type="button">Expeditions</button></div>
       </div>
@@ -684,7 +684,12 @@
           </aside>
         </div>
       </div>
-      <div id="speciesAdminPane">
+      <div id="batchAdminPane" class="hidden">
+ <header class="bw-header"><div><span class="eyebrow">MONSTER STUDIO · BATCH WORKSHOP</span><h2>A whole new generation.</h2><p>Your ideas, ready for a final look. Edit each draft, check its artwork, then approve it as a custom monster. Crossbreed parents are left for you to choose.</p><div id="bwStats"></div></div><div class="bw-header-actions"><button id="bwApproveReady" type="button">Approve all ready</button><button id="bwAdd" type="button" class="ghost">+ Add a draft</button></div></header>
+ <p id="bwMessage" role="status" aria-live="polite">Draft changes save automatically in this browser. Nothing enters the game before approval.</p>
+ <div class="bw-layout"><aside class="bw-sidebar"><label>Find a monster<input id="bwSearch" type="search" placeholder="Name or element…"></label><label>Show<select id="bwFilter"><option>Pending</option><option>Mainland</option><option>Crossbreeds</option><option>Quilly’s Island</option><option>Reconstruction Lab</option><option>Approved</option><option>All</option></select></label><div id="bwList" class="bw-list"></div></aside><div id="bwEditor"></div></div>
+</div>
+<div id="speciesAdminPane">
         <div class="admin-toolbar">
           <button id="newSpecies" class="primary">+ New Monster</button><button id="admin2DuplicateMonster" class="ghost" type="button">Duplicate Settings</button><button id="admin2OpenPublish" class="ghost" type="button">Publishing Checkup</button>
           <button id="exportData" class="ghost">Export Admin Data</button>
@@ -1657,7 +1662,7 @@ const TYPE_STRONG_MULTIPLIER=1.5;
 const TYPE_RESIST_MULTIPLIER=2/3;
 const TYPE_MIN_MULTIPLIER=.5;
 const TYPE_MAX_MULTIPLIER=2;
-const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Hunting Zone", "Reconstruction Lab Only", "Admin / Test"];
+const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Hunting Zone", "Reconstruction Lab Only", "Admin / Test", "Quilly's Island"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
 const ATTACK_FX_STYLES = ["Auto","Bite","Slash","Slam","Projectile","Burst","Beam","Wave"];
@@ -2089,6 +2094,7 @@ const TRADE_GOODS={
 };
 function fieldFindIds(){return Object.keys(TRADE_GOODS).filter(id=>TRADE_GOODS[id]?.category==='Field Find');}
 function itemInfoForInventoryId(id){
+  if(id==='qi_dream_egg')return {...QI_ITEMS.qi_dream_egg,id,category:'Dream Egg',spriteKey:id,isConsumable:true,sellValue:0};
   if(id.startsWith('scroll:')){
     const attack=attackOf(id.slice(7));
     const price=Number(attack?.scrollPrice||5000);
@@ -3267,7 +3273,7 @@ function normalizeState(){
     }
     // The obtain method and the Admin toggle describe the same exclusive encounter pool.
     // Legacy records default to false, without changing older Mythic obtain settings.
-    sp.mythicTempleOnly=!sp.isCrossbreed&&(sp.obtain==='Mythic Temple Only'||sp.mythicTempleOnly===true);
+    sp.mythicTempleOnly=!sp.isCrossbreed&&sp.obtain!=="Quilly's Island"&&(sp.obtain==='Mythic Temple Only'||sp.mythicTempleOnly===true);
     if(sp.mythicTempleOnly){sp.rarity='Mythic';sp.isMythic=true;sp.obtain='Mythic Temple Only';}
     sp.nativeFacing=sp.nativeFacing==='left'?'left':'right';
     if(!sp.builtin)sp.published=!!sp.published;
@@ -6556,13 +6562,13 @@ async function openInventoryDetail(id){
   document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
   document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood&&id!=='ancient_pages'?' • Resale rate: 5% of shop value':''}`;
   const use=document.getElementById('inventoryUseButton');
-  const directUse=id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||id==='ancient_pages'||!!DONATION_CRYSTALS[id];
+  const directUse=id==='qi_dream_egg'||id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||id==='ancient_pages'||!!DONATION_CRYSTALS[id];
   use.classList.toggle('hidden',!directUse);
   use.disabled=false;
   use.removeAttribute('data-refresh-juice-timer');
   use.removeAttribute('data-capture-pod-timer');
   use.removeAttribute('data-monster-ward-timer');
-  if(id==='refresh_juice'){
+  if(id==='qi_dream_egg'){use.textContent='Open Dream Egg';use.disabled=!qiPool(false).length;}else if(id==='refresh_juice'){
     const remain=refreshJuiceRemaining();
     use.disabled=remain>0;
     use.textContent=remain>0?`Refresh Juice • ${formatShortCooldown(remain)}`:'Use Refresh Juice';
@@ -6603,6 +6609,7 @@ function resetInventorySellPanel(){
 async function useSelectedInventoryItem(){
   if(!inventorySelection)return;
   const id=inventorySelection.id;
+  if(id==='qi_dream_egg'){qiOpenDreamEgg();return;}
   if(id==='refresh_juice')useRefreshJuice();
   else if(id==='capture_pod')useCapturePod();
   else if(id==='monster_ward')useMonsterWard();
@@ -6795,16 +6802,34 @@ function populateParentDropdowns(excludeSlug=''){
   const opts=Object.entries(state.species).filter(([slug])=>slug!==excludeSlug).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,sp])=>`<option value="${slug}">${sp.name}</option>`).join('');
   document.getElementById('parentA').innerHTML=opts;document.getElementById('parentB').innerHTML=opts;
 }
+let speciesArtLoadVersion=0;
+function resetSpeciesArtUploads(){
+  ++speciesArtLoadVersion;
+  for(const kind of ['base','prismatic','egg']){
+    document.getElementById(kind+'Art').value='';
+    document.getElementById(kind+'Preview').removeAttribute('src');
+  }
+  return speciesArtLoadVersion;
+}
 function newSpeciesForm(){
+  resetSpeciesArtUploads();
   document.getElementById('speciesForm').reset();document.getElementById('editSlug').value='';document.getElementById('p1bst').value=280;document.getElementById('battleType').value='Speed';document.getElementById('nativeFacing').value='right';document.getElementById('speciesRarity').value='Standard';document.getElementById('mythicTempleOnly').checked=false;document.getElementById('speciesElement').value='Aether';document.getElementById('speciesElement2').value='Fire';document.getElementById('obtainMethod').value='Random Battle Reward';document.getElementById('huntingRarity').value='Uncommon';document.getElementById('shopPrice').value=1000;document.getElementById('publishSpecies').checked=false;document.getElementById('publishSpecies').disabled=false;document.getElementById('crossbreedChance').value=15;document.getElementById('crossbreedSeason').value='';document.getElementById('breedTimer').value=60;document.getElementById('hatchTimer').value=60;
   speciesSignatureDraft='';
   ['basePreview','prismaticPreview','eggPreview'].forEach(id=>document.getElementById(id).removeAttribute('src'));document.getElementById('deleteSpecies').classList.add('hidden');document.getElementById('adminMessage').textContent='';populateParentDropdowns('');renderSignatureDropdown();updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
 }
 async function loadSpeciesIntoForm(slug){
-  const sp=state.species[slug];if(!sp)return;document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=['Mythic','GOD'].includes(sp.rarity)?sp.rarity:'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('huntingRarity').value=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon';document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
+  const sp=state.species[slug];if(!sp)return;const artVersion=resetSpeciesArtUploads();document.getElementById('editSlug').value=slug;document.getElementById('speciesName').value=sp.name;document.getElementById('speciesRole').value=sp.role||'';document.getElementById('speciesElement').value=sp.element;document.getElementById('speciesElement2').value=sp.secondaryElement||ELEMENTS.find(x=>x!==sp.element)||ELEMENTS[0];document.getElementById('battleType').value=sp.battleType;document.getElementById('nativeFacing').value=sp.nativeFacing==='left'?'left':'right';document.getElementById('speciesRarity').value=['Mythic','GOD'].includes(sp.rarity)?sp.rarity:'Standard';document.getElementById('mythicTempleOnly').checked=!!sp.mythicTempleOnly||sp.obtain==='Mythic Temple Only';document.getElementById('p1bst').value=sp.p1bst;document.getElementById('obtainMethod').value=sp.obtain;document.getElementById('huntingRarity').value=HUNT_RARITIES.includes(sp.huntingRarity)?sp.huntingRarity:'Uncommon';document.getElementById('shopPrice').value=Number.isFinite(Number(sp.shopPrice))?Number(sp.shopPrice):1000;document.getElementById('publishSpecies').checked=!sp.builtin&&!!sp.published;document.getElementById('publishSpecies').disabled=!!sp.builtin;document.getElementById('isCrossbreed').checked=!!sp.isCrossbreed;document.getElementById('crossbreedChance').value=sp.crossbreedChance??15;document.getElementById('crossbreedSeason').value=sp.seasonalEventFamily||'';document.getElementById('breedTimer').value=sp.breedSeconds||60;document.getElementById('hatchTimer').value=sp.hatchSeconds||60;
   populateParentDropdowns(slug);if(sp.parents?.[0])document.getElementById('parentA').value=sp.parents[0];if(sp.parents?.[1])document.getElementById('parentB').value=sp.parents[1];speciesSignatureDraft=sp.signatureAttackId||'';renderSignatureDropdown(speciesSignatureDraft);
-  for(const kind of ['base','prismatic','egg']){const id=kind==='base'?'basePreview':kind==='prismatic'?'prismaticPreview':'eggPreview',src=await imageSrc(slug,kind);if(src)document.getElementById(id).src=src;else document.getElementById(id).removeAttribute('src');}
   document.getElementById('deleteSpecies').classList.toggle('hidden',!!sp.builtin);document.getElementById('adminMessage').textContent='Editing '+sp.name;updateAdminConditional();updateCurve();admin2MarkClean('species');admin2SyncTimers();admin2El('admin2SpeciesTemplate').value='';
+  for(const kind of ['base','prismatic','egg']){
+    const src=await imageSrc(slug,kind);
+    if(artVersion!==speciesArtLoadVersion)return;
+    // A fresh upload chosen while stored art loads takes priority.
+    if(document.getElementById(kind+'Art').files?.length)continue;
+    const preview=document.getElementById(kind+'Preview');
+    if(src)preview.src=src;else preview.removeAttribute('src');
+  }
+  admin2RenderMonsterSnapshot();
 }
 function updateAutoZonePreview(){
   const box=document.getElementById('autoZonePreview');
@@ -6826,7 +6851,7 @@ function updateAdminConditional(){
   else {chanceInput.disabled=false;if(Number(chanceInput.value)<1)chanceInput.value=15;}
   const templeCheck=document.getElementById('mythicTempleOnly');
   const mythic=document.getElementById('speciesRarity').value==='Mythic';
-  const templeAllowed=!cross&&mythic;
+  const templeAllowed=!cross&&mythic&&document.getElementById('obtainMethod').value!=="Quilly's Island";
   if(!templeAllowed)templeCheck.checked=false;
   templeCheck.disabled=!templeAllowed;
   document.getElementById('mythicTempleAdminHelp').textContent=!templeAllowed?'Set Rarity to Mythic and leave Crossbreed unchecked to enable Temple-only encounters.':'Temple-only monsters cannot appear in standard Explore battles or wild eggs. Published species are chosen regardless of zone.';
@@ -8072,6 +8097,7 @@ function renderExploreSupplies(){
 }
 
 async function renderExplorePage(){
+  qiSync();
   const day=currentDayName(),zone=currentZone(),pool=eligibleWildSpecies();
   const allowedElements=zoneElementsFor(day);
   document.getElementById('zoneDay').textContent=day.toUpperCase();
@@ -8163,6 +8189,7 @@ function chooseFieldFind(sign=null){
   return weightedChoice(entries);
 }
 async function moveExploreMaze(dir){
+  if(qiView)return;
   const active=activeMonster(),maze=ensureExploreMaze();
   if(!exploreExpeditionActive||mazeClearTransitionBusy||!active||isMonsterFainted(active)||battleSession||exploreEvent||!mazeCanMove(maze,dir))return;
   maze.pos=mazeDestination(maze,dir);
@@ -10062,6 +10089,7 @@ async function refreshBattleUI(){
   }else{
     controls.classList.remove('hidden');result.classList.add('hidden');result.innerHTML='';setBattleControlsLocked(!!battleSession.locked);
   }
+  qiBattleReturn();
   await hydrateSprites(result);
 }
 
@@ -10271,6 +10299,7 @@ document.getElementById('huntingBaitDialog').addEventListener('close',()=>{selec
 
 let uiRenderVersion=0;
 async function renderAll(){
+  qiSync();
   const version=++uiRenderVersion;
   if(settleHabitatAffection(Date.now()))save();
 
@@ -10586,7 +10615,10 @@ async function removeArtifactIcon(){
 }
 let admin2CurrentPane='dashboard';
 function showAdminPane(name){
-  if(!admin2CanLeave(name))return;
+  if(bwBusy||!admin2CanLeave(name))return;
+  document.getElementById('batchAdminPane').classList.toggle('hidden',name!=='batch');
+  document.getElementById('showBatchAdmin').classList.toggle('active',name==='batch');
+  if(name==='batch')bwOpen();
   admin2CurrentPane=name;
   document.getElementById('admin2DashboardPane').classList.toggle('hidden',name!=='dashboard');
   document.getElementById('admin2PublishingPane').classList.toggle('hidden',name!=='publishing');
@@ -11343,7 +11375,7 @@ document.addEventListener('keydown',async event=>{
   const directions={ArrowUp:'N',ArrowLeft:'W',ArrowDown:'S',ArrowRight:'E',w:'N',a:'W',s:'S',d:'E'};
   const direction=directions[event.key]||directions[event.key.toLowerCase?.()];
   if(!direction||event.repeat||event.ctrlKey||event.metaKey||event.altKey)return;
-  if(!document.getElementById('explore')?.classList.contains('active')||!exploreExpeditionActive)return;
+  if(qiView||!document.getElementById('explore')?.classList.contains('active')||!exploreExpeditionActive)return;
   const focused=document.activeElement;
   if(focused?.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'))return;
   if(document.querySelector('dialog[open]')||battleSession||exploreEvent||mazeClearTransitionBusy||exploreKeyboardMoveBusy)return;
@@ -11391,6 +11423,381 @@ function installContentStudio(){
  }
 }
 installContentStudio();
+
+const QI_ITEMS={
+ qi_dream_thread:{name:'Dreamthread',symbol:'⌁',sellValue:2,desc:'A soft thread gathered in Quilly’s Island mazes. Kept in Inventory as a dream field find.'},
+ qi_moon_pearl:{name:'Moon Pearl',symbol:'◉',sellValue:3,desc:'A tiny moon held inside a sleeping droplet. Found in Quilly’s Island mazes and kept in Inventory.'},
+ qi_star_sand:{name:'Star Sand',symbol:'✧',sellValue:3,desc:'A handful of unfinished wishes from Quilly’s Island. Kept in Inventory as a dream field find.'},
+ qi_lucid_lens:{name:'Lucid Lens',symbol:'◇',sellValue:5,desc:'Use on Quilly’s Island to align the current dream path. Earn its encounter by crossing afterwards.'},
+ qi_lullaby:{name:'Bottled Lullaby',symbol:'♫',sellValue:5,desc:'Use on Quilly’s Island to give your active monster 25 XP. Kept when the island vanishes.'}
+};
+for(const [id,item] of Object.entries(QI_ITEMS)){
+ TRADE_GOODS[id]={...item,category:'Dream Keepsakes',spriteKey:id};
+ SPRITE_DEFS[id]={name:item.name,category:'Quilly’s Island',kind:'glyph',fallback:item.symbol};
+}
+let qiView=false,qiBusy=false,qiPreview=false,qiPreviewState=null,qiPreviewBag={},qiNotice='',qiLastTickDay='';
+function qiRandom(seed){let h=2166136261;for(const c of seed){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return()=>{h+=0x6D2B79F5;let t=Math.imul(h^(h>>>15),1|h);t^=t+Math.imul(t^(t>>>7),61|t);return((t^(t>>>14))>>>0)/4294967296;};}
+
+function qiDay(){return localDateKey();}
+
+function qiAppears(day=qiDay()){return qiRandom('PrismWilds:Quilly-Island:v1:'+day)()<.20;}
+
+function qiBag(){return qiPreview?qiPreviewBag:state.inventory;}
+
+function qiAdd(id,n){const bag=qiBag();bag[id]=(Number(bag[id])||0)+n;}
+
+function qiLog(q,text){q.last=text;q.history.push(text);q.history=q.history.slice(-8);}
+
+function qiCanAct(){return qiView&&qiAvailable()&&!qiBusy&&!saveLoadFailure&&!eventTestSession&&(!battleSession||!!battleSession.result)&&document.getElementById('explore').classList.contains('active');}
+
+function qiCommit(action){
+ if(!qiCanAct()){qiSync();return false;}
+ qiBusy=true;const before=JSON.parse(JSON.stringify(state));
+ try{action(qiEnsure());if(!qiPreview&&!save()){state=before;qiNotice='Could not save this action. Nothing was spent or awarded. Resolve the save warning and try again.';return false;}qiNotice='';return true;}
+ finally{qiBusy=false;qiRender();document.getElementById('currency').textContent=money(state.currency);renderInventory();}
+}
+
+function qiRotate(mask){return ((mask<<1)&15)|(mask>>3);}
+
+function qiDirection(a,b){return b===a-3?1:b===a+1?2:b===a+3?4:8;}
+
+function qiBoard(q){
+ const rng=qiRandom(`quilly-board:${q.day}:${q.steps}:${q.shore}`),target=q.shore*3+2;
+ function shuffle(a){return a.map(x=>[rng(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);}
+ function search(path){const p=path.at(-1);if(p===target)return path.length>=4?path:null;const row=Math.floor(p/3),col=p%3;for(const n of shuffle([row>0?p-3:-1,col<2?p+1:-1,row<2?p+3:-1,col>0?p-1:-1].filter(n=>n>=0&&!path.includes(n)))){const out=search([...path,n]);if(out)return out;}return null;}
+ const path=search([3])||[[3,0,1,2],[3,4,1,2,5],[3,6,7,8]][q.shore];
+ const solution=Array.from({length:9},()=>rng()<.5?3:5);
+ path.forEach((p,i)=>{solution[p]=(i?qiDirection(p,path[i-1]):8)|(i===path.length-1?2:qiDirection(p,path[i+1]));});
+ const tiles=solution.map(mask=>{for(let n=Math.floor(rng()*4);n>0;n--)mask=qiRotate(mask);return mask;});
+ if(path.every(p=>tiles[p]===solution[p]))tiles[3]=qiRotate(tiles[3]);
+ return {id:`${q.day}:${q.steps}:${q.shore}`,tiles,solution,path};
+}
+
+function qiTrace(board,shore){
+ if(!board)return {connected:false,path:[]};let p=3,entry=8;const path=[];
+ while(!path.includes(p)){
+  const mask=board.tiles[p];if(!(mask&entry))return {connected:false,path};path.push(p);
+  const exit=mask^entry,row=Math.floor(p/3),col=p%3;
+  if(exit===2&&col===2)return {connected:row===shore,path};
+  if((exit===1&&row===0)||(exit===4&&row===2)||(exit===8&&col===0))return {connected:false,path};
+  p+=exit===1?-3:exit===2?1:exit===4?3:-1;entry=exit===1?4:exit===2?8:exit===4?1:2;
+ }return {connected:false,path};
+}
+
+function qiTurn(index,boardId){const q=qiEnsure();if(!q.board||q.board.id!==boardId||q.pending||!Number.isInteger(index)||index<0||index>8)return;qiCommit(q=>{q.board.tiles[index]=qiRotate(q.board.tiles[index]);});document.querySelector(`[data-qi-tile="${index}"]`)?.focus({preventScroll:true});}
+
+function qiHint(){const q=qiEnsure();if(!qiCanAct()||q.pending||!q.board)return;const i=q.board.path.find(i=>q.board.tiles[i]!==q.board.solution[i]);qiNotice=i===undefined?'The seal is aligned. Claim the exit reward!':`Trace tile ${i+1}: its path should point ${[1,2,4,8].filter(b=>q.board.solution[i]&b).map(b=>({1:'up',2:'right',4:'down',8:'left'})[b]).join(' and ')}.`;qiRender();if(i!==undefined)document.querySelector(`[data-qi-tile="${i}"]`)?.focus({preventScroll:true});}
+
+function qiSelect(island){
+ if(island&&!qiAvailable())return;
+ if(battleSession?.started&&!battleSession.result){showBattleSubpage('wildbattle');renderWildBattle();return;}
+ qiView=island;qiNotice='';qiSync();if(island)qiRender();
+}
+
+function qiSync(){
+ qiEnsure();const available=qiAvailable(),tab=document.getElementById('qiIslandTab');if(!tab)return;
+ if(!available&&qiView){qiView=false;qiNotice='Quilly’s Island slipped back into its dream. Your keepsakes are safe.';}
+ tab.hidden=!available;tab.classList.toggle('active',qiView);tab.setAttribute('aria-selected',String(qiView));
+ const wild=document.getElementById('qiWildTab');wild.classList.toggle('active',!qiView);wild.setAttribute('aria-selected',String(!qiView));
+ document.getElementById('qiWildPane').hidden=qiView;document.getElementById('qiIslandPane').hidden=!qiView;
+ document.getElementById('qiArrival').hidden=!available||qiView;
+ document.getElementById('qiDeparture').textContent=!available?qiNotice:'';
+ if(qiView)qiRender();
+}
+
+function qiInstall(){
+ const explore=document.getElementById('explore'),bar=explore.querySelector('.subpage-bar'),wild=document.createElement('div');wild.id='qiWildPane';
+ for(const child of [...explore.children])if(child!==bar)wild.append(child);explore.append(wild);
+ const nav=document.createElement('div');nav.className='qi-nav';nav.setAttribute('role','tablist');nav.setAttribute('aria-label','Explore locations');nav.innerHTML='<button id="qiWildTab" type="button" role="tab" aria-controls="qiWildPane" class="active">Weekday Wilds</button><button id="qiIslandTab" type="button" role="tab" aria-controls="qiIslandPane" hidden>☾ Quilly’s Island <span>HERE TODAY</span></button>';bar.after(nav);
+ const arrival=document.createElement('div');arrival.id='qiArrival';arrival.className='qi-arrival';arrival.hidden=true;arrival.innerHTML='<span>☾ A sleeping island has appeared. Its shores will stay until midnight.</span><button id="qiVisit" type="button" class="ghost">Visit Quilly’s Island →</button>';nav.after(arrival);
+ const departure=document.createElement('p');departure.id='qiDeparture';arrival.after(departure);
+ const pane=document.createElement('div');pane.id='qiIslandPane';pane.hidden=true;pane.setAttribute('role','tabpanel');wild.setAttribute('role','tabpanel');wild.setAttribute('aria-labelledby','qiWildTab');pane.setAttribute('aria-labelledby','qiIslandTab');explore.append(pane);
+ document.getElementById('qiWildTab').onclick=()=>qiSelect(false);document.getElementById('qiIslandTab').onclick=()=>qiSelect(true);document.getElementById('qiVisit').onclick=()=>qiSelect(true);
+ nav.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)||!qiAvailable())return;e.preventDefault();qiSelect(e.key==='Home'?false:e.key==='End'?true:!qiView);document.getElementById(qiView?'qiIslandTab':'qiWildTab').focus();});
+ const preview=document.createElement('section');preview.className='qi-card';preview.innerHTML='<h3>Quilly’s Island · Maze preview</h3><p>Explore the revealed maze with a separate preview pouch. No real items, XP, currency or daily appearance results are changed.</p><button type="button" class="ghost">Open island preview</button>';document.getElementById('expeditionAdminPane').append(preview);preview.querySelector('button').onclick=()=>{if(!isAdminAccount()||eventTestSession||battleSession?.started&&!battleSession.result)return;qiPreview=true;qiPreviewState=qiFresh(qiDay());qiPreviewBag=Object.fromEntries(Object.keys(QI_ITEMS).map(id=>[id,20]));qiView=true;showBattleSubpage('explore');qiSync();};
+ setInterval(()=>{if(saveLoadFailure)return;const day=qiDay();if(day!==qiLastTickDay){qiLastTickDay=day;qiSync();}else if(qiView&&explore.classList.contains('active')){const time=explore.querySelector('.qi-time');if(time&&!qiPreview){const end=new Date();end.setHours(24,0,0,0);const n=Math.max(0,Math.ceil((end-Date.now())/60000));time.textContent=`Here until local midnight · ${Math.floor(n/60)}h ${n%60}m remaining`;}}},10000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!saveLoadFailure)qiSync();});
+}
+
+// Revealed-maze island. Daily presence and the exit line puzzle reuse the tested island helpers.
+QI_ITEMS.qi_dream_egg={name:'Dream Egg',symbol:'◈',sellValue:0,desc:'Open to receive an egg for incubation. Draws from monsters assigned to Quilly’s Island: 99% ordinary, 1% Mythic when a Mythic is assigned. Requires an ordinary island roster; otherwise this item is kept.'};
+SPRITE_DEFS.qi_dream_egg={name:'Dream Egg',category:'Quilly’s Island',kind:'glyph',fallback:'◈'};
+function qiAvailable(){return qiPreview||qiAppears();}
+function qiPool(mythic=false){return Object.entries(state.species).filter(([,sp])=>(sp.builtin||sp.published===true)&&sp.obtain==="Quilly's Island"&&!sp.isCrossbreed&&sp.rarity!=='GOD'&&!!(sp.rarity==='Mythic'||sp.isMythic)===mythic);}
+function qiFresh(day){return {version:2,day,steps:0,shore:1,maze:null,board:null,exitReward:null,pending:null,history:[],last:'The whole maze is visible. Find the exit; each step may reveal dream finds or monsters.'};}
+function qiEnsure(){
+ if(qiPreview)return qiPreviewState;
+ const day=qiDay();let q=state.quillyIsland;
+ if(!q||q.day!==day||q.version!==2){q=state.quillyIsland=qiFresh(day);save();}
+ q.steps=Number.isSafeInteger(q.steps)&&q.steps>=0?q.steps:0;q.shore=1;
+ q.history=Array.isArray(q.history)?q.history.slice(-8):[];
+ if(q.maze&&(!Array.isArray(q.maze.cells)||q.maze.cells.length!==49||q.maze.size!==7||!Number.isInteger(q.maze.pos)||q.maze.pos<0||q.maze.pos>48)){q.maze=null;q.pending=null;q.exitReward=null;q.board=null;}
+ return q;
+}
+function qiCreateMaze(){
+ const maze=generateMaze(7);maze.revealed=maze.cells.map((_,i)=>i);maze.oasis=null;maze.alpha=null;
+ const free=maze.cells.map((_,i)=>i).filter(i=>i!==0&&i!==maze.exit),take=()=>free.splice(Math.floor(Math.random()*free.length),1)[0];
+ if(qiPool(true).length&&Math.random()<.01)maze.oasis={cell:take(),used:false};
+ if(qiPool(false).length&&Math.random()<ALPHA_TRACK_CHANCE)maze.alpha={cell:take(),used:false};
+ return maze;
+}
+function qiMazeReady(q){if(!q.maze){q.maze=qiCreateMaze();if(!qiPreview)save();}return q.maze;}
+function qiRollExit(){return {puzzle:Math.random()<.30,egg:Math.random()<.10,material:randomChoice(['qi_dream_thread','qi_moon_pearl','qi_star_sand']),qty:randomInt(2,4)};}
+function qiRollStep(){const n=Math.random();return n<.40?'battle':n<.72?'field':n<.80?'currency':'quiet';}
+function qiMove(dir){
+ if(!['N','E','S','W'].includes(dir))return;const q=qiEnsure(),m=q.maze;
+ if(!m||q.pending||q.exitReward||!mazeCanMove(m,dir))return;
+ const mon=activeMonster();if(!qiPreview&&(!mon||isMonsterFainted(mon))){qiNotice='Choose a rested active monster before exploring.';qiRender();return;}
+ qiCommit(q=>{
+  const m=q.maze;m.pos=mazeDestination(m,dir);const first=!m.visited.includes(m.pos);if(first)m.visited.push(m.pos);
+  if(m.pos===m.exit){q.exitReward=qiRollExit();q.board=q.exitReward.puzzle?qiBoard(q):null;qiLog(q,q.exitReward.puzzle?'A dream seal guards the exit. Connect its path to claim your reward and enter the next maze.':'You reached the exit. Collect your reward to enter a new dream maze.');return;}
+  let mode=null;
+  if(m.oasis?.cell===m.pos&&!m.oasis.used){m.oasis.used=true;mode='mythic-temple';}
+  else if(m.alpha?.cell===m.pos&&!m.alpha.used){m.alpha.used=true;mode='alpha-hunt';}
+  const kind=mode?'battle':qiRollStep(),pool=qiPool(mode==='mythic-temple');
+  if(kind==='battle'&&pool.length){const [slug]=randomChoice(pool);q.pending={kind:'battle',slug,mode:mode||'wild'};qiLog(q,mode==='mythic-temple'?'The Dream Oasis stirs. A Mythic is waiting.':mode==='alpha-hunt'?'An Alpha watches from its dream den.':'A dreaming monster crosses your path.');}
+  else if(kind==='field'||kind==='battle'){const item=randomChoice(['qi_dream_thread','qi_moon_pearl','qi_star_sand']);qiAdd(item,1);qiLog(q,`Found ${QI_ITEMS[item].name} ×1. Added to Inventory.`);}
+  else if(kind==='currency'){const n=randomInt(5,20);if(!qiPreview)state.currency+=n;qiLog(q,`Found ${n} currency${qiPreview?' (preview)':''} among the sleeping flowers.`);}
+  else qiLog(q,'Lavender mist drifts over the path. The exit waits somewhere ahead.');
+ });
+}
+function qiClaimExit(boardId=null){
+ const q=qiEnsure(),reward=q.exitReward;if(!reward||q.pending)return;
+ if(reward.puzzle&&(!q.board||q.board.id!==boardId||!qiTrace(q.board,1).connected))return;
+ qiCommit(q=>{const r=q.exitReward;qiAdd(r.material,r.qty);if(r.egg)qiAdd('qi_dream_egg',1);q.steps++;q.exitReward=null;q.board=null;q.maze=qiCreateMaze();qiLog(q,`Maze cleared! +${r.qty} ${QI_ITEMS[r.material].name}${r.egg?' and +1 Dream Egg':''}. Your finds are in Inventory. A new dream maze unfolds.`);});
+}
+function qiResolveEncounter(fight){
+ const q=qiEnsure(),p=q.pending;if(!p)return;
+ if(!fight){qiCommit(q=>{q.pending=null;qiLog(q,'You slip past peacefully. The path to the exit remains open.');});return;}
+ const mon=activeMonster();if(!qiPreview&&(!mon||isMonsterFainted(mon))){qiNotice='Your active monster needs to recover first.';qiRender();return;}
+ if(!qiPool(p.mode==='mythic-temple').some(([slug])=>slug===p.slug)){qiCommit(q=>{q.pending=null;qiLog(q,'That monster is no longer assigned to this encounter. The path is clear.');});return;}
+ if(qiPreview){qiCommit(q=>{q.pending=null;qiLog(q,`Preview: ${p.mode==='mythic-temple'?'Dream Oasis':p.mode==='alpha-hunt'?'Alpha':'Wild'} battle with ${state.species[p.slug].name}. No real battle or rewards were started.`);});return;}
+ if(!qiCommit(q=>{q.pending=null;qiLog(q,'You approach '+state.species[p.slug].name+'.');}))return;
+ if(p.mode==='alpha-hunt')prepareAlphaBattle({slug:p.slug});else prepareWildBattle(p.slug);
+ if(!battleSession)return;battleSession.mode=p.mode;battleSession.quillyIsland=true;battleSession.quillyEncounter=p.mode;battleSession.started=true;
+ battleSession.log.push(p.mode==='mythic-temple'?'The Dream Oasis opens around you.':'The island dreams around your encounter.');enterBattleScene();
+}
+function qiBattleReturn(){
+ if(!battleSession?.quillyIsland)return;document.getElementById('battleScreenLabel').textContent=battleSession.quillyEncounter==='mythic-temple'?'Quilly’s Island · Dream Oasis':battleSession.quillyEncounter==='alpha-hunt'?'Quilly’s Island · Alpha Den':'Quilly’s Island · Dream Wanderer';
+ const b=document.getElementById('leaveBattle');if(b&&battleSession.result){b.textContent=qiAvailable()?'Return to Quilly’s Island':'Return to Explore';b.onclick=()=>{battleSession=null;showBattleSubpage('explore');qiView=qiAvailable();qiSync();renderExplorePage();renderAll();};}
+}
+function qiDreamEggSpecies(roll=Math.random()){
+ const ordinary=qiPool(false),mythics=qiPool(true);if(!ordinary.length)return null;
+ return randomChoice(roll<.01&&mythics.length?mythics:ordinary);
+}
+function qiOpenDreamEgg(){
+ if(eventTestSession||saveLoadFailure||!(state.inventory.qi_dream_egg>0))return false;
+ const picked=qiDreamEggSpecies();if(!picked){document.getElementById('inventoryDetailDescription').textContent='No ordinary Quilly’s Island monsters are published yet. This Dream Egg is kept safely until the roster is ready.';return false;}
+ const before=JSON.parse(JSON.stringify(state)),[slug,sp]=picked;state.inventory.qi_dream_egg--;
+ state.eggs.push({id:uid('E',state.nextEggNum++),slug,speciesName:sp.name,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:'Quilly’s Island Dream Egg',createdAt:Date.now(),status:'waiting',catalystUsed:false});
+ if(!save()){state=before;document.getElementById('inventoryDetailDescription').textContent='Could not save. Your Dream Egg has not been spent.';return false;}
+ document.getElementById('inventoryDetailModal').close();inventorySelection=null;renderAll();return true;
+}
+function qiUseLegacy(id){
+ const q=qiEnsure();if(q.pending||!(qiBag()[id]>0))return;
+ if(id==='qi_lucid_lens'&&q.board&&!qiTrace(q.board,1).connected)qiCommit(q=>{qiAdd(id,-1);q.board.tiles=[...q.board.solution];qiLog(q,'Your Lucid Lens aligned the exit seal. Claim the exit reward when ready.');});
+ if(id==='qi_lullaby'){const mon=activeMonster();if(!qiPreview&&(!mon||mon.level>=100))return;qiCommit(q=>{qiAdd(id,-1);if(!qiPreview)grantXP(mon,25);qiLog(q,'Bottled Lullaby: +25 active-monster XP'+(qiPreview?' (preview)':'')+'.');});}
+}
+function qiRender(){
+ if(!qiView)return;if(!qiAvailable()){qiSync();return;}const q=qiEnsure(),m=qiMazeReady(q),host=document.getElementById('qiIslandPane'),bag=qiBag(),pending=q.pending,exit=q.exitReward,board=q.board;
+ const focus=document.activeElement?.dataset?.qiMove,detailsOpen=!!document.getElementById('qiJournal')?.open;
+ const end=new Date();end.setHours(24,0,0,0);const n=Math.max(0,Math.ceil((end-Date.now())/60000));
+ host.innerHTML=`<header class="qi-hero"><div class="qi-hero-copy"><div class="eyebrow">THE SLEEPING ISLAND</div><h2>Quilly’s Island</h2><p>The paths are visible, but the dream keeps changing. Find the exit before the island slips back into sleep.</p><span class="qi-time">${qiPreview?'ADMIN PREVIEW · no real rewards or costs':`Here until local midnight · ${Math.floor(n/60)}h ${n%60}m`}</span>${qiPreview?'<button id="qiExitPreview" class="ghost" type="button">Exit preview</button>':''}</div><div class="qi-hero-art"><img id="qiQuillightArt" alt="Quillight"><span>“Every exit is another beginning.”</span></div></header>
+ <div class="qm-layout"><section class="qi-map-card"><div class="qi-section-heading"><div><span class="eyebrow">REVEALED DREAM MAZE</span><h3>Follow the paths. Find the exit.</h3></div><span class="qi-count">${q.steps} mazes cleared</span></div>
+ <div class="qm-grid" role="img" aria-label="Fully revealed 7 by 7 maze. You are at row ${Math.floor(m.pos/7)+1}, column ${m.pos%7+1}. Exit at row ${Math.floor(m.exit/7)+1}, column ${m.exit%7+1}.">${m.cells.map((mask,i)=>{const row=Math.floor(i/7),col=i%7,mark=i===m.pos?'◆':i===m.exit?'EXIT':i===0?'S':m.oasis?.cell===i&&!m.oasis.used?'✦':m.alpha?.cell===i&&!m.alpha.used?'⚑':'';return `<div class="qm-cell ${i===m.pos?'qm-player':''} ${i===m.exit?'qm-exit':''} ${m.visited.includes(i)?'qm-visited':''}" style="border-top-color:${mask&1?'transparent':'#493354'};border-right-color:${mask&2?'transparent':'#493354'};border-bottom-color:${mask&4?'transparent':'#493354'};border-left-color:${mask&8?'transparent':'#493354'}" title="Row ${row+1}, column ${col+1}${mark?': '+mark:''}"><span>${mark}</span></div>`;}).join('')}</div>
+ <div class="qm-legend"><span>◆ You</span><span>S Entrance</span><span>EXIT Next maze</span><span>⚑ Alpha den</span><span>✦ Dream Oasis</span></div>
+ <p class="qi-instructions">Use the arrows or WASD to walk. Each step can bring monsters or dream field finds. Special encounters are optional.</p>
+ <div class="qm-pad" role="group" aria-label="Maze movement">${[['N','↑','Up'],['W','←','Left'],['S','↓','Down'],['E','→','Right']].map(([dir,arrow,label])=>`<button type="button" data-qi-move="${dir}" aria-label="Move ${label.toLowerCase()}" ${pending||exit||!mazeCanMove(m,dir)?'disabled':''}>${arrow}</button>`).join('')}</div>
+ <p id="qiFeedback" class="qi-feedback" role="status">${labSafe(qiNotice||q.last)}</p>
+ ${pending?`<article class="qi-encounter"><div class="eyebrow">${pending.mode==='mythic-temple'?'DREAM OASIS':pending.mode==='alpha-hunt'?'ALPHA DEN':'DREAM WANDERER'}</div><h3>${labSafe(state.species[pending.slug]?.name||'A fading dream')}</h3><p>${pending.mode==='mythic-temple'?'A Mythic assigned to this island waits inside a sleeping spring.':pending.mode==='alpha-hunt'?'A stronger island monster watches over this den.':'An island monster is waiting. Approach for a wild battle or pass peacefully.'}</p><button id="qiEncounter" class="primary" type="button">${qiPreview?'Preview encounter':'Approach'}</button><button id="qiPass" class="ghost" type="button">Pass peacefully</button></article>`:''}
+ ${exit?`<section class="qi-encounter qm-seal"><div class="eyebrow">MAZE EXIT</div><h3>${exit.puzzle?'A dream seal waits.':'The dream opens.'}</h3><p>${exit.puzzle?'Rotate the tiles to connect the left entrance to the right exit. Complete the seal to collect this maze’s reward.':'Collect your dream field finds and step into a fresh layout.'}</p>${exit.puzzle?`<div class="qi-tapestry"><span class="qi-start">START →</span><div class="qi-board">${board.tiles.map((mask,i)=>`<button class="qi-tile ${qiTrace(board,1).path.includes(i)?'qi-lit':''}" type="button" data-qi-tile="${i}" aria-label="Rotate tile ${i+1} clockwise"><span class="qi-tile-number">${i+1}</span><svg viewBox="0 0 100 100" aria-hidden="true">${[1,2,4,8].filter(b=>mask&b).map(b=>`<path d="M50 50 L${({1:'50 0',2:'100 50',4:'50 100',8:'0 50'})[b]}"/>`).join('')}<circle cx="50" cy="50" r="7"/></svg></button>`).join('')}</div><span class="qi-start">→ EXIT</span></div><button id="qiHint" class="ghost" type="button">Trace a hint</button>${bag.qi_lucid_lens>0?'<button id="qiLens" class="ghost" type="button">Use saved Lucid Lens</button>':''}`:''}<button id="qiClaim" type="button" class="primary" ${exit.puzzle&&!qiTrace(board,1).connected?'disabled':''}>Claim reward & enter next maze</button></section>`:''}</section>
+ <aside class="qi-sidebar"><section class="qi-card"><span class="eyebrow">FIELD FINDS</span><h3>Dream keepsakes</h3><div class="qi-keepsakes">${Object.entries(QI_ITEMS).filter(([id])=>!['qi_lucid_lens','qi_lullaby'].includes(id)||(bag[id]||0)>0).map(([id,item])=>`<div><span>${item.symbol}</span><strong>${item.name}</strong><b>${bag[id]||0}</b></div>`).join('')}</div><p>All finds go into Inventory and stay after the island vanishes. Open Dream Eggs from Inventory, then incubate them normally.</p>${bag.qi_lullaby>0?'<button id="qiLullaby" class="ghost" type="button">Use saved Bottled Lullaby</button>':''}</section>
+ <section class="qi-card"><span class="eyebrow">EXIT REWARDS</span><h3>One more dream</h3><p>Every exit grants 2–4 dream field finds. <strong>30%</strong> have a connection puzzle; finish it before collecting. Each completed maze has a <strong>10%</strong> chance to award a Dream Egg.</p><p>Dream Eggs: <strong>1% total Mythic chance</strong> when island Mythics are assigned; otherwise ordinary monsters. Eggs are kept if no ordinary roster is available.</p></section>
+ <details id="qiJournal" class="qi-card" ${detailsOpen?'open':''}><summary>Island roster & dream journal</summary><p>Only monsters assigned to <strong>Quilly’s Island</strong> appear here, regardless of element.</p><p>Maze & Alphas: ${qiPool(false).map(([,s])=>labSafe(s.name)).join(', ')||'None assigned yet.'}</p><p>Dream Oasis & rare eggs: ${qiPool(true).map(([,s])=>labSafe(s.name)).join(', ')||'No Mythics assigned yet.'}</p><p>Dream Oasis: 1% of new mazes. Alpha den: 12% of new mazes, when their rosters are populated.</p>${q.history.slice().reverse().map(s=>`<p>${labSafe(s)}</p>`).join('')}</details></aside></div>`;
+ if(state.species.quillight)setMonsterImage(document.getElementById('qiQuillightArt'),'quillight','base');else document.getElementById('qiQuillightArt').hidden=true;
+ host.querySelectorAll('[data-qi-move]').forEach(b=>b.onclick=()=>qiMove(b.dataset.qiMove));
+ if(pending){document.getElementById('qiEncounter').onclick=()=>qiResolveEncounter(true);document.getElementById('qiPass').onclick=()=>qiResolveEncounter(false);}
+ if(exit){const id=board?.id;document.getElementById('qiClaim').onclick=()=>qiClaimExit(id);if(board){host.querySelectorAll('[data-qi-tile]').forEach(b=>b.onclick=()=>qiTurn(Number(b.dataset.qiTile),id));document.getElementById('qiHint').onclick=qiHint;}}
+ if(document.getElementById('qiLens'))document.getElementById('qiLens').onclick=()=>qiUseLegacy('qi_lucid_lens');if(document.getElementById('qiLullaby'))document.getElementById('qiLullaby').onclick=()=>qiUseLegacy('qi_lullaby');
+ if(qiPreview)document.getElementById('qiExitPreview').onclick=()=>{qiPreview=false;qiView=false;qiSync();switchTab('admin');showAdminPane('expedition');};
+ if(focus)host.querySelector(`[data-qi-move="${focus}"]`)?.focus({preventScroll:true});
+}
+qiInstall();
+document.addEventListener('keydown',e=>{if(!qiView||!document.getElementById('explore').classList.contains('active')||e.repeat||e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]')||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;const dir={ArrowUp:'N',ArrowRight:'E',ArrowDown:'S',ArrowLeft:'W',w:'N',d:'E',s:'S',a:'W'}[e.key];if(dir){e.preventDefault();qiMove(dir);}});
+const qiObtainHelp=document.createElement('p');qiObtainHelp.className='form-note';qiObtainHelp.textContent='Quilly’s Island: Standard monsters join its maze and Alpha pools. Mythics join the Dream Oasis and 1% Dream Egg pool. Disable Mythic Temple Only first, choose Quilly’s Island here, then Save and Publish.';document.getElementById('obtainMethod').closest('label').append(qiObtainHelp);
+
+const BW_SEED=[{"id": "oct26-caustella", "name": "Caustella", "group": "Mainland", "element": "Toxic", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 302, "rarity": "Standard", "nativeFacing": "left", "role": "A patient coil of living venom, Caustella gathers bitter sap beneath its hood and leaves glassy trails across stone.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/caustella-base.png", "prismatic": "assets/batch-workshop/caustella-prismatic.png"}, "attack": {"name": "Venom Helix", "element": "Toxic", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Poison", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Twists a ribbon of venom around the target. Has a 20% chance to inflict poison for 2 turns."}}, {"id": "oct26-zephystripe", "name": "Zephystripe", "group": "Mainland", "element": "Air", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 294, "rarity": "Standard", "nativeFacing": "left", "role": "Its striped wings break up its silhouette against moving clouds. Herds race the wind between high, narrow ridges.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/zephystripe-base.png", "prismatic": "assets/batch-workshop/zephystripe-prismatic.png"}, "attack": {"name": "Gale Gallop", "element": "Air", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "None", "statusChance": 0, "statusDuration": 0, "lifeSteal": 0, "evadeNext": 0, "description": "Charges through the target on a compressed gust."}}, {"id": "oct26-nerisshade", "name": "Nerisshade", "group": "Mainland", "element": "Water", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 318, "rarity": "Standard", "nativeFacing": "left", "role": "A deepwater singer whose drifting hair glows like distant lanterns. It guides lost swimmers away from hungry currents.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/nerisshade-base.png", "prismatic": "assets/batch-workshop/nerisshade-prismatic.png"}, "attack": {"name": "Undertow Lullaby", "element": "Water", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Sleep", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Sings as a dark current pulls at the target. Has a 20% chance to inflict sleep for 2 turns."}}, {"id": "oct26-stormcoil", "name": "Stormcoil", "group": "Crossbreeds", "element": "Lightning", "secondaryElement": "Water", "battleType": "Speed", "p1bst": 338, "rarity": "Standard", "nativeFacing": "left", "role": "Static leaps between its hooked fins as it coils to spring. A single shed scale can make a compass spin for hours.", "isCrossbreed": true, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Breeding Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/stormcoil-base.png", "prismatic": "assets/batch-workshop/stormcoil-prismatic.png"}, "attack": {"name": "Arc Fang", "element": "Lightning", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Shock", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Drives an electrified fang into the target. Has a 20% chance to inflict shock for 2 turns."}}, {"id": "oct26-verdantusk", "name": "Verdantusk", "group": "Crossbreeds", "element": "Nature", "secondaryElement": "Earth", "battleType": "Defender", "p1bst": 342, "rarity": "Standard", "nativeFacing": "left", "role": "A walking thicket with patient eyes and root-plated shoulders. Small woodland creatures shelter beneath its layered armor.", "isCrossbreed": true, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Breeding Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/verdantusk-base.png", "prismatic": "assets/batch-workshop/verdantusk-prismatic.png"}, "attack": {"name": "Rootbound Rampart", "element": "Nature", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Sends binding roots surging beneath the target. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-relicrake", "name": "Relicrake", "group": "Crossbreeds", "element": "Earth", "secondaryElement": "Metal", "battleType": "Brute", "p1bst": 350, "rarity": "Standard", "nativeFacing": "left", "role": "Ancient spirals turn within its fossil armor. Each heavy footfall shakes loose a memory of the world before Keepers.", "isCrossbreed": true, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Breeding Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/relicrake-base.png", "prismatic": "assets/batch-workshop/relicrake-prismatic.png"}, "attack": {"name": "Epoch Rend", "element": "Earth", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "Guard Break", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Rakes the target with ancient stone claws. Has a 20% chance to inflict guard break for 2 turns."}}, {"id": "oct26-somnara", "name": "Somnara", "group": "Crossbreeds", "element": "Aether", "secondaryElement": "Shadow", "battleType": "Speed", "p1bst": 394, "rarity": "Mythic", "nativeFacing": "left", "role": "A winged wanderer that gathers unfinished dreams in its flowing mane. Its shadow keeps moving after it comes to rest.", "isCrossbreed": true, "parents": ["", ""], "crossbreedChance": 5, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Breeding Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/somnara-base.png", "prismatic": "assets/batch-workshop/somnara-prismatic.png"}, "attack": {"name": "Reverie Eclipse", "element": "Aether", "style": "Standard", "power": 80, "accuracy": 95, "critChance": 2, "status": "Sleep", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Folds a shimmering dream across the target. Has a 20% chance to inflict sleep for 2 turns."}}, {"id": "oct26-ferrindle", "name": "Ferrindle", "group": "Mainland", "element": "Metal", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 308, "rarity": "Standard", "nativeFacing": "left", "role": "Ferrindle polishes its overlapping plates against iron-rich rock. When startled, it becomes a rolling ball of ringing steel.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/ferrindle-base.png", "prismatic": "assets/batch-workshop/ferrindle-prismatic.png"}, "attack": {"name": "Rivet Roll", "element": "Metal", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Guard Break", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Rolls into the target with its steel plates locked. Has a 20% chance to inflict guard break for 2 turns."}}, {"id": "oct26-heliopride", "name": "Heliopride", "group": "Mainland", "element": "Light", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 326, "rarity": "Standard", "nativeFacing": "left", "role": "Its radiant mane stores the warmth of clear mornings. Travelers follow its golden outline through fog and winter dusk.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/heliopride-base.png", "prismatic": "assets/batch-workshop/heliopride-prismatic.png"}, "attack": {"name": "Daybreak Roar", "element": "Light", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "None", "statusChance": 0, "statusDuration": 0, "lifeSteal": 0, "evadeNext": 0, "description": "Unleashes a focused roar of stored sunlight."}}, {"id": "oct26-mazenna", "name": "Mazenna", "group": "Mainland", "element": "Earth", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 314, "rarity": "Standard", "nativeFacing": "left", "role": "Mazenna remembers every passage it has walked. It protects lost travelers, but seals dangerous paths with a sweep of its horns.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/mazenna-base.png", "prismatic": "assets/batch-workshop/mazenna-prismatic.png"}, "attack": {"name": "Labyrinth Breaker", "element": "Earth", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "Stun", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Strikes with horns hardened by the earth. Has a 20% chance to inflict stun for 2 turns."}}, {"id": "oct26-nectharrow", "name": "Nectharrow", "group": "Mainland", "element": "Nature", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 296, "rarity": "Standard", "nativeFacing": "left", "role": "Sweet nectar gathers inside its thorn-lined pitcher. It pretends to be a harmless garden plant until prey brushes its roots.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/nectharrow-base.png", "prismatic": "assets/batch-workshop/nectharrow-prismatic.png"}, "attack": {"name": "Pitcher Snare", "element": "Nature", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Poison", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Snares the target in nectar-coated thorns. Has a 20% chance to inflict poison for 2 turns."}}, {"id": "oct26-nuloculus", "name": "Nuloculus", "group": "Mainland", "element": "Void", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 282, "rarity": "Standard", "nativeFacing": "left", "role": "Its single eye follows ripples nobody else can see. It roosts in silent caves where even falling water seems to hold its breath.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/nuloculus-base.png", "prismatic": "assets/batch-workshop/nuloculus-prismatic.png"}, "attack": {"name": "Hollow Gaze", "element": "Void", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Pins the target beneath an unsettling void gaze. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-mossnuffle", "name": "Mossnuffle", "group": "Quilly’s Island", "element": "Nature", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 288, "rarity": "Standard", "nativeFacing": "left", "role": "This gentle island forager carries a miniature mushroom grove on its back. Fresh sprouts mark the places where it has dreamed.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/mossnuffle-base.png", "prismatic": "assets/batch-workshop/mossnuffle-prismatic.png"}, "attack": {"name": "Briar Burrow", "element": "Nature", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Bursts from the soil in a tangle of thorny roots. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-zappindle", "name": "Zappindle", "group": "Quilly’s Island", "element": "Lightning", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 298, "rarity": "Standard", "nativeFacing": "left", "role": "Its needlelike fur crackles whenever the island shifts in its sleep. It races along dream paths just before they change.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/zappindle-base.png", "prismatic": "assets/batch-workshop/zappindle-prismatic.png"}, "attack": {"name": "Static Scuttle", "element": "Lightning", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Shock", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Skitters past the target in a shower of sparks. Has a 20% chance to inflict shock for 2 turns."}}, {"id": "oct26-rimehorn", "name": "Rimehorn", "group": "Quilly’s Island", "element": "Ice", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 322, "rarity": "Standard", "nativeFacing": "left", "role": "A shaggy guardian of snowy dreams, Rimehorn exhales tiny frost flowers. Its broad horns clear paths through impossible blizzards.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/rimehorn-base.png", "prismatic": "assets/batch-workshop/rimehorn-prismatic.png"}, "attack": {"name": "Glacier Ram", "element": "Ice", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "Freeze", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Rams the target with frost-covered horns. Has a 20% chance to inflict freeze for 2 turns."}}, {"id": "oct26-miremaw", "name": "Miremaw", "group": "Quilly’s Island", "element": "Toxic", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 310, "rarity": "Standard", "nativeFacing": "left", "role": "Warm dream-mist bubbles from the growths along its back. It waits beneath shallow pools with only its sleepy eyes showing.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/miremaw-base.png", "prismatic": "assets/batch-workshop/miremaw-prismatic.png"}, "attack": {"name": "Bogbubble Bite", "element": "Toxic", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Poison", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Bites through a cloud of bursting venom bubbles. Has a 20% chance to inflict poison for 2 turns."}}, {"id": "oct26-ironwarren", "name": "Ironwarren", "group": "Quilly’s Island", "element": "Metal", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 306, "rarity": "Standard", "nativeFacing": "left", "role": "This armored digger tunnels through the underside of the island. Its metal plates softly chime whenever a dreamer turns over.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/ironwarren-base.png", "prismatic": "assets/batch-workshop/ironwarren-prismatic.png"}, "attack": {"name": "Platequake", "element": "Metal", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Guard Break", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Slams its interlocking plates into the target. Has a 20% chance to inflict guard break for 2 turns."}}, {"id": "oct26-lunaclaw", "name": "Lunaclaw", "group": "Quilly’s Island", "element": "Spirit", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 316, "rarity": "Standard", "nativeFacing": "left", "role": "Lunaclaw carries a hollow moon upon its back. Listen closely and the shell echoes with tides from seas that never existed.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/lunaclaw-base.png", "prismatic": "assets/batch-workshop/lunaclaw-prismatic.png"}, "attack": {"name": "Mooncrater Crush", "element": "Spirit", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Crushes the target beneath a moonlit claw. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-velvetveil", "name": "Velvetveil", "group": "Quilly’s Island", "element": "Shadow", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 292, "rarity": "Standard", "nativeFacing": "left", "role": "Its velvet wings gather the last colors of evening. The dust it sheds settles into tiny landscapes on sleeping leaves.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/velvetveil-base.png", "prismatic": "assets/batch-workshop/velvetveil-prismatic.png"}, "attack": {"name": "Duskwing Dust", "element": "Shadow", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Sleep", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Scatters dark wing dust across the target. Has a 20% chance to inflict sleep for 2 turns."}}, {"id": "oct26-auroroyal", "name": "Auroroyal", "group": "Quilly’s Island", "element": "Light", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 334, "rarity": "Standard", "nativeFacing": "left", "role": "An antlered sentinel that patrols the island at its imagined dawn. Its mane brightens when a frightened dreamer finds courage.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/auroroyal-base.png", "prismatic": "assets/batch-workshop/auroroyal-prismatic.png"}, "attack": {"name": "Crownflare", "element": "Light", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "None", "statusChance": 0, "statusDuration": 0, "lifeSteal": 0, "evadeNext": 0, "description": "Projects a brilliant flare from its golden crown."}}, {"id": "oct26-cragdozer", "name": "Cragdozer", "group": "Quilly’s Island", "element": "Earth", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 320, "rarity": "Standard", "nativeFacing": "left", "role": "Often mistaken for a warm boulder, Cragdozer naps across narrow paths. It moves only when the island dreams of somewhere new.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/cragdozer-base.png", "prismatic": "assets/batch-workshop/cragdozer-prismatic.png"}, "attack": {"name": "Slumberstone Slam", "element": "Earth", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Stun", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Drops its stone-heavy body onto the target. Has a 20% chance to inflict stun for 2 turns."}}, {"id": "oct26-lullark", "name": "Lullark", "group": "Quilly’s Island", "element": "Air", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 300, "rarity": "Standard", "nativeFacing": "left", "role": "Long tail ribbons trace gentle currents through the dream sky. Its clear song keeps floating paths from drifting apart.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/lullark-base.png", "prismatic": "assets/batch-workshop/lullark-prismatic.png"}, "attack": {"name": "Ribbon Gale", "element": "Air", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "None", "statusChance": 0, "statusDuration": 0, "lifeSteal": 0, "evadeNext": 0, "description": "Whips a ribbon of wind across the target."}}, {"id": "oct26-tickalune", "name": "Tickalune", "group": "Quilly’s Island", "element": "Spirit", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 304, "rarity": "Standard", "nativeFacing": "left", "role": "A porcelain dancer wound by moonlight. Its tiny gears count moments borrowed from dreams rather than ordinary hours.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/tickalune-base.png", "prismatic": "assets/batch-workshop/tickalune-prismatic.png"}, "attack": {"name": "Midnight Pirouette", "element": "Spirit", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Spins through the target in a shower of ghostly gears. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-rosalume", "name": "Rosalume", "group": "Quilly’s Island", "element": "Aether", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 402, "rarity": "Mythic", "nativeFacing": "left", "role": "A rose-crowned host of the Dream Oasis, Rosalume welcomes weary minds. Its folded wings hold the colors of dreams yet to begin.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 5, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/rosalume-base.png", "prismatic": "assets/batch-workshop/rosalume-prismatic.png"}, "attack": {"name": "Velvet Reverie", "element": "Aether", "style": "Standard", "power": 80, "accuracy": 95, "critChance": 2, "status": "Sleep", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Wraps the target in a soft wave of dreamlight. Has a 20% chance to inflict sleep for 2 turns."}}, {"id": "oct26-noctharon", "name": "Noctharon", "group": "Quilly’s Island", "element": "Shadow", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 410, "rarity": "Mythic", "nativeFacing": "left", "role": "This horned keeper watches the borders of the Dream Oasis. Its calm gaze holds restless nightmares still until morning.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 5, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Quilly's Island", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/noctharon-base.png", "prismatic": "assets/batch-workshop/noctharon-prismatic.png"}, "attack": {"name": "Nightfall Covenant", "element": "Shadow", "style": "Heavy", "power": 80, "accuracy": 95, "critChance": 2, "status": "Guard Break", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Strikes from a curtain of gathered night. Has a 20% chance to inflict guard break for 2 turns."}}, {"id": "oct26-ossiruin", "name": "Ossiruin", "group": "Reconstruction Lab", "element": "Earth", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 336, "rarity": "Standard", "nativeFacing": "left", "role": "Reassembled from ruined stone and ancient bones, Ossiruin shields the fragile relics embedded in its immense frame.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Reconstruction Lab Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/ossiruin-base.png", "prismatic": "assets/batch-workshop/ossiruin-prismatic.png"}, "attack": {"name": "Fossil Bastion", "element": "Earth", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Guard Break", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Drives its fossil-plated arms into the target. Has a 20% chance to inflict guard break for 2 turns."}, "recipe": {"title": "Ossiruin Reconstruction", "ingredients": [{"id": "dig_fossil_ammonite", "qty": 5}, {"id": "dig_bone_rib", "qty": 5}, {"id": "dig_bone_claw", "qty": 3}]}}, {"id": "oct26-stratadon", "name": "Stratadon", "group": "Reconstruction Lab", "element": "Earth", "secondaryElement": "Fire", "battleType": "Brute", "p1bst": 330, "rarity": "Standard", "nativeFacing": "left", "role": "Layers of shale preserve the outline of an ancient predator. Reconstructed Stratadon hunt by feeling vibrations through their fossil claws.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Reconstruction Lab Only", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/stratadon-base.png", "prismatic": "assets/batch-workshop/stratadon-prismatic.png"}, "attack": {"name": "Shaletooth Rush", "element": "Earth", "style": "Heavy", "power": 65, "accuracy": 95, "critChance": 2, "status": "Bleed", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Rushes the target with jagged shale teeth. Has a 20% chance to inflict bleed for 2 turns."}, "recipe": {"title": "Stratadon Reconstruction", "ingredients": [{"id": "dig_fossil_ammonite", "qty": 5}, {"id": "dig_bone_rib", "qty": 5}, {"id": "dig_bone_claw", "qty": 3}]}}, {"id": "oct26-velunaut", "name": "Velunaut", "group": "Mainland", "element": "Aether", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 312, "rarity": "Standard", "nativeFacing": "left", "role": "Six delicate arms steer Velunaut through invisible currents. Its glowing shell charts patterns that resemble unfamiliar constellations.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/velunaut-base.png", "prismatic": "assets/batch-workshop/velunaut-prismatic.png"}, "attack": {"name": "Spiral Pulse", "element": "Aether", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Releases a spiraling pulse from its glowing shell. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-terravault", "name": "Terravault", "group": "Mainland", "element": "Nature", "secondaryElement": "Fire", "battleType": "Defender", "p1bst": 344, "rarity": "Standard", "nativeFacing": "left", "role": "An entire little forest grows across Terravault’s broad shell. It walks carefully so nesting birds never lose a single egg.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/terravault-base.png", "prismatic": "assets/batch-workshop/terravault-prismatic.png"}, "attack": {"name": "Canopy Quake", "element": "Nature", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Slow", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Shakes the ground beneath its forested shell. Has a 20% chance to inflict slow for 2 turns."}}, {"id": "oct26-venofrost", "name": "Venofrost", "group": "Mainland", "element": "Ice", "secondaryElement": "Fire", "battleType": "Speed", "p1bst": 318, "rarity": "Standard", "nativeFacing": "left", "role": "Venom remains liquid inside its frozen crystal claws. It stores the bitter cold of glacier caverns beneath translucent armor.", "isCrossbreed": false, "parents": ["", ""], "crossbreedChance": 15, "breedSeconds": 3600, "hatchSeconds": 1800, "obtain": "Random Battle Reward", "huntingRarity": "Uncommon", "shopPrice": 2500, "published": true, "art": {"base": "assets/batch-workshop/venofrost-base.png", "prismatic": "assets/batch-workshop/venofrost-prismatic.png"}, "attack": {"name": "Cryovenom Sting", "element": "Ice", "style": "Standard", "power": 55, "accuracy": 95, "critChance": 2, "status": "Poison", "statusChance": 20, "statusDuration": 2, "lifeSteal": 0, "evadeNext": 0, "description": "Drives a frozen, venom-filled stinger at the target. Has a 20% chance to inflict poison for 2 turns."}}];
+// Review-only drafts live in the keeper save; only approval creates game content.
+let bwSelected='',bwFilter='Pending',bwQuery='',bwBusy=false,bwPreviewVersion=0;
+const bwEl=id=>document.getElementById(id);
+const bwEscape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function bwDrafts(){
+ if(!state.batchWorkshop){state.batchWorkshop={version:1,drafts:JSON.parse(JSON.stringify(BW_SEED))};if(!save())throw new Error('Drafts could not be saved. Free browser storage before continuing.');}
+ return state.batchWorkshop.drafts;
+}
+function bwCurrent(){return bwDrafts().find(d=>d.id===bwSelected);}
+function bwProblems(d){
+ const errors=[];
+ const range=(v,min,max,label)=>{if(!Number.isFinite(Number(v))||Number(v)<min||Number(v)>max||!Number.isInteger(Number(v)))errors.push(`${label} must be a whole number from ${min} to ${max}.`);};
+ if(!d.name.trim()||d.name.length>40||!slugify(d.name))errors.push('Enter a monster name (up to 40 characters).');
+ const slug=slugify(d.name),attackId=slugify(d.attack.name);
+ if(state.species[slug]&&state.species[slug].batchDraftId!==d.id)errors.push('That monster name is already in use. Choose a different name.');
+ if(!d.attack.name.trim()||d.attack.name.length>50||!attackId)errors.push('Enter a signature attack name (up to 50 characters).');
+ if(state.attacks[attackId]&&state.attacks[attackId].batchDraftId!==d.id)errors.push('That attack name is already in use. Choose a different name.');
+ if(!d.role.trim())errors.push('Add a creature description.');
+ if(!d.attack.description.trim()||d.attack.description.length>160)errors.push('Add an attack description of up to 160 characters.');
+ if(!d.art.base&&!d.uploads?.base)errors.push('Add normal artwork.');
+ if(!d.art.prismatic&&!d.uploads?.prismatic)errors.push('Add prismatic artwork.');
+ if(!ELEMENTS.includes(d.element)||!ELEMENTS.includes(d.attack.element))errors.push('Choose valid monster and attack elements.');
+ range(d.p1bst,100,999,'BST');range(d.attack.power,0,999,'Attack power');range(d.attack.accuracy,1,100,'Accuracy');range(d.attack.critChance,0,100,'Critical chance');range(d.attack.statusChance,0,100,'Status chance');range(d.attack.statusDuration,0,99,'Status duration');range(d.attack.lifeSteal,0,100,'Life steal');range(d.attack.evadeNext,0,100,'Dodge chance');range(d.breedSeconds,1,604800,'Breeding seconds');range(d.hatchSeconds,1,604800,'Hatching seconds');range(d.shopPrice,0,10000000,'Shop price');
+ if(!['Standard','Mythic'].includes(d.rarity)||!['Speed','Brute','Defender'].includes(d.battleType)||!['left','right'].includes(d.nativeFacing)||!ATTACK_STYLES.includes(d.attack.style)||!STATUSES.includes(d.attack.status)||!OBTAIN_METHODS.includes(d.obtain))errors.push('Choose valid battle and availability settings.');
+ if(d.isCrossbreed){
+   if(!d.parents[0]||!d.parents[1])errors.push('Choose both crossbreed parents.');
+   else if(d.parents[0]===d.parents[1]||d.parents.some(p=>!state.species[p]))errors.push('Choose two different existing parent monsters.');
+   if(!ELEMENTS.includes(d.secondaryElement)||d.element===d.secondaryElement)errors.push('Crossbreeds need two different elements.');
+   range(d.crossbreedChance,d.rarity==='Mythic'?1:10,20,'Crossbreed chance');
+ }else if(d.obtain==='Breeding Only')errors.push('Mark this monster as a crossbreed and choose its parents, or change its obtain location.');
+ if(d.obtain==='Mythic Temple Only'&&d.rarity!=='Mythic')errors.push('Temple-only monsters must be Mythic.');
+ if(d.obtain==='Reconstruction Lab Only'){
+  if(!d.recipe?.title.trim()||d.recipe.ingredients.length!==3||d.recipe.ingredients.some(p=>!itemInfoForInventoryId(p.id)||!Number.isInteger(Number(p.qty))||p.qty<1||p.qty>9999))errors.push('Complete the reconstruction recipe with three materials and quantities from 1 to 9999.');
+ }
+ return errors;
+}
+function bwNotice(message,error=false){bwEl('bwMessage').textContent=message;bwEl('bwMessage').classList.toggle('bw-error',error);}
+function bwPersist(){if(!save()){bwNotice('Your changes are still on screen, but could not be saved. Free browser storage and try again.',true);return false;}bwNotice('Draft edits saved in this browser.');return true;}
+function bwOpen(){try{const drafts=bwDrafts();if(!bwSelected)bwSelected=drafts.find(d=>!d.approvedSlug)?.id||drafts[0]?.id;bwRender();}catch(e){bwNotice(e.message,true);}}
+function bwRenderList(){
+ const drafts=bwDrafts(),pending=drafts.filter(d=>!d.approvedSlug),ready=pending.filter(d=>!bwProblems(d).length);
+ bwEl('bwStats').textContent=`${pending.length} pending · ${ready.length} ready · ${drafts.length-pending.length} approved`;
+ bwEl('bwApproveReady').disabled=bwBusy||!ready.length;
+ const filtered=drafts.filter(d=>(bwFilter==='All'||bwFilter==='Approved'?bwFilter==='All'||d.approvedSlug:!d.approvedSlug&&(bwFilter==='Pending'||d.group===bwFilter))&&`${d.name} ${d.group} ${d.element}`.toLowerCase().includes(bwQuery.toLowerCase()));
+ bwEl('bwList').innerHTML=filtered.map(d=>`<button type="button" class="bw-card ${d.id===bwSelected?'selected':''}" data-draft="${bwEscape(d.id)}" aria-pressed="${d.id===bwSelected}"><strong>${bwEscape(d.name||'Unnamed monster')}</strong><span>${bwEscape(d.group)} · ${bwEscape(d.element)}</span><small>${d.approvedSlug?'✓ Approved':bwProblems(d).length?'○ Needs review':'✓ Ready to approve'}</small></button>`).join('')||'<p>No drafts match this view.</p>';
+}
+function bwOptions(values,selected){return values.map(x=>{const [value,label]=Array.isArray(x)?x:[x,x];return `<option value="${bwEscape(value)}" ${value===selected?'selected':''}>${bwEscape(label)}</option>`;}).join('');}
+function bwField(label,key,value,type='text',extra='') {return `<label>${label}<input data-field="${key}" type="${type}" value="${bwEscape(value)}" ${extra}></label>`;}
+function bwSelect(label,key,value,values){return `<label>${label}<select data-field="${key}">${bwOptions(values,value)}</select></label>`;}
+function bwText(label,key,value,max){return `<label class="bw-wide">${label}<textarea data-field="${key}" maxlength="${max}" rows="3">${bwEscape(value)}</textarea></label>`;}
+function bwRender(){
+ bwRenderList();const d=bwCurrent();++bwPreviewVersion;
+ if(!d){bwEl('bwEditor').innerHTML='<p>Select a draft or add a monster to begin.</p>';return;}
+ if(d.approvedSlug){bwEl('bwEditor').innerHTML=`<div class="bw-approved"><span class="eyebrow">APPROVED CUSTOM MONSTER</span><h3>${bwEscape(d.name)}</h3><p>This monster and its signature attack are now in the regular editors. Further changes belong there.</p><button type="button" id="bwOpenApproved">Open in Monster Studio</button></div>`;return;}
+ const parents=[['','Choose a parent…'],...Object.entries(state.species).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([slug,s])=>[slug,s.name])];
+ const a=d.attack;
+ bwEl('bwEditor').innerHTML=`<fieldset class="bw-fields" ${bwBusy?'disabled':''}><div class="bw-editor-title"><div><span class="eyebrow">${bwEscape(d.group)} · DRAFT</span><h3>${bwEscape(d.name||'New monster')}</h3></div><button type="button" id="bwApprove">Approve monster</button></div><div id="bwValidation" role="status"></div>
+ <div class="bw-art-grid">${['base','prismatic','egg'].map(k=>`<label class="bw-art"><span>${k==='base'?'Normal':k==='prismatic'?'Prismatic':'Egg (optional)'}</span><img id="bwArt-${k}" alt="${k} artwork preview"><input type="file" data-art="${k}" accept="image/png,image/webp,image/jpeg"><small>${bwEscape(d.art[k]?.split('/').pop()||'Choose artwork')}</small></label>`).join('')}</div><button id="bwSwap" type="button" class="ghost">Swap normal / prismatic art</button>
+ <section><h4>Identity & battle profile</h4><div class="bw-grid">${bwField('Name','name',d.name,'text','maxlength="40"')}${bwSelect('Element','element',d.element,ELEMENTS)}${bwSelect('Rarity','rarity',d.rarity,['Standard','Mythic'])}${bwSelect('Battle type','battleType',d.battleType,['Speed','Brute','Defender'])}${bwField('Base stat total (BST)','p1bst',d.p1bst,'number','min="100" max="999"')}${bwSelect('Artwork naturally faces','nativeFacing',d.nativeFacing,[['left','Left'],['right','Right']])}${bwText('Creature description','role',d.role,400)}</div></section>
+ <section><h4>Signature attack</h4><div class="bw-grid">${bwField('Attack name','attack.name',a.name,'text','maxlength="50"')}${bwSelect('Attack element','attack.element',a.element,ELEMENTS)}${bwSelect('Style','attack.style',a.style,ATTACK_STYLES)}${bwField('Power','attack.power',a.power,'number','min="0" max="999"')}${bwField('Accuracy %','attack.accuracy',a.accuracy,'number','min="1" max="100"')}${bwField('Critical chance %','attack.critChance',a.critChance,'number','min="0" max="100"')}${bwSelect('Status','attack.status',a.status,STATUSES)}${bwField('Status chance %','attack.statusChance',a.statusChance,'number','min="0" max="100"')}${bwField('Duration (turns)','attack.statusDuration',a.statusDuration,'number','min="0" max="99"')}${bwField('Life steal %','attack.lifeSteal',a.lifeSteal,'number','min="0" max="100"')}${bwField('Next attack dodge %','attack.evadeNext',a.evadeNext,'number','min="0" max="100"')}${bwText('Attack description','attack.description',a.description,160)}</div><small>Descriptions are editable text. Adjust the effect fields above to change battle behavior.</small></section>
+ <section><h4>Availability & breeding</h4><label class="check-row"><input data-field="isCrossbreed" type="checkbox" ${d.isCrossbreed?'checked':''}> Crossbreed</label><div class="bw-grid">${bwSelect('Obtain location','obtain',d.obtain,OBTAIN_METHODS)}${bwField('Shop egg price','shopPrice',d.shopPrice,'number','min="0"')}${bwSelect('Hunting rarity','huntingRarity',d.huntingRarity,HUNT_RARITIES)}${bwField('Breeding time (seconds)','breedSeconds',d.breedSeconds,'number','min="1" max="604800"')}${bwField('Hatching time (seconds)','hatchSeconds',d.hatchSeconds,'number','min="1" max="604800"')}${d.isCrossbreed?`${bwSelect('Second element','secondaryElement',d.secondaryElement,ELEMENTS)}${bwSelect('Parent A','parents.0',d.parents[0],parents)}${bwSelect('Parent B','parents.1',d.parents[1],parents)}${bwField('Crossbreed chance %','crossbreedChance',d.crossbreedChance,'number','min="1" max="20"')}`:''}</div>${d.isCrossbreed?'<p>Parents are yours to choose. This draft cannot be approved until both are selected.</p>':''}</section>
+ ${d.obtain==='Reconstruction Lab Only'?bwRecipeForm(d):''}
+ <label class="check-row"><input type="checkbox" data-field="published" ${d.published?'checked':''}> Include the approved monster and attack in Live Content exports</label><p class="bw-footnote">Approval adds custom content locally. Use your usual Live Content export when you are ready to publish.</p></fieldset>`;
+ bwRefreshValidation();bwLoadPreviews(d,bwPreviewVersion);
+}
+function bwRecipeForm(d){
+ const materials=Object.entries({...TRADE_GOODS,...state.reconstructionMaterials}).map(([id,m])=>[id,m.name]);
+ return `<section><h4>Reconstruction recipe</h4><p>Discoverable with Ancient Pages after approval. Editable later in Reconstruction Lab.</p><div class="bw-grid">${bwField('Recipe title','recipe.title',d.recipe.title,'text','maxlength="72"')}${d.recipe.ingredients.map((p,i)=>bwSelect(`Material ${i+1}`,`recipe.ingredients.${i}.id`,p.id,materials)+bwField('Quantity',`recipe.ingredients.${i}.qty`,p.qty,'number','min="1" max="9999"')).join('')}</div></section>`;
+}
+function bwRefreshValidation(){const d=bwCurrent();if(!d||d.approvedSlug)return;const errors=bwProblems(d);bwEl('bwValidation').innerHTML=errors.length?`<strong>Before approval</strong><ul>${errors.map(e=>`<li>${bwEscape(e)}</li>`).join('')}</ul>`:'<span class="bw-ready">✓ Ready for your approval</span>';bwEl('bwApprove').disabled=bwBusy||!!errors.length;}
+async function bwLoadPreviews(d,version){for(const kind of ['base','prismatic','egg']){const src=d.uploads?.[kind]?await storedAssetUrl(`batch-draft:${d.id}:${kind}`):d.art[kind];if(version!==bwPreviewVersion)return;const img=bwEl('bwArt-'+kind);if(src)img.src=src;else img.removeAttribute('src');}}
+// Browsers cannot fetch PNG bytes from file:// pages. These small, on-demand
+// script containers carry the original PNG bytes without changing saved drafts.
+const bwArtRequests=new Map();
+function bwBundledArt(ref){
+ if(!BW_SEED.some(d=>Object.values(d.art).includes(ref)))return Promise.reject(new Error('This artwork is not in the bundled batch. Choose its image file in the draft.'));
+ if(bwArtRequests.has(ref))return bwArtRequests.get(ref);
+ const pending=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');let timer;
+  const cleanup=()=>{clearTimeout(timer);script.remove();if(window.PRISMWILD_BATCH_ART)delete window.PRISMWILD_BATCH_ART[ref];};
+  const failed=()=>{cleanup();reject(new Error('Cannot read bundled artwork. Merge the fix’s assets folder into your game folder, then reload and retry. Your pending drafts are unchanged.'));};
+  script.onload=()=>{
+   try{
+    const encoded=window.PRISMWILD_BATCH_ART?.[ref];
+    if(typeof encoded!=='string'||!encoded.length)throw new Error('Missing artwork bytes');
+    const raw=atob(encoded),bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    // Reject invalid/missing files before any custom monster record is created.
+    if(bytes.length<8||bytes[0]!==137||bytes[1]!==80||bytes[2]!==78||bytes[3]!==71)throw new Error('Invalid PNG');
+    cleanup();resolve(new Blob([bytes],{type:'image/png'}));
+   }catch(_){failed();}
+  };
+  script.onerror=failed;script.src=ref+'.js';timer=setTimeout(failed,15000);document.head.appendChild(script);
+ });
+ bwArtRequests.set(ref,pending);
+ const clear=()=>bwArtRequests.delete(ref);pending.then(clear,clear);
+ return pending;
+}
+async function bwArtBlob(d,kind){
+ if(d.uploads?.[kind]){
+  const blob=await getAssetBlob(`batch-draft:${d.id}:${kind}`);
+  if(!blob)throw new Error(`Missing ${kind} upload for ${d.name}. Please select the file again.`);
+  return blob;
+ }
+ const ref=d.art[kind];if(!ref)return null;
+ if(location.protocol!=='file:'){
+  try{const response=await fetch(ref);if(response.ok)return await response.blob();}catch(_){/* Use the bundled bytes when a PNG request fails. */}
+ }
+ return bwBundledArt(ref);
+}
+
+async function bwApproveDraft(d){
+ if(d.approvedSlug)return false;
+ const errors=bwProblems(d);if(errors.length)throw new Error(errors.join(' '));
+ const slug=slugify(d.name),attackId=slugify(d.attack.name);
+ if(state.species[slug]||state.attacks[attackId])throw new Error('This monster or attack already exists. Choose a different name.');
+ const blobs={};for(const kind of ['base','prismatic','egg'])blobs[kind]=await bwArtBlob(d,kind);
+ for(const [kind,blob] of Object.entries(blobs))if(blob)await putAsset(`${slug}:${kind}`,blob);
+ const recipeId='recon_batch_'+slug;
+ if(d.obtain==='Reconstruction Lab Only'&&state.reconstructionRecipes[recipeId])throw new Error('That reconstruction recipe already exists. Choose a different monster name.');
+ state.attacks[attackId]={...d.attack,fxStyle:'Auto',scrollEnabled:false,scrollPrice:5000,builtin:false,published:!!d.published,batchDraftId:d.id};
+ state.species[slug]={name:d.name.trim(),role:d.role.trim(),element:d.element,secondaryElement:d.isCrossbreed?d.secondaryElement:'',battleType:d.battleType,p1bst:Number(d.p1bst),rarity:d.rarity,isMythic:d.rarity==='Mythic',nativeFacing:d.nativeFacing,isCrossbreed:d.isCrossbreed,parents:d.isCrossbreed?[...d.parents]:[],crossbreedChance:d.isCrossbreed?Number(d.crossbreedChance):0,breedSeconds:Number(d.breedSeconds),hatchSeconds:Number(d.hatchSeconds),obtain:d.isCrossbreed?'Breeding Only':d.obtain,mythicTempleOnly:d.obtain==='Mythic Temple Only',huntingRarity:d.huntingRarity,shopPrice:Number(d.shopPrice),signatureAttackId:attackId,builtin:false,published:!!d.published,createdAt:Date.now(),batchDraftId:d.id};
+ if(d.obtain==='Reconstruction Lab Only')state.reconstructionRecipes[recipeId]={id:recipeId,title:d.recipe.title,slug,eggSpriteKey:'auto',pageDiscoverable:true,ingredients:d.recipe.ingredients.map(p=>({id:p.id,qty:Number(p.qty)}))};
+ d.approvedSlug=slug;d.approvedAt=Date.now();
+ if(!save()){delete state.species[slug];delete state.attacks[attackId];if(d.obtain==='Reconstruction Lab Only')delete state.reconstructionRecipes[recipeId];delete d.approvedSlug;delete d.approvedAt;throw new Error('Approval could not be saved. The monster remains a draft. Free browser storage and retry.');}
+ return true;
+}
+async function bwApprove(all=false){
+ if(bwBusy||!isAdminAccount())return;
+ if(eventTestSession||saveLoadFailure){bwNotice('Exit test mode and resolve save recovery before approving drafts.',true);return;}
+ const targets=all?bwDrafts().filter(d=>!d.approvedSlug&&!bwProblems(d).length):[bwCurrent()].filter(Boolean);
+ if(!targets.length)return;
+ if(!confirm(all?`Approve ${targets.length} ready monsters and their signature attacks? Incomplete crossbreeds stay as drafts.`:`Approve ${targets[0].name} and its signature attack as custom content?`))return;
+ bwBusy=true;bwRender();let count=0;
+ try{for(const d of targets)if(await bwApproveDraft(d))count++;await renderAll();bwNotice(`Approved ${count} monster${count===1?'':'s'}. Available in Monster Studio and the normal content exports.`);}
+ catch(e){bwNotice(`${count?`Approved ${count} before stopping. `:''}${e.message}`,true);}
+ finally{bwBusy=false;bwRender();}
+}
+async function bwUpload(input){
+ const d=bwCurrent(),kind=input.dataset.art,file=input.files[0];if(!file||!d||d.approvedSlug||bwBusy)return;
+ bwBusy=true;bwRenderList();bwRefreshValidation();const fieldset=bwEl('bwEditor').querySelector('fieldset');fieldset.disabled=true;
+ try{if(!['image/png','image/webp','image/jpeg'].includes(file.type))throw new Error('Choose a PNG, WebP, or JPEG image.');const bitmap=await createImageBitmap(file);bitmap.close();await putAsset(`batch-draft:${d.id}:${kind}`,file);d.uploads={...d.uploads,[kind]:true};bwPersist();}
+ catch(e){bwNotice('Artwork was not changed: '+e.message,true);}
+ finally{bwBusy=false;bwRender();}
+}
+async function bwSwapArt(){
+ if(bwBusy)return;const d=bwCurrent();if(!d||d.approvedSlug)return;bwBusy=true;bwRender();
+ try{const base=await bwArtBlob(d,'base'),prism=await bwArtBlob(d,'prismatic');if(!base||!prism)throw new Error('Add both artwork versions before swapping.');
+ // Both files commit together, so a failed write cannot leave a half-swap.
+ await new Promise((resolve,reject)=>{const tx=assetDB.transaction(STORE,'readwrite');tx.objectStore(STORE).put(prism,`batch-draft:${d.id}:base`);tx.objectStore(STORE).put(base,`batch-draft:${d.id}:prismatic`);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});
+ for(const k of ['base','prismatic']){const key=`batch-draft:${d.id}:${k}`;if(assetUrlCache[key])URL.revokeObjectURL(assetUrlCache[key]);delete assetUrlCache[key];}d.uploads={...d.uploads,base:true,prismatic:true};bwPersist();
+ }catch(e){bwNotice(e.message,true);}finally{bwBusy=false;bwRender();}
+}
+function bwAdd(){if(bwBusy)return;const d=JSON.parse(JSON.stringify(BW_SEED[0]));d.id='draft-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);d.name='';d.role='';d.art={};d.group='Mainland';d.attack.name='';d.attack.description='';bwDrafts().push(d);bwSelected=d.id;bwFilter='Pending';bwEl('bwFilter').value=bwFilter;bwQuery='';bwEl('bwSearch').value='';bwPersist();bwRender();}
+function bwBind(){
+ bwEl('showBatchAdmin').onclick=()=>showAdminPane('batch');
+ bwEl('bwSearch').oninput=e=>{bwQuery=e.target.value;bwRenderList();};bwEl('bwFilter').onchange=e=>{bwFilter=e.target.value;bwRenderList();};
+ bwEl('bwAdd').onclick=bwAdd;bwEl('bwApproveReady').onclick=()=>bwApprove(true);
+ bwEl('bwList').onclick=e=>{const card=e.target.closest('[data-draft]');if(card&&!bwBusy){bwSelected=card.dataset.draft;bwRender();}};
+ bwEl('bwEditor').addEventListener('input',e=>{
+  const field=e.target.dataset.field,d=bwCurrent();if(!field||!d||d.approvedSlug||bwBusy)return;
+  const parts=field.split('.');let obj=d;for(const key of parts.slice(0,-1))obj=obj[key];obj[parts.at(-1)]=e.target.type==='checkbox'?e.target.checked:e.target.type==='number'?Number(e.target.value):e.target.value;
+  if(field==='isCrossbreed')d.obtain=d.isCrossbreed?'Breeding Only':'Random Battle Reward';
+  if(d.isCrossbreed)d.obtain='Breeding Only';
+  if(d.obtain==='Reconstruction Lab Only'&&!d.recipe)d.recipe={title:d.name+' Reconstruction',ingredients:[{id:'dig_fossil_ammonite',qty:5},{id:'dig_bone_rib',qty:5},{id:'dig_bone_claw',qty:3}]};
+  bwPersist();if(['isCrossbreed','obtain'].includes(field))bwRender();else{bwRenderList();bwRefreshValidation();}
+ });
+ bwEl('bwEditor').addEventListener('change',e=>{if(e.target.dataset.art)bwUpload(e.target);});
+ bwEl('bwEditor').onclick=e=>{if(e.target.id==='bwApprove')bwApprove();if(e.target.id==='bwSwap')bwSwapArt();if(e.target.id==='bwOpenApproved'){const d=bwCurrent();if(state.species[d.approvedSlug]){showAdminPane('species');loadSpeciesIntoForm(d.approvedSlug);}else bwNotice('This approved monster was deleted from the game. Add a new draft if you want to recreate it.',true);}};
+}
+bwBind();
 
 (async()=>{initZoneBackdrop();await openAssetDB();if(saveLoadFailure){showSaveRecovery();return;}try{await loadLiveContentScript();await applyLiveContent(window.PRISMWILD_LIVE_CONTENT);}catch(e){console.warn('Live Content could not be applied:',e);}window.PRISMWILD_LIVE_CONTENT=null;applyBuildMigrations();populateStatic();normalizeState();completeKeeperTablets();save();newSpeciesForm();newAttackForm();newTrialForm();clearLandingPostEditor();await loadSpriteIntoForm(selectedSpriteKey);await renderAll();showAdminPane('dashboard');if(!state.onboarding.completed)await openNewcomerExperience();})();
 </script>
