@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismwild v0.16.3 · Monster Clicker</title>
-<link rel="stylesheet" href="styles.css?v=0.16.3-monster-clicker">
+<title>Prismwild v0.16.7 · Autumn Harvest</title>
+<link rel="stylesheet" href="styles.css?v=0.16.5-harvest-board">
 </head>
 <body>
 <div id="zoneBackdrop" class="zone-backdrop" aria-hidden="true">
@@ -27,7 +27,7 @@
 <div class="shell">
   <header class="topbar">
     <div>
-      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.16.3 · MONSTER CLICKER</div>
+      <div class="eyebrow">PUBLIC TEST PREP • PRISMWILD v0.16.7 · AUTUMN HARVEST</div>
       <h1>PRISMWILD</h1>
       <p>A Fantastical Grim Monster Breeding Game</p>
     </div>
@@ -1662,7 +1662,7 @@ const TYPE_STRONG_MULTIPLIER=1.5;
 const TYPE_RESIST_MULTIPLIER=2/3;
 const TYPE_MIN_MULTIPLIER=.5;
 const TYPE_MAX_MULTIPLIER=2;
-const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Hunting Zone", "Reconstruction Lab Only", "Admin / Test", "Quilly's Island"];
+const OBTAIN_METHODS = ["Random Battle Reward", "Mythic Temple Only", "Shop Egg", "Breeding Only", "Halloween Maze Encounter", "Halloween Event Shop Egg", "Haunted Event Egg", "Winter Event Shop Egg", "Winter Mystery Egg", "Event / Promo", "Golden Acorn Evolution", "Hunting Zone", "Reconstruction Lab Only", "Admin / Test", "Quilly's Island"];
 const STATUSES = ["None", "Freeze", "Burn", "Poison", "Shock", "Bleed", "Sleep", "Stun", "Slow", "Guard Break"];
 const ATTACK_STYLES = ["Light", "Standard", "Heavy"];
 const ATTACK_FX_STYLES = ["Auto","Bite","Slash","Slam","Projectile","Burst","Beam","Wave"];
@@ -2007,6 +2007,10 @@ const SPRITE_DEFS={
   old_candle_stub:{name:'Old Candle Stub',category:'Halloween Event',kind:'image',fallback:'assets/icons/basic_sprites/old_candle_stub.png'},
   spider_silk_bundle:{name:'Spider Silk Bundle',category:'Halloween Event',kind:'image',fallback:'assets/icons/basic_sprites/spider_silk_bundle.png'},
   cracked_monster_tooth:{name:'Cracked Monster Tooth',category:'Halloween Event',kind:'image',fallback:'assets/icons/basic_sprites/cracked_monster_tooth.png'},
+  autumn_harvest:{name:'Autumn Harvest',category:'Seasonal Events',kind:'glyph',fallback:'🍂'},
+  autumn_turkey_egg:{name:'Turkey Egg',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/autumn_turkey_egg.png'},
+  autumn_clear_egg:{name:'Autumn Egg',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/autumn_clear_egg.png'},
+  autumn_golden_acorn:{name:'Golden Acorn',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/autumn_golden_acorn.svg'},
   winter_event:{name:'Winter Event',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/winter_event.png'},
   winter_snowflake:{name:'Snowflakes',category:'Winter Event',kind:'glyph',fallback:'❄️'},
   spring_event:{name:'Spring Event',category:'Seasonal Events',kind:'image',fallback:'assets/icons/basic_sprites/spring_event.png'},
@@ -2095,6 +2099,7 @@ const TRADE_GOODS={
 function fieldFindIds(){return Object.keys(TRADE_GOODS).filter(id=>TRADE_GOODS[id]?.category==='Field Find');}
 function itemInfoForInventoryId(id){
   if(id==='qi_dream_egg')return {...QI_ITEMS.qi_dream_egg,id,category:'Dream Egg',spriteKey:id,isConsumable:true,sellValue:0};
+  if(id===GOLDEN_ACORN_ID)return {id,name:'Golden Acorn',category:'Autumn Harvest',desc:'Use on Oaklash for Elder Oaklore from 7:00 AM until 5:00 PM or Wither Wood from 6:00 PM until 4:00 AM. Times are local.',spriteKey:id,isConsumable:true,sellValue:0};
   if(id.startsWith('scroll:')){
     const attack=attackOf(id.slice(7));
     const price=Number(attack?.scrollPrice||5000);
@@ -2183,6 +2188,32 @@ const EXPEDITION_SPECIALTIES={
 
 // ---------- Reusable Event Framework ----------
 const EVENT_HOUR_MS=60*60*1000;
+const AUTUMN_HARVEST_ID='autumn_harvest_2026';
+const AUTUMN_HARVEST_START='2026-11-07';
+const AUTUMN_HARVEST_DAYS=22;
+const HARVEST_BOARD_SIZE=9;
+const HARVEST_TILE_COUNT=HARVEST_BOARD_SIZE**2;
+const HARVEST_FLIPS_PER_BATCH=3;
+const HARVEST_FLIP_CAP=12;
+const HARVEST_RECHARGE_MS=5*60*1000;
+const HARVEST_CLEAR_LEAVES=25;
+const GOLDEN_ACORN_ID='autumn_golden_acorn';
+const ELDER_OAKLORE_SLUG='elder-oaklore';
+const WITHER_WOOD_SLUG='wither-wood';
+const HARVEST_EGGS={
+  turkey:{name:'Turkey Egg',spriteKey:'autumn_turkey_egg',pool:['turkey-cockatrice','black-cat-witch','whirlhusk']},
+  autumn:{name:'Autumn Egg',spriteKey:'autumn_clear_egg',pool:['were-moose']}
+};
+const HARVEST_TILE_REWARDS=[
+  {value:{type:'eventCurrency',amount:1},weight:440},
+  {value:{type:'eventCurrency',amount:2},weight:120},
+  {value:{type:'money',amount:10},weight:244},
+  {value:{type:'money',amount:20},weight:65},
+  {value:{type:'item',id:'heal_gel',qty:1},weight:90},
+  {value:{type:'item',id:'revive_gem',qty:1},weight:15},
+  {value:{type:'egg',id:'turkey'},weight:25},
+  {value:{type:'acorn'},weight:1}
+];
 const EVENT_TRADE_GOODS={
   old_candle_stub:{name:'Old Candle Stub',fangValue:1,icon:'🕯️',spriteKey:'old_candle_stub',desc:'A half-melted candle recovered from the maze.'},
   spider_silk_bundle:{name:'Spider Silk Bundle',fangValue:2,icon:'🕸️',spriteKey:'spider_silk_bundle',desc:'A surprisingly sturdy bundle of spectral spider silk.'},
@@ -2199,6 +2230,18 @@ const EVENT_DEFS={
       {id:'halloween_recovery_gel',name:'Recovery Gel',category:'Event Supply',cost:5,limit:null,description:'A useful recovery supply for long nights in the Haunted Maze.',reward:{type:'item',id:'heal_gel',qty:1}},
       {id:'halloween_catalyst',name:'Incubation Catalyst',category:'Event Supply',cost:15,limit:3,description:'A limited Halloween stock of Incubation Catalysts.',reward:{type:'item',id:'incu_catalyst',qty:1}},
       {id:'halloween_crimson_siphon_scroll',name:'Crimson Siphon Scroll',category:'Halloween Attack Scroll',cost:150,limit:null,description:'Teach any monster the Shadow technique Crimson Siphon. It restores 50% of the damage actually dealt as Vitality.',reward:{type:'scroll',id:'crimson_siphon',qty:1}}
+    ]
+  },
+  [AUTUMN_HARVEST_ID]:{
+    id:AUTUMN_HARVEST_ID,family:'autumn_harvest',name:'Autumn Harvest',icon:'🍂',spriteKey:'autumn_harvest',available:true,
+    start:`${AUTUMN_HARVEST_START}T00:00:00`,end:'2026-11-29T00:00:00',
+    description:'Flip tiles on the Harvest Board, hatch seasonal monsters, and trade your Amber Leaves at the Harvest Shop.',
+    currency:{name:'Amber Leaves',icon:'🍁',spriteKey:'autumn_harvest'},
+    calendar:{days:AUTUMN_HARVEST_DAYS,start:AUTUMN_HARVEST_START},activity:{type:'none',name:'Harvest Shop'},
+    shop:[
+      {id:'autumn_oaklash',name:'Oaklash Egg',category:'Monster Egg',cost:20,limit:1,description:'Hatch the acorn monster Oaklash. One egg per Keeper.',reward:{type:'egg',slug:'oaklash'}},
+      {id:'autumn_catalyst',name:'Incubation Catalyst',category:'Event Supply',cost:10,limit:3,description:'Speed up an egg in the incubator. Up to three per Keeper.',reward:{type:'item',id:'incu_catalyst',qty:1}},
+      {id:'autumn_recovery_gel',name:'Recovery Gel',category:'Event Supply',cost:5,limit:null,description:'Pack a little extra Vitality for your next battle.',reward:{type:'item',id:'heal_gel',qty:1}}
     ]
   },
   winter_event_2026:{id:'winter_event_2026',family:'winter_event',name:'Winter Event',icon:'❄️',spriteKey:'winter_event',available:true,start:'2026-12-01T00:00:00',end:'2027-01-03T00:00:00',description:'Winter has settled over Prismwild. Open daily gifts, match frosty monster pairs, gather Snowflakes, and trade them for seasonal rewards.',currency:{name:'Snowflakes',icon:'❄️',spriteKey:'winter_snowflake'},calendar:{days:25,start:'2026-12-01'},activity:{type:'memory',name:'Winter Memory',size:4,pairReward:2,maxFails:3,failCooldownMs:180000,clearCooldownMs:3600000,memorySpecies:['frostmaw','shardback','morrowisp','bellgrave','aurevane','tideveil','hexolith','voltalon'],mysteryEggPool:['yulemaw'],mysteryEggLabel:'Winter Mystery Egg'},shop:[]},
@@ -2285,6 +2328,10 @@ function eventRewardAvailable(reward){
 }
 
 const DEFAULT_EVENT_CALENDARS={
+  [AUTUMN_HARVEST_ID]:{
+    start:AUTUMN_HARVEST_START,days:AUTUMN_HARVEST_DAYS,catchUp:false,
+    entries:Object.fromEntries(Array.from({length:AUTUMN_HARVEST_DAYS},(_,i)=>[i+1,{type:'eventCurrency',amount:5}]))
+  },
   winter_event_2026:{start:'2026-12-01',days:25,catchUp:true,entries:{1:{type:'eventCurrency',amount:50}}}
 };
 function cloneEventCalendars(){return JSON.parse(JSON.stringify(DEFAULT_EVENT_CALENDARS));}
@@ -3260,9 +3307,12 @@ function normalizeState(){
     if(sp.obtain==='Halloween Shop Egg'||sp.obtain==='Halloween Shop')sp.obtain='Halloween Event Shop Egg';
     if(!OBTAIN_METHODS.includes(sp.obtain))sp.obtain=sp.isCrossbreed?'Breeding Only':'Random Battle Reward';
     if(!Number.isFinite(Number(sp.shopPrice)))sp.shopPrice=1000;
-    if(!sp.isCrossbreed){sp.secondaryElement='';delete sp.seasonalEventFamily;}
+    if(!sp.isCrossbreed){
+      if(sp.obtain!=='Golden Acorn Evolution')sp.secondaryElement='';
+      delete sp.seasonalEventFamily;
+    }
     if(sp.seasonalEventFamily&&!['spooky_halloween','winter_event'].includes(sp.seasonalEventFamily))sp.seasonalEventFamily='';
-    if(sp.isCrossbreed && sp.secondaryElement===sp.element)sp.secondaryElement='';
+    if(sp.secondaryElement===sp.element||!ELEMENTS.includes(sp.secondaryElement))sp.secondaryElement='';
     if(sp.isCrossbreed)sp.obtain='Breeding Only';
     if(isGodSpecies(sp)){
       sp.isCrossbreed=true;
@@ -3450,6 +3500,11 @@ function applyBuildMigrations(){
   }
 }
 let state=load();
+function autumnProgressStamp(keeper){
+  return `${keeper?.eventStates?.[AUTUMN_HARVEST_ID]?.harvestBoard?.stamp||''}|${keeper?.oaklashEvolutionStamp||''}`;
+}
+let lastSavedAutumnStamp=autumnProgressStamp(state);
+let lastSavedKeeperRaw=saveOriginalKey==='monsterGame_v06'?saveOriginalRaw:null;
 // Event Test Chamber: swap the live in-memory state for a disposable copy.
 let eventTestSession=null,eventTestEpoch=0;
 function eventTestBegin(){
@@ -3484,16 +3539,26 @@ function showSaveHealth(message){
 function save(){
   if(eventTestSession||saveLoadFailure)return false;
   try{
+    const previous=localStorage.getItem('monsterGame_v06');
+    if(previous!==lastSavedKeeperRaw){
+      const stamp=autumnProgressStamp(previous?JSON.parse(previous):null);
+      if(stamp!==lastSavedAutumnStamp){
+        showSaveHealth('Your Autumn Harvest progress changed in another tab. Reload this tab to continue from the latest save.');
+        return false;
+      }
+    }
     let checkpointFailed=false;
     if(!saveCheckpointTaken){
-      const previous=localStorage.getItem('monsterGame_v06');
       if(previous){
         validateStoredProgress(JSON.parse(previous));
         try{localStorage.setItem('prismwild_previous_checkpoint',previous);}catch(error){checkpointFailed=true;}
       }
       if(!checkpointFailed)saveCheckpointTaken=true;
     }
-    localStorage.setItem('monsterGame_v06',JSON.stringify(state));
+    const serialized=JSON.stringify(state);
+    localStorage.setItem('monsterGame_v06',serialized);
+    lastSavedKeeperRaw=serialized;
+    lastSavedAutumnStamp=autumnProgressStamp(state);
     showSaveHealth(checkpointFailed?'Progress saved, but a recovery checkpoint could not be created. Export a Keeper Save from Profile.':'');
     return true;
   }catch(error){
@@ -3601,7 +3666,7 @@ async function renderNewcomerStep(){
 function finishNewcomerReplay(){state.onboarding.replay=false;state.onboarding.completed=true;save();document.getElementById('newcomerModal').close();newcomerStage='welcome';newcomerSelectedStarter=null;renderAll();}
 function finishNewcomerExperience(){state.onboarding.completed=true;state.onboarding.replay=false;state.onboarding.lastMessage='Welcome to Prismwild. Your starter is Active and your New Keeper Bundle is waiting in My Hideout.';save();document.getElementById('newcomerModal').close();newcomerStage='welcome';newcomerSelectedStarter=null;switchTab('home');}
 async function openNewcomerExperience({replay=false}={}){state.onboarding.replay=!!replay;newcomerStage='welcome';newcomerSelectedStarter=state.onboarding.starterSlug||STARTER_SLUGS[0];save();const modal=document.getElementById('newcomerModal');if(!modal.open)modal.showModal();await renderNewcomerStep();}
-function resetToFreshPlayer(){localStorage.removeItem('monsterGame_v06');state=defaultState();normalizeState();battleSession=null;gauntletSession=null;trialSession=null;exploreEvent=null;exploreMaze=null;exploreExpeditionActive=false;exploreMazeStreak=0;exploreMazeMessage='';selectedTrialId='nature_trial';newcomerStage='welcome';newcomerSelectedStarter=null;save();newSpeciesForm();newAttackForm();newTrialForm();currentCollectionPen=0;clearLandingPostEditor();switchTab('home');openNewcomerExperience();}
+function resetToFreshPlayer(){localStorage.removeItem('monsterGame_v06');lastSavedKeeperRaw=null;state=defaultState();lastSavedAutumnStamp=autumnProgressStamp(state);normalizeState();battleSession=null;gauntletSession=null;trialSession=null;exploreEvent=null;exploreMaze=null;exploreExpeditionActive=false;exploreMazeStreak=0;exploreMazeMessage='';selectedTrialId='nature_trial';newcomerStage='welcome';newcomerSelectedStarter=null;save();newSpeciesForm();newAttackForm();newTrialForm();currentCollectionPen=0;clearLandingPostEditor();switchTab('home');openNewcomerExperience();}
 function money(n){return Number(n||0).toLocaleString();}
 function uid(prefix,n){return `${prefix}${String(n).padStart(4,'0')}`;}
 function slugify(s){return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50)||`item-${Date.now()}`;}
@@ -3748,6 +3813,10 @@ function eventStatusLabel(def){
   return 'ENDED';
 }
 function formatEventDate(iso){return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function eventDateRange(def){
+  const end=def.id===AUTUMN_HARVEST_ID?new Date(def.end).getTime()-1:def.end;
+  return `${formatEventDate(def.start)} – ${formatEventDate(end)}`;
+}
 function eventCountdown(def){
   if(!eventIsActive(def))return '';
   const diff=Math.max(0,new Date(def.end).getTime()-Date.now());
@@ -3821,8 +3890,9 @@ function eventDailyCalendar(def){return state.eventCalendars?.[def?.id]||null;}
 function eventCalendarDay(def){
   const cfg=eventDailyCalendar(def);if(!cfg)return 0;
   const test=Math.max(0,Number(state.eventTestDays?.[def.id]||0));if(test)return Math.min(cfg.days,test);
-  const start=new Date(`${cfg.start}T00:00:00`),now=new Date();
-  const day=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()-new Date(start.getFullYear(),start.getMonth(),start.getDate()).getTime())/86400000)+1;
+  const start=Date.parse(`${cfg.start}T00:00:00Z`),now=new Date();
+  const today=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+  const day=Math.floor((today-start)/86400000)+1;
   if(eventOverride(def)==='active'&&day<1)return 1;
   return Math.max(0,Math.min(cfg.days,day));
 }
@@ -3844,6 +3914,13 @@ function calendarRewardIcon(reward,def=null){
   if(reward.type==='monster')return '◆';
   return '◇';
 }
+function grantEventEgg(slug,source,displayName){
+  const sp=state.species[slug];
+  if(!sp||sp.rarity==='GOD')return false;
+  const id=uid('E',state.nextEggNum++);
+  state.eggs.push({id,slug,speciesName:sp.name,displayName:displayName||`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source,createdAt:Date.now(),status:'waiting',catalystUsed:false});
+  return true;
+}
 function grantEventCalendarReward(def,reward){
   if(!reward)return {ok:false,label:'No prize configured'};
   if(!['money','eventCurrency','item','egg','monster'].includes(reward.type))return {ok:false,label:'Unsupported prize'};
@@ -3851,7 +3928,8 @@ function grantEventCalendarReward(def,reward){
   if(reward.type==='eventCurrency'){const amount=Math.max(0,Number(reward.amount||0));addEventCurrency(def,amount);return {ok:true,label:`${amount} ${def.currency.name}`};}
   if(reward.type==='item'){const item=ITEM_SHOP.find(x=>x.id===reward.id);if(!item)return {ok:false,label:'Missing item'};const qty=Math.max(1,Number(reward.qty||1));state.inventory[reward.id]=(state.inventory[reward.id]||0)+qty;return {ok:true,label:`${item.name} ×${qty}`};}
   if(reward.type==='egg'){
-    const sp=state.species[reward.slug];if(!sp||sp.rarity==='GOD')return {ok:false,label:'Invalid event egg species'};const id=uid('E',state.nextEggNum++);state.eggs.push({id,slug:reward.slug,speciesName:sp.name,displayName:`${sp.name} Egg`,motherId:null,fatherId:null,motherPotential:1,inheritedTrait:rollTrait(),inheritedAttacks:[sp.signatureAttackId].filter(Boolean),isPrismatic:rollPrismatic(),source:`event-calendar:${def.id}`,createdAt:Date.now(),status:'waiting',catalystUsed:false});return {ok:true,label:`${sp.name} Egg`};
+    if(!grantEventEgg(reward.slug,`event-calendar:${def.id}`))return {ok:false,label:'Invalid event egg species'};
+    return {ok:true,label:`${state.species[reward.slug].name} Egg`};
   }
   if(reward.type==='monster'){
     const sp=state.species[reward.slug];if(!sp||sp.rarity==='GOD')return {ok:false,label:'Invalid event monster species'};if(!collectionHasOpenSlot())return {ok:false,label:'No open Collection Pen slot'};
@@ -3870,6 +3948,13 @@ function claimEventCalendarDay(eventId,day){
 function renderDailyEventCalendar(def){
   const cfg=eventDailyCalendar(def);if(!cfg)return '';
   const es=eventStateFor(def),current=eventCalendarDay(def);
+  if(def.id===AUTUMN_HARVEST_ID){
+    const reward=cfg.entries?.[current],claimed=!!es.calendarClaims[current];
+    return `<section class="event-activity-card autumn-harvest-daily">
+      <div><div class="eyebrow">DAILY HARVEST</div><h3>Gather Amber Leaves</h3><p>Come back each day through November 28 for a fresh bundle.</p></div>
+      <button class="primary" type="button" data-event-calendar-claim="${current}" ${claimed||!reward?'disabled':''}>${claimed?'Collected today':reward?`Collect ${eventEscape(calendarRewardLabel(reward,def))}`:'No bundle available'}</button>
+    </section>`;
+  }
   const cells=Array.from({length:cfg.days},(_,i)=>i+1).map(day=>{
     const reward=cfg.entries?.[day],claimed=!!es.calendarClaims?.[day],unlocked=eventIsActive(def)&&(cfg.catchUp?day<=current:day===current),future=day>current;
     const cls=['event-day-tile',claimed?'claimed':'',unlocked&&reward&&!claimed?'claimable':'',future?'future':'',!reward?'unconfigured':''].filter(Boolean).join(' ');
@@ -3955,7 +4040,7 @@ async function renderMemoryEventPage(host,def){
   hydrateSprites(host);
 }
 function renderEventCalendarHTML(){
-  return Object.values(EVENT_DEFS).sort((a,b)=>new Date(a.start)-new Date(b.start)).map(def=>`<div class="event-calendar-row"><div class="event-calendar-icon">${glyphSpriteMarkup(def.spriteKey||'event_currency_generic',def.icon||'◆','event-calendar-sprite')}</div><div><strong>${def.name}</strong><small>${formatEventDate(def.start)} – ${formatEventDate(def.end)}</small></div><span class="event-status ${eventIsActive(def)?'active':''}">${eventStatusLabel(def)}</span></div>`).join('');
+  return Object.values(EVENT_DEFS).sort((a,b)=>new Date(a.start)-new Date(b.start)).map(def=>`<div class="event-calendar-row"><div class="event-calendar-icon">${glyphSpriteMarkup(def.spriteKey||'event_currency_generic',def.icon||'◆','event-calendar-sprite')}</div><div><strong>${def.name}</strong><small>${eventDateRange(def)}</small></div><span class="event-status ${eventIsActive(def)?'active':''}">${eventStatusLabel(def)}</span></div>`).join('');
 }
 function renderMazeGrid(def,maze){
   const revealed=new Set(maze.revealed||[]),visited=new Set(maze.visited||[]),bits={N:1,E:2,S:4,W:8};
@@ -3988,6 +4073,146 @@ function eventShopItems(def){
       speciesShopEgg:true
     }));
   return [...fixed,...speciesEggs];
+}
+function harvestBoardFor(def){
+  const es=eventStateFor(def);
+  if(!Array.isArray(es.harvestBoard?.tiles)||es.harvestBoard.tiles.length!==HARVEST_TILE_COUNT){
+    es.harvestBoard={round:1,tiles:Array(HARVEST_TILE_COUNT).fill(null),flips:HARVEST_FLIPS_PER_BATCH,nextFlipAt:0,notice:''};
+  }
+  return es.harvestBoard;
+}
+function harvestFlipBank(board,now=Date.now()){
+  const {flips,nextFlipAt}=board;
+  if(!nextFlipAt||now<nextFlipAt)return {flips,nextFlipAt};
+  const batches=1+Math.floor((now-nextFlipAt)/HARVEST_RECHARGE_MS);
+  const charged=Math.min(HARVEST_FLIP_CAP,flips+batches*HARVEST_FLIPS_PER_BATCH);
+  return {flips:charged,nextFlipAt:charged===HARVEST_FLIP_CAP?0:nextFlipAt+batches*HARVEST_RECHARGE_MS};
+}
+function harvestEggPool(kind){
+  return HARVEST_EGGS[kind].pool.filter(slug=>eventRewardAvailable({type:'egg',slug}));
+}
+function harvestRewardLabel(reward,def){
+  if(reward.type==='egg')return HARVEST_EGGS[reward.id].name;
+  if(reward.type==='acorn')return 'Golden Acorn';
+  if(reward.type==='eventCurrency'&&reward.amount===1)return '1 Amber Leaf';
+  return calendarRewardLabel(reward,def);
+}
+function harvestRewardMarkup(reward,def){
+  if(reward.type==='egg'||reward.type==='acorn'){
+    const key=reward.type==='egg'?HARVEST_EGGS[reward.id].spriteKey:'autumn_golden_acorn';
+    return spriteFallbackMarkup(key,'harvest-reward-icon');
+  }
+  const amount=reward.type==='eventCurrency'||reward.type==='money'?`<span class="harvest-tile-amount" aria-hidden="true">${reward.amount}</span>`:'';
+  return calendarRewardIcon(reward,def)+amount;
+}
+function grantHarvestReward(def,reward){
+  if(reward.type==='egg')return grantEventEgg(randomChoice(harvestEggPool(reward.id)),`event-harvest:${reward.id}`,HARVEST_EGGS[reward.id].name);
+  if(reward.type==='acorn'){
+    state.inventory.autumn_golden_acorn=(state.inventory.autumn_golden_acorn||0)+1;
+    return true;
+  }
+  return grantEventCalendarReward(def,reward).ok;
+}
+function harvestBankLabel(bank,now=Date.now()){
+  if(bank.flips===HARVEST_FLIP_CAP)return 'Flip bank full';
+  return bank.nextFlipAt?`+${HARVEST_FLIPS_PER_BATCH} flips in ${fmtTime(bank.nextFlipAt-now)}`:'Recharge starts with your first flip';
+}
+function renderHarvestBoard(def){
+  const board=harvestBoardFor(def),bank=harvestFlipBank(board),revealed=board.tiles.filter(Boolean).length;
+  const ready=harvestEggPool('turkey').length===HARVEST_EGGS.turkey.pool.length&&harvestEggPool('autumn').length===HARVEST_EGGS.autumn.pool.length;
+  const tiles=board.tiles.map((reward,index)=>{
+    const label=reward?harvestRewardLabel(reward,def):'Hidden';
+    const tileName=`Row ${Math.floor(index/HARVEST_BOARD_SIZE)+1}, column ${index%HARVEST_BOARD_SIZE+1}`;
+    return `<button type="button" class="harvest-tile${reward?' harvest-tile-open':''}" data-harvest-tile="${index}" aria-label="${tileName}, ${eventEscape(label)}" title="${eventEscape(label)}" ${reward||!bank.flips||!ready?'disabled':''}>${reward?harvestRewardMarkup(reward,def):'<span aria-hidden="true">✦</span>'}</button>`;
+  }).join('');
+  return `<section class="event-activity-card harvest-board" data-harvest-round="${board.round}" data-harvest-ready="${ready}" aria-labelledby="harvestBoardTitle">
+    <div class="harvest-board-header"><div><div class="eyebrow">AUTUMN MINIGAME</div><h3 id="harvestBoardTitle">Harvest Board</h3><p>Flip tiles to uncover Amber Leaves, healing items, coins, Turkey Eggs, or a very rare Golden Acorn.</p></div>
+    <div class="harvest-bank"><strong><span data-harvest-flips>${bank.flips}</span> / ${HARVEST_FLIP_CAP} flips</strong><small data-harvest-recharge>${harvestBankLabel(bank)}</small></div></div>
+    <div class="harvest-board-meta"><strong data-harvest-progress>${revealed} / ${HARVEST_TILE_COUNT} revealed</strong><span>Board ${board.round}</span></div>
+    <div class="harvest-grid" role="group" aria-label="9 by 9 Harvest Board">${tiles}</div>
+    <p class="harvest-board-notice" data-harvest-notice role="status" tabindex="-1">${eventEscape(ready?(board.notice||'Choose any hidden tile to start.'):'Harvest Board rewards could not load. Reload with the latest content pack.')}</p>
+    <div class="harvest-clear-prize">${harvestRewardMarkup({type:'egg',id:'autumn'},def)}<span>Clear all ${HARVEST_TILE_COUNT} tiles for <strong>${HARVEST_CLEAR_LEAVES} Amber Leaves + 1 Autumn Egg</strong>. The board then resets.</span></div>
+    <details class="harvest-egg-guide"><summary>What hatches from these eggs?</summary><p><strong>Turkey Egg</strong> · Turkey Cockatrice, Black Cat Witch, or Whirlhusk</p><p><strong>Autumn Egg</strong> · Were-Moose</p></details>
+  </section>`;
+}
+function refreshHarvestBoard(panel,board){
+  if(Number(panel.dataset.harvestRound)!==board.round)return;
+  const bank=harvestFlipBank(board),flips=panel.querySelector('[data-harvest-flips]');
+  const disabled=!bank.flips||panel.dataset.harvestReady!=='true';
+  if(flips.textContent!==String(bank.flips))flips.textContent=bank.flips;
+  const recharge=panel.querySelector('[data-harvest-recharge]'),label=harvestBankLabel(bank);
+  if(recharge.textContent!==label)recharge.textContent=label;
+  for(const tile of panel.querySelectorAll('.harvest-tile:not(.harvest-tile-open)'))if(tile.disabled!==disabled)tile.disabled=disabled;
+}
+function refreshHarvestWallet(def){
+  const wallet=document.querySelector('[data-harvest-wallet]');
+  if(wallet)wallet.textContent=eventCurrency(def);
+  const items=eventShopItems(def),purchases=eventStateFor(def).purchases;
+  for(const button of document.querySelectorAll('#eventContent [data-event-buy]')){
+    const item=items.find(entry=>entry.id===button.dataset.eventBuy);
+    if(item)button.disabled=(!!item.limit&&Number(purchases[item.id]||0)>=item.limit)||eventCurrency(def)<item.cost||!eventRewardAvailable(item.reward);
+  }
+  document.getElementById('currency').textContent=money(state.currency);
+  document.getElementById('eggBadge').textContent=state.eggs.filter(egg=>egg.status!=='hatched').length;
+  document.getElementById('invBadge').textContent=Object.values(state.inventory).reduce((sum,qty)=>sum+qty,0);
+}
+function makeAutumnActionStamp(now=Date.now()){
+  return `${now}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
+}
+function withAutumnProgressLock(action){
+  const owner=state;
+  const commit=()=>{if(state===owner)return action();};
+  if(navigator.locks&&!eventTestSession)return navigator.locks.request('prismwild-autumn-progress',commit);
+  return commit();
+}
+function commitHarvestFlip(def,panel,tile,fromKeyboard){
+  if(!panel.isConnected||!eventIsActive(def)||saveLoadFailure||panel.dataset.harvestReady!=='true')return;
+  const es=eventStateFor(def),board=harvestBoardFor(def),index=Number(tile.dataset.harvestTile);
+  if(Number(panel.dataset.harvestRound)!==board.round||!Number.isInteger(index)||index<0||index>=HARVEST_TILE_COUNT||board.tiles[index])return;
+  const now=Date.now(),bank=harvestFlipBank(board,now);
+  if(!bank.flips)return;
+  const reward=weightedChoice(HARVEST_TILE_REWARDS),tiles=board.tiles.slice();
+  tiles[index]=reward;
+  const revealed=tiles.filter(Boolean).length,cleared=revealed===HARVEST_TILE_COUNT;
+  const label=harvestRewardLabel(reward,def),notice=panel.querySelector('[data-harvest-notice]');
+  const wallet=eventWalletFor(def),previous={leaves:wallet.currency,money:state.currency,inventory:{...state.inventory},eggCount:state.eggs.length,nextEgg:state.nextEggNum};
+  const awarded=grantHarvestReward(def,reward)&&(!cleared||grantHarvestReward(def,{type:'egg',id:'autumn'}));
+  if(awarded&&cleared)addEventCurrency(def,HARVEST_CLEAR_LEAVES);
+  const message=cleared?`Found ${label}. Board cleared! +${HARVEST_CLEAR_LEAVES} Amber Leaves and 1 Autumn Egg.`:`Found ${label}.`;
+  es.harvestBoard={round:board.round+(cleared?1:0),tiles:cleared?Array(HARVEST_TILE_COUNT).fill(null):tiles,
+    flips:bank.flips-1,nextFlipAt:bank.nextFlipAt||now+HARVEST_RECHARGE_MS,notice:message,
+    stamp:makeAutumnActionStamp(now)};
+  if(!awarded||(!eventTestSession&&!save())){
+    es.harvestBoard=board;wallet.currency=previous.leaves;state.currency=previous.money;
+    state.inventory=previous.inventory;state.eggs.length=previous.eggCount;state.nextEggNum=previous.nextEgg;
+    notice.textContent=awarded?'This flip could not be saved. Check the save notice and try again.':'The prize could not be granted. Reload with the latest content pack.';
+    return;
+  }
+  tile.disabled=true;tile.classList.add('harvest-tile-open','harvest-tile-flipped');
+  tile.innerHTML=harvestRewardMarkup(reward,def);tile.title=label;
+  tile.setAttribute('aria-label',tile.getAttribute('aria-label').replace(/Hidden$/,label));
+  hydrateSprites(tile);
+  panel.querySelector('[data-harvest-progress]').textContent=`${revealed} / ${HARVEST_TILE_COUNT} revealed`;
+  notice.textContent=message;
+  refreshHarvestWallet(def);
+  if(cleared){
+    panel.querySelector('[data-harvest-flips]').textContent=es.harvestBoard.flips;
+    panel.querySelector('[data-harvest-recharge]').textContent='Fresh board incoming…';
+    setTimeout(async()=>{
+      if(!panel.isConnected)return;
+      await renderEventPage();
+      if(fromKeyboard)document.querySelector('.harvest-tile:enabled, [data-harvest-notice]')?.focus({preventScroll:true});
+    },650);
+  }else{
+    refreshHarvestBoard(panel,es.harvestBoard);
+    if(fromKeyboard){
+      const next=[...panel.querySelectorAll('.harvest-tile:enabled')];
+      (next.find(button=>Number(button.dataset.harvestTile)>index)||next[0]||notice).focus({preventScroll:true});
+    }
+  }
+}
+function flipHarvestTile(def,panel,tile,fromKeyboard){
+  return withAutumnProgressLock(()=>commitHarvestFlip(def,panel,tile,fromKeyboard));
 }
 async function eventShopRewardVisual(item){
   const r=item?.reward||{};
@@ -4040,6 +4265,7 @@ function grantEventShopReward(def,reward){
 function buyEventShopItem(eventId,itemId){
   const def=EVENT_DEFS[eventId],es=eventStateFor(def),item=eventShopItems(def).find(x=>x.id===itemId);if(!def||!item||!eventIsActive(def)||!eventRewardAvailable(item.reward))return;const bought=Number(es.purchases[item.id]||0);if(item.limit&&bought>=item.limit)return;if(eventCurrency(def)<item.cost)return;
   if(!confirm(`Spend ${item.cost} ${def.currency.name} on ${item.name}?`))return;
+  if(!eventIsActive(def))return;
   addEventCurrency(def,-item.cost);es.purchases[item.id]=bought+1;const rewardName=grantEventShopReward(def,item.reward);es.lastMessage=`Bought ${item.name}. Received ${rewardName}.`;save();renderAll();
 }
 function grantRareEventEgg(def){
@@ -4097,11 +4323,18 @@ async function moveEventMaze(dir){
 }
 
 async function renderEventShopOnly(host,def){
+  const autumn=def.id===AUTUMN_HARVEST_ID;
   const es=eventStateFor(def),items=eventShopItems(def),shop=(await Promise.all(items.map(async item=>{
     const bought=Number(es.purchases[item.id]||0),sold=item.limit&&bought>=item.limit,afford=eventCurrency(def)>=item.cost;
     return `<div class="event-shop-card"><div class="event-shop-icon">${await eventShopRewardVisual(item)}</div><h4>${eventEscape(item.name)}</h4><p>${eventEscape(item.description)}</p><div class="event-shop-bottom"><strong>${item.cost} ${eventEscape(def.currency.name)}</strong><button class="primary small" type="button" data-event-buy="${eventEscape(item.id)}" ${sold||!afford||!eventRewardAvailable(item.reward)?'disabled':''}>${sold?'Sold Out':'Buy'}</button></div></div>`;
   }))).join('');
-  host.innerHTML=`<div class="event-hero"><div><div class="eyebrow">ACTIVE EVENT</div><h2>${eventEscape(def.name)}</h2><p>${eventEscape(def.description)}</p><div class="event-countdown">${eventCountdown(def)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(def,'event-wallet-sprite')}</span><div><small>${eventEscape(def.currency.name)}</small><strong>${eventCurrency(def)}</strong></div></div></div>${renderDailyEventCalendar(def)}<section class="event-shop-section"><div class="event-section-heading"><h3>Event Shop</h3></div><div class="event-shop-grid">${shop||'<p>No stock yet.</p>'}</div></section>`;
+  if(!eventIsActive(def)||selectedEvent()?.id!==def.id)return;
+  host.innerHTML=`<div class="event-hero${autumn?' autumn-harvest-hero':''}"><div><div class="eyebrow">ACTIVE EVENT</div><h2>${eventEscape(def.name)}</h2><p>${eventEscape(def.description)}</p><div class="event-countdown" id="eventCountdown">${eventCountdown(def)}</div></div><div class="event-wallet"><span>${eventCurrencySpriteMarkup(def,'event-wallet-sprite')}</span><div><small>${eventEscape(def.currency.name)}</small><strong ${autumn?'data-harvest-wallet':''}>${eventCurrency(def)}</strong></div></div></div>${autumn?renderHarvestBoard(def):''}${renderDailyEventCalendar(def)}<section class="event-shop-section"><div class="event-section-heading"><h3>${autumn?'Harvest Shop':'Event Shop'}</h3></div><div class="event-shop-grid">${shop||'<p>No stock yet.</p>'}</div>${autumn&&es.lastMessage?`<p class="autumn-harvest-status" role="status">${eventEscape(es.lastMessage)}</p>`:''}</section>`;
+  const board=host.querySelector('.harvest-board');
+  board?.querySelector('.harvest-grid').addEventListener('click',event=>{
+    const tile=event.target.closest('button[data-harvest-tile]');
+    if(tile)flipHarvestTile(def,board,tile,event.detail===0);
+  });
   host.querySelectorAll('[data-event-buy]').forEach(btn=>btn.addEventListener('click',()=>buyEventShopItem(def.id,btn.dataset.eventBuy)));
   host.querySelectorAll('[data-event-calendar-claim]').forEach(btn=>btn.addEventListener('click',()=>claimEventCalendarDay(def.id,Number(btn.dataset.eventCalendarClaim))));
   hydrateSprites(host);
@@ -5234,12 +5467,30 @@ function renderMonsterLineage(mon){
   tree.innerHTML=`<div class="lineage-parents"><div class="lineage-node parent"><span>Mother</span><strong>${mother.name}</strong><small>${mother.meta}</small></div><div class="lineage-node parent"><span>Father</span><strong>${father.name}</strong><small>${father.meta}</small></div></div><div class="lineage-connector"><i></i></div><div class="lineage-node child"><span>Offspring</span><strong>${displayName(mon)}</strong><small>${sp?.name||mon.slug} • ${mon.id}</small></div>`;
   document.getElementById('detailLineage').textContent=`Mother: ${mon.parents.mother||'Unknown'} • Father: ${mon.parents.father||'Unknown'}`;
 }
-function ownedMonsterTargetItems(){
+function ownedMonsterTargetItems(mon){
   return [...ITEM_SHOP.filter(item=>item.id==='nature_disc'||item.id.startsWith('dna_splicer_')||item.id.startsWith('injector_p')),
+    ...(mon.slug==='oaklash'?[itemInfoForInventoryId(GOLDEN_ACORN_ID)]:[]),
     ...Object.entries(DONATION_CRYSTALS).map(([id,data])=>({id,...data}))].filter(item=>Number(state.inventory[item.id]||0)>0);
+}
+function goldenAcornEvolution(mon,now=new Date()){
+  if(mon?.slug!=='oaklash')return {ok:false,label:'Requires Oaklash'};
+  if(!(state.inventory[GOLDEN_ACORN_ID]>0))return {ok:false,label:'No Golden Acorn owned'};
+  if(isMonsterBreeding(mon.id))return {ok:false,label:'Currently breeding'};
+  if(isMonsterOnExpedition(mon.id))return {ok:false,label:'On an expedition'};
+  if(gauntletSession?.playerId===mon.id||trialSession?.playerId===mon.id||
+    (battleSession?.playerId===mon.id&&!battleSession.result))return {ok:false,label:'Finish the current battle run'};
+  const hour=now.getHours();
+  let slug;
+  if(hour>=7&&hour<17)slug=ELDER_OAKLORE_SLUG;
+  else if(hour>=18||hour<4)slug=WITHER_WOOD_SLUG;
+  else return {ok:false,label:'Available at 7:00 AM or 6:00 PM'};
+  const species=state.species[slug];
+  if(!species||!attackOf(species.signatureAttackId))return {ok:false,label:'Evolution content unavailable'};
+  return {ok:true,label:`Evolve into ${species.name}`,slug,species};
 }
 function monsterItemEligibility(mon,item){
   const qty=Number(state.inventory[item.id]||0);if(qty<=0)return {ok:false,label:'None owned'};
+  if(item.id===GOLDEN_ACORN_ID)return goldenAcornEvolution(mon);
   if(DONATION_CRYSTALS[item.id])return mon.level>=100?{ok:false,label:'MAX LEVEL'}:{ok:true,label:`+${DONATION_CRYSTALS[item.id].xp} XP`};
   if(item.id==='nature_disc')return mon.natureDiscDate===localDateKey()?{ok:false,label:'Used today'}:{ok:true,label:'Reroll Trait'};
   if(item.id.startsWith('dna_splicer_'))return mon.dnaSplice?{ok:false,label:'Splicer already used'}:{ok:true,label:`+${DNA_SPLICE_BONUS} ${item.dnaStat==='hp'?'Vitality':item.dnaStat[0].toUpperCase()+item.dnaStat.slice(1)}`};
@@ -5248,15 +5499,63 @@ function monsterItemEligibility(mon,item){
 }
 function renderMonsterItemTools(mon){
   const box=document.getElementById('monsterItemTools'),status=document.getElementById('monsterItemToolStatus');if(!box||!status)return;
-  const items=ownedMonsterTargetItems();status.textContent=items.length?`${items.length} item type${items.length===1?'':'s'} available`:'No targeted items owned';box.innerHTML='';
+  const items=ownedMonsterTargetItems(mon);status.textContent=items.length?`${items.length} item type${items.length===1?'':'s'} available`:'No targeted items owned';box.innerHTML='';
   if(!items.length){box.innerHTML='<div class="empty-card monster-item-empty">No Nature Discs, Injectors, DNA Splicers, or XP Crystals are currently in your Inventory.</div>';return;}
   items.forEach(item=>{const qty=Number(state.inventory[item.id]||0),elig=monsterItemEligibility(mon,item),card=document.createElement('div');card.className='monster-item-card';card.innerHTML=`<div><strong>${item.name}</strong><span>Owned ×${qty}</span><p>${item.desc||''}</p></div><button class="${elig.ok?'primary':'ghost'} small" type="button" data-monster-use-item="${item.id}" ${elig.ok?'':'disabled'}>${elig.label}</button>`;box.appendChild(card);});
 }
 function consumeInventoryItem(id){
   if(!state.inventory[id])return false;state.inventory[id]--;if(state.inventory[id]<=0)delete state.inventory[id];return true;
 }
+function refreshGoldenAcornButton(){
+  const button=document.querySelector(`#detailModal[open] [data-monster-use-item="${GOLDEN_ACORN_ID}"]`);
+  if(!button)return;
+  const evolution=goldenAcornEvolution(state.monsters.find(mon=>mon.id===selectedMonsterId));
+  if(button.textContent!==evolution.label)button.textContent=evolution.label;
+  if(button.disabled===evolution.ok){
+    button.disabled=!evolution.ok;
+    button.classList.toggle('primary',evolution.ok);
+    button.classList.toggle('ghost',!evolution.ok);
+  }
+}
+async function useGoldenAcorn(mon){
+  if(saveLoadFailure)return;
+  const evolution=goldenAcornEvolution(mon);
+  if(!evolution.ok){refreshGoldenAcornButton();return;}
+  if(!confirm(`Use one Golden Acorn to evolve ${displayName(mon)} into ${evolution.species.name}?`))return;
+  const result=await withAutumnProgressLock(()=>{
+    const next=goldenAcornEvolution(mon);
+    if(!next.ok||!state.monsters.includes(mon))return next.ok?'Oaklash is no longer in your Collection.':next.label;
+    if(next.slug!==evolution.slug)return 'The evolution window changed. Choose the current evolution to continue.';
+    const previous={slug:mon.slug,attacks:mon.attacks,qty:state.inventory[GOLDEN_ACORN_ID],
+      discoveries:state.discoveredSpecies.length,stamp:state.oaklashEvolutionStamp};
+    const oldSignature=speciesOf(mon)?.signatureAttackId,newSignature=next.species.signatureAttackId;
+    const attacks=[...new Set((mon.attacks||[]).filter(Boolean).map(id=>id===oldSignature?newSignature:id))];
+    if(attacks.length<2&&!attacks.includes(newSignature))attacks.unshift(newSignature);
+    if(!consumeInventoryItem(GOLDEN_ACORN_ID))return 'No Golden Acorn owned';
+    mon.slug=next.slug;
+    mon.attacks=attacks;
+    if(!state.discoveredSpecies.includes(next.slug))state.discoveredSpecies.push(next.slug);
+    state.oaklashEvolutionStamp=makeAutumnActionStamp();
+    if(!eventTestSession&&!save()){
+      mon.slug=previous.slug;mon.attacks=previous.attacks;state.inventory[GOLDEN_ACORN_ID]=previous.qty;
+      state.discoveredSpecies.length=previous.discoveries;state.oaklashEvolutionStamp=previous.stamp;
+      return 'Evolution could not be saved. Check the save notice and try again.';
+    }
+    return '';
+  });
+  if(result===undefined)return;
+  if(result){
+    refreshGoldenAcornButton();
+    document.getElementById('monsterItemToolStatus').textContent=result;
+    return;
+  }
+  renderAll();await openDetail(mon.id);
+  document.getElementById('monsterItemToolStatus').textContent=`Oaklash evolved into ${speciesOf(mon).name}.`;
+}
 function useMonsterTargetItem(itemId){
-  const mon=state.monsters.find(m=>m.id===selectedMonsterId),item=ITEM_SHOP.find(x=>x.id===itemId)||(DONATION_CRYSTALS[itemId]?{id:itemId,...DONATION_CRYSTALS[itemId]}:null);if(!mon||!item||!state.inventory[itemId])return;
+  const mon=state.monsters.find(m=>m.id===selectedMonsterId);
+  if(itemId===GOLDEN_ACORN_ID)return useGoldenAcorn(mon);
+  const item=ITEM_SHOP.find(x=>x.id===itemId)||(DONATION_CRYSTALS[itemId]?{id:itemId,...DONATION_CRYSTALS[itemId]}:null);if(!mon||!item||!state.inventory[itemId])return;
   const elig=monsterItemEligibility(mon,item);if(!elig.ok)return;
   if(DONATION_CRYSTALS[itemId]){
     if(!confirm(`Give ${item.name} (+${item.xp} XP) to ${displayName(mon)}?\nThis consumes one crystal.`))return;
@@ -5579,6 +5878,10 @@ function collectEgg(slotIndex=0){
 
 async function eggVisual(slug,sizeClass='egg-image',source='generic',egg=null){
   if(source==='daily-wild-mystery')return iconMarkup('egg_wild',`sheet-icon ${sizeClass} egg-sheet-icon`);
+  if(typeof source==='string'&&source.startsWith('event-harvest:')){
+    const sprite=HARVEST_EGGS[source.slice('event-harvest:'.length)]?.spriteKey;
+    if(sprite)return spriteFallbackMarkup(sprite,sizeClass);
+  }
   if(egg?.eggSpriteKey&&SPRITE_DEFS[egg.eggSpriteKey])return spriteFallbackMarkup(egg.eggSpriteKey,`sheet-icon ${sizeClass} recon-egg-code`);
   if(source==='event-maze')return imageSpriteMarkup('halloween_event_egg','assets/icons/halloween_event_egg.png',`${sizeClass} halloween-event-egg-icon`,'Haunted Event Egg');
   const custom=await imageSrc(slug,'egg');
@@ -6560,15 +6863,18 @@ async function openInventoryDetail(id){
   else if(info.shopPrice>0)meta.push(`Shop value ${money(info.shopPrice)}`);
   document.getElementById('inventoryDetailMeta').innerHTML=meta.map(x=>`<span>${x}</span>`).join('');
   document.getElementById('inventoryDetailSellValue').innerHTML=currencyMarkup(each,'currency-inline shop-modal-price');
-  document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood&&id!=='ancient_pages'?' • Resale rate: 5% of shop value':''}`;
+  document.getElementById('inventoryDetailOwned').textContent=`Owned: ${owned}${!info.isTradeGood&&id!=='ancient_pages'&&id!==GOLDEN_ACORN_ID?' • Resale rate: 5% of shop value':''}`;
   const use=document.getElementById('inventoryUseButton');
-  const directUse=id==='qi_dream_egg'||id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||id==='ancient_pages'||!!DONATION_CRYSTALS[id];
+  const directUse=id===GOLDEN_ACORN_ID||id==='qi_dream_egg'||id==='refresh_juice'||id==='capture_pod'||id==='monster_ward'||id==='lottery_egg'||id==='ancient_egg'||id==='ancient_pages'||!!DONATION_CRYSTALS[id];
   use.classList.toggle('hidden',!directUse);
   use.disabled=false;
   use.removeAttribute('data-refresh-juice-timer');
   use.removeAttribute('data-capture-pod-timer');
   use.removeAttribute('data-monster-ward-timer');
-  if(id==='qi_dream_egg'){use.textContent='Open Dream Egg';use.disabled=!qiPool(false).length;}else if(id==='refresh_juice'){
+  if(id===GOLDEN_ACORN_ID){
+    use.disabled=!state.monsters.some(mon=>mon.slug==='oaklash');
+    use.textContent=use.disabled?'Requires Oaklash':'Choose Oaklash in Collection';
+  }else if(id==='qi_dream_egg'){use.textContent='Open Dream Egg';use.disabled=!qiPool(false).length;}else if(id==='refresh_juice'){
     const remain=refreshJuiceRemaining();
     use.disabled=remain>0;
     use.textContent=remain>0?`Refresh Juice • ${formatShortCooldown(remain)}`:'Use Refresh Juice';
@@ -6609,6 +6915,14 @@ function resetInventorySellPanel(){
 async function useSelectedInventoryItem(){
   if(!inventorySelection)return;
   const id=inventorySelection.id;
+  if(id===GOLDEN_ACORN_ID){
+    const targets=state.monsters.filter(mon=>mon.slug==='oaklash');
+    if(!targets.length)return;
+    document.getElementById('inventoryDetailModal').close();inventorySelection=null;
+    switchTab('collection');
+    if(targets.length===1){await openDetail(targets[0].id);showMonsterDetailPane('items');}
+    return;
+  }
   if(id==='qi_dream_egg'){qiOpenDreamEgg();return;}
   if(id==='refresh_juice')useRefreshJuice();
   else if(id==='capture_pod')useCapturePod();
@@ -6911,6 +7225,7 @@ async function saveSpeciesForm(e){
   if(templeOnly&&(isCross||rarity!=='Mythic')){document.getElementById('adminMessage').textContent='Mythic Temple Only requires Mythic rarity and a non-Crossbreed monster.';return;}
   const obtain=isCross?'Breeding Only':templeOnly?'Mythic Temple Only':document.getElementById('obtainMethod').value;
   const prev=state.species[slug]||{};
+  const evolutionElement=obtain==='Golden Acorn Evolution'&&prev.secondaryElement!==primaryElement&&ELEMENTS.includes(prev.secondaryElement)?prev.secondaryElement:'';
   // The visible selector is authoritative at Save time. The draft only protects the
   // choice across redraws; it must never override a newer selection in the form.
   const visibleSignature=document.getElementById('signatureAttack').value;
@@ -6918,7 +7233,7 @@ async function saveSpeciesForm(e){
   if(document.getElementById('publishSpecies').checked&&!selectedSignature){document.getElementById('adminMessage').textContent='Choose a signature attack before publishing this monster.';return;}
   if(!confirm(oldSlug?`Save changes to monster "${name}"?`:`Create new monster "${name}"?`))return;
   const {encounterDays:_legacyEncounterDays,signatureAttack:_legacySignatureAttack,...cleanPrev}=prev;
-  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',mythicTempleOnly:templeOnly,element:primaryElement,secondaryElement:isCross?secondaryElement:'',p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,huntingRarity:obtain==='Hunting Zone'?document.getElementById('huntingRarity').value:(prev.huntingRarity||'Uncommon'),shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
+  state.species[slug]={...cleanPrev,name,role:document.getElementById('speciesRole').value.trim(),battleType:document.getElementById('battleType').value,nativeFacing:document.getElementById('nativeFacing').value==='left'?'left':'right',rarity:document.getElementById('speciesRarity').value||'Standard',isMythic:document.getElementById('speciesRarity').value==='Mythic',mythicTempleOnly:templeOnly,element:primaryElement,secondaryElement:isCross?secondaryElement:evolutionElement,p1bst:Number(document.getElementById('p1bst').value),signatureAttackId:selectedSignature,obtain,huntingRarity:obtain==='Hunting Zone'?document.getElementById('huntingRarity').value:(prev.huntingRarity||'Uncommon'),shopPrice:Number(document.getElementById('shopPrice').value||1000),isCrossbreed:isCross,parents:isCross?[pa,pb]:[],crossbreedChance:isCross?crossChance:0,seasonalEventFamily:isCross?(document.getElementById('crossbreedSeason').value||''):undefined,breedSeconds:Number(document.getElementById('breedTimer').value),hatchSeconds:Number(document.getElementById('hatchTimer').value),builtin:!!prev.builtin,published:prev.builtin?undefined:document.getElementById('publishSpecies').checked,createdAt:Number(prev.createdAt||(!oldSlug?Date.now():0))||undefined};
   speciesSignatureDraft=selectedSignature;
   const files={base:document.getElementById('baseArt').files?.[0],prismatic:document.getElementById('prismaticArt').files?.[0],egg:document.getElementById('eggArt').files?.[0]};for(const [kind,file] of Object.entries(files))if(file)await putAsset(`${slug}:${kind}`,file);
   save();document.getElementById('editSlug').value=slug;document.getElementById('adminMessage').textContent=`Saved ${name} locally.${state.species[slug].published?' Export Live Package when you are ready to publish it.':' It remains a draft.'}`;renderAll();await loadSpeciesIntoForm(slug);admin2MarkClean('species');
@@ -7445,10 +7760,10 @@ function renderLandingPosts(kind,hostId){
 function renderLandingEvent(){
   const host=document.getElementById('landingEventContent');if(!host)return;const active=activeEvent();
   if(active){
-    host.innerHTML=`<div class="landing-event-live"><div class="landing-event-icon">${glyphSpriteMarkup(active.spriteKey||'event_currency_generic',active.icon||'◆','landing-event-sprite')}</div><div><div class="landing-live-badge">LIVE NOW</div><h4>${active.name}</h4><p>${active.description}</p><div class="landing-event-meta"><span>${formatEventDate(active.start)} – ${formatEventDate(active.end)}</span><strong>${eventCountdown(active)}</strong></div></div></div>`;
+    host.innerHTML=`<div class="landing-event-live"><div class="landing-event-icon">${glyphSpriteMarkup(active.spriteKey||'event_currency_generic',active.icon||'◆','landing-event-sprite')}</div><div><div class="landing-live-badge">LIVE NOW</div><h4>${active.name}</h4><p>${active.description}</p><div class="landing-event-meta"><span>${eventDateRange(active)}</span><strong>${eventCountdown(active)}</strong></div></div></div>`;
   }else{
     const next=Object.values(EVENT_DEFS).filter(def=>new Date(def.start).getTime()>Date.now()).sort((a,b)=>new Date(a.start)-new Date(b.start))[0];
-    host.innerHTML=next?`<div class="landing-event-live upcoming"><div class="landing-event-icon">${glyphSpriteMarkup(next.spriteKey||'event_currency_generic',next.icon||'◆','landing-event-sprite')}</div><div><div class="landing-live-badge">UPCOMING</div><h4>${next.name}</h4><p>${next.description}</p><div class="landing-event-meta"><span>${formatEventDate(next.start)} – ${formatEventDate(next.end)}</span></div></div></div>`:'<div class="landing-empty">No seasonal event is scheduled right now.</div>';
+    host.innerHTML=next?`<div class="landing-event-live upcoming"><div class="landing-event-icon">${glyphSpriteMarkup(next.spriteKey||'event_currency_generic',next.icon||'◆','landing-event-sprite')}</div><div><div class="landing-live-badge">UPCOMING</div><h4>${next.name}</h4><p>${next.description}</p><div class="landing-event-meta"><span>${eventDateRange(next)}</span></div></div></div>`:'<div class="landing-empty">No seasonal event is scheduled right now.</div>';
   }
   hydrateSprites(host);
 }
@@ -10763,8 +11078,10 @@ document.getElementById('resetLocalProgress').addEventListener('click',()=>{if(!
 document.getElementById('dismissNewKeeperChecklist').addEventListener('click',()=>{state.onboarding.checklistDismissed=true;save();renderAll();});
 document.getElementById('newcomerModal').addEventListener('cancel',e=>{if(state.onboarding.replay){e.preventDefault();finishNewcomerReplay();}else e.preventDefault();});
 document.getElementById('resetSave').addEventListener('click',()=>{if(!confirm('Reset Prismwild v0.15.52 to a brand-new Player account? Custom uploaded art stays in browser storage, but local game progress resets.'))return;resetToFreshPlayer();});
+let lastAutumnHarvestDay=0;
 function tickLiveTimers(){
   if(saveLoadFailure)return;
+  refreshGoldenAcornButton();
   renderHideoutReady();
   // Lottery status updates without rebuilding wheel or interrupting its spin animation.
   if(currentShopMode==='donations'&&state.donations?.dateKey!==localDateKey()){ensureDailyDonations();save();renderDonations();}
@@ -10839,6 +11156,14 @@ function tickLiveTimers(){
   const incubatorModal=document.getElementById('incubatorDetailModal');
   if(incubatorModal?.open && selectedIncubatorIndex!==null)updateIncubatorDetailLive();
 
+  const harvest=EVENT_DEFS[AUTUMN_HARVEST_ID];
+  const harvestDay=eventIsActive(harvest)?eventCalendarDay(harvest):0;
+  if(harvestDay!==lastAutumnHarvestDay){
+    lastAutumnHarvestDay=harvestDay;
+    renderLandingEvent();renderEventPage();
+  }
+  const harvestPanel=document.querySelector('#event.active .harvest-board');
+  if(harvestDay&&harvestPanel)refreshHarvestBoard(harvestPanel,harvestBoardFor(harvest));
   const def=activeEvent();
   if(def){
     const es=eventStateFor(def),before=es.steps;refreshMazeSteps(def);
@@ -10849,7 +11174,7 @@ function tickLiveTimers(){
       const memoryTimer=document.querySelector('.memory-cooldown span');if(memoryTimer&&m)memoryTimer.textContent=memoryCooldownText(m);
     }
     const regen=document.getElementById('mazeRegenTimer');if(regen)regen.textContent=mazeRegenText(def);
-    const countdown=document.getElementById('eventCountdown');if(countdown)countdown.textContent=eventCountdown(def);
+    const countdown=document.getElementById('eventCountdown');if(countdown)countdown.textContent=eventCountdown(selectedEvent()||def);
   }
   // An expired timer must request ONE UI refresh, not one every 500 ms.
   // Clear its marker immediately so a slow async render cannot be pre-empted
